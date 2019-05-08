@@ -1,0 +1,2 @@
+# synobuild
+Synology setup
