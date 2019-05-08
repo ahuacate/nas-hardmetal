@@ -1,5 +1,5 @@
 # Synobuild
-The following post is specifically for a Synology Diskstation. I want to SSH into it using key-based authentication, but that seemed not supported by default. In this post I explain how I made it work.
+The following post is specifically for a Synology Diskstation. In this post I explain how I made it work.
 The steps are:
 * create required volum
 * create two new synology users;
@@ -8,18 +8,17 @@ The steps are:
 * Configure Synology NAS SSH Key-based authentication for the above users.
 
 ## Setting up Key Based Authentication
-Normally, setting this up is not a lot of work:
-* Make sure your SSH daemon has Public Key Authentication enabled
-* Make sure you have an SSH key on your client machine
-* Make sure the public key is in ~/.ssh/authorized_keys
+ I want to SSH into the synology diskstation using key-based authentication, but that seemed not supported by default. So to enable SSH key-based authentication we need to make a few tweaks. But first make sure you have your public SSH keys, commonly has a filename `id_rsa.pub`, on your PC (notebook, workstation or whatever).
+ 
 ### Enable SSH Server
-Log in to the Synology Desktop and go to `**"Control Panel > Terminal & SNMP"**`
-Check `**Enable SSH Service**` and choose a non-default port. If you use the default port of 22 you'll get a security warning later.
+Log in to the Synology Desktop and go to **`"Control Panel > Terminal & SNMP"`**
+Check **`Enable SSH Service`** and choose a non-default port . If you use the default port of 22 you'll get a security warning later.
+
 ### Enable Public Key Authentication
 
 Log in to your NAS using ssh:
 
-    ssh -p <port> your-nas-user@your-nas-hostname
+    ssh -p <port> storm@192.168.1.10
 
 Open the SSH server configuration file for editing:
 
