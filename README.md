@@ -13,8 +13,8 @@ Normally, setting this up is not a lot of work:
 * Make sure you have an SSH key on your client machine
 * Make sure the public key is in ~/.ssh/authorized_keys
 ### Enable SSH Server
-Log in to the Synology Desktop and go to **"Control Panel > Terminal & SNMP"**
-Check **Enable SSH Service** and choose a non-default port. If you use the default port of 22 you'll get a security warning later.
+Log in to the Synology Desktop and go to `**"Control Panel > Terminal & SNMP"**`
+Check `**Enable SSH Service**` and choose a non-default port. If you use the default port of 22 you'll get a security warning later.
 ### Enable Public Key Authentication
 
 Log in to your NAS using ssh:
