@@ -3,8 +3,8 @@ The following post is specifically for a Synology Diskstation. I want to SSH int
 The steps are:
 * create required volum
 * create two new synology users;
-  * user one named: storm
-  * user two named: gituser
+  * user one named: `storm`
+  * user two named: `gituser`
 * Configure Synology NAS SSH Key-based authentication for the above users.
 
 ## Setting up Key Based Authentication
