@@ -1,6 +1,12 @@
 # Synobuild
 The following is for a Synology Diskstation only. Modify accordingly for your own NAS or NFS server setup.
-The tasks to be performed are:
+Prerequisites are:
+- [x] Synology Static IP Address is `192.168.1.10`
+- [x] Synology Hostname is `cyclone-01`
+- [x] Synology Gateway is `192.168.1.5`
+- [x] Synology DNS Server is `192.168.1.5`
+
+Tasks to be performed are:
 - [ ] Create the required Synology shared folders and NFS shares
 - [ ] Create two new Synology users;
   * first user named: `storm`
@@ -11,7 +17,7 @@ The tasks to be performed are:
 ### Create Shared Folders
 We need the following shared folder tree on the Synology NAS:
 ```
-Synology NAS with 1x Volume/
+Synology NAS/
 │
 └──  volume1/
     ├── backup
@@ -32,14 +38,33 @@ To create shared folders log in to the Synology Desktop and:
    Name: `"i.e backup"`
    Description: `"leave blank"`
    Location: `"Volume 1"`
-3. Configure storage pool properties:
-   Storage pool description: `"download"`
-   RAID type: `"SHR"`
-4. Choose Disks: `"Select your newly installed SSD 0,5 TB"`
-5. Perform Disk Check: `"Yes"`
-6. Confirm settings: All looks good hit `"Apply"` and be patient as it takes a while to verify & perform a parity check on the new disk.
+   Hide this shared ...: `"Off"`
+   Hide sub-folders ...: `"Off"`
+   Enable Recycle Bin:
+    ├── backup `"On"`
+    ├── docker `"On"`
+    ├── download `"Off"`
+    ├── music  `"On"`
+    ├── openvpn `"On"`
+    ├── photo  `"On"`
+    ├── pxe `"On"`
+    ├── ssh_key `"On"`
+    ├── video  `"Off"`
+    ├── virtualbox `"On"`
+    └── proxmox `"On"`
 
-
+## Set up NFS Permissions
+Create NFS shares for all of the above folders. 
+1. Log in to the Synology Desktop and go to `"Control Panel" > "Shared Folder" > "Select a Folder" > "Edit" > "NFS Permissions" > "Create" `
+2. NFS rule options:
+   Hostname or IP*: `"192.168.1.0/24"`
+   Privilege: `"Read/Write"`
+   Squash: `"Map all users to admin"`
+   Security: `"auth_sys"`
+   Enable asynchronous: `"yes"`
+   Allow connections from non-privileged ports: `"yes"`
+   Allow users to access mounted subfolders: `"yes"`
+3. Repeat steps 1 to 3 for all of the above folders
 
 ## Setting up Key Based Authentication
  I want to SSH into the synology diskstation using key-based authentication, but that seemed not supported by default. So to enable SSH key-based authentication we need to make a few tweaks. But first make sure you have your public SSH keys, commonly has a filename `id_rsa.pub`, on your PC (notebook, workstation or whatever).
