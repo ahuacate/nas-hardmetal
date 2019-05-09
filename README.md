@@ -28,16 +28,44 @@ To create a Syno storage pool log in to the Synology Desktop and:
 
 ### Shared Folders
 The following Synology shared folders are needed:
-├── app
-│   ├── css
-│   │   ├── **/*.css
-│   ├── favicon.ico
-│   ├── images
-│   ├── index.html
-│   ├── js
-│   │   ├── **/*.js
-│   └── partials/template
-├── dist (or build)
+```
+<h2>Synology Folder Tree</h2>
+<pre>
+Synology NAS with 2x Volumes/
+│
+├── volume1/
+│   ├── docker
+│   ├── music
+│   ├── openvpn
+│   ├── photo
+│   ├── pxe
+│   ├── ssh_key
+│   ├── video
+│   ├── virtualbox
+│   └── proxmox
+│
+└──  volume2/
+    ├── cache
+    ├── download
+    └── transcode
+
+Synology NAS with 1x Volume/
+│
+└──  volume1/
+    ├── cache
+    ├── docker
+    ├── download
+    ├── music
+    ├── openvpn
+    ├── photo
+    ├── pxe
+    ├── ssh_key
+    ├── video
+    ├── virtualbox
+    ├── proxmox
+    └── transcode
+</pre>
+```
 You can create a shared folder in the Synology Desktop:
 
 ## Setting up Key Based Authentication
