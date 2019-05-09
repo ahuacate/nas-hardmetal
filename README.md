@@ -1,11 +1,44 @@
 # Synobuild
-The following post is specifically for a Synology Diskstation. In this post I explain how I made it work.
-The steps are:
-* create required volum
-* create two new synology users;
+The following is for a Synology Diskstation only. Modify accordingly for your own NAS or NFS server setup.
+The tasks to be performed are:
+- [ ] Create the required Synology pools, volumes, shared folders and NFS shares
+- [ ] Create two new Synology users;
   * first user named: `storm`
   * second user named: `gituser`
-* Configure Synology NAS SSH Key-based authentication for the above users.
+- [ ] Configure Synology NAS SSH Key-based authentication for the above users.
+
+## Create the required Syno storage pools, volumes, shared folders and NFS shares
+### Create a SSD Storage Pool
+If you have a empty Synology disk bay it can be used as a SSD `download share drive` for all virtual machines & nodes, lxc containers, docker clients and cluster nodes. I recommend a single SSD 500Gb because this disk will be used for non critical data such as downloads, cache, transcodes etc. If you dont have a empty Synology disk bay then skip this step.
+>> Important:
+Before you start, make sure there is no important data on the SSD drive that the storage pool is going to be created on. All existing data will be deleted during the creation process. Log in to the Synology Desktop and go to `"Storage Manager > HDD/SSD"` page and make sure the status of each drive (actually, your newly inserted drive in bay (x)) is `Normal` or `Not Initialized`.
+
+To create a Syno storage pool log in to the Synology Desktop and:
+1. Open `"Storage Manager > Storage Pool > Create"`.
+2. Choose the storage pool type:
+   `"Higher Flexibility"`
+3. Configure storage pool properties:
+   Storage pool description: `"download"`
+   RAID type: `"SHR"`
+4. Choose Disks: `"Select your newly installed SSD 0,5 TB"`
+5. Perform Disk Check: `"Yes"`
+6. Confirm settings: All looks good hit `"Apply"` and be patient as it takes a while to verify & perform a parity check on the new disk.
+
+### Create Volumes
+
+### Shared Folders
+The following Synology shared folders are needed:
+├── app
+│   ├── css
+│   │   ├── **/*.css
+│   ├── favicon.ico
+│   ├── images
+│   ├── index.html
+│   ├── js
+│   │   ├── **/*.js
+│   └── partials/template
+├── dist (or build)
+You can create a shared folder in the Synology Desktop:
 
 ## Setting up Key Based Authentication
  I want to SSH into the synology diskstation using key-based authentication, but that seemed not supported by default. So to enable SSH key-based authentication we need to make a few tweaks. But first make sure you have your public SSH keys, commonly has a filename `id_rsa.pub`, on your PC (notebook, workstation or whatever).
