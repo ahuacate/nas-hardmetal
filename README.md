@@ -57,14 +57,14 @@ To create shared folders log in to the Synology Desktop and:
 Create NFS shares for all of the above folders. 
 1. Log in to the Synology Desktop and go to `Control Panel` > `Shared Folder` > `Select a Folder` > `Edit` > `NFS Permissions` > `Create `
 2. NFS rule options:
-   Hostname or IP*: `"192.168.1.0/24"`
-   Privilege: `Read/Write`
-   Squash: `Map all users to admin`
-   Security: `auth_sys`
-   Enable asynchronous: `yes`
-   Allow connections from non-privileged ports: `yes`
-   Allow users to access mounted subfolders: `yes`
-3. Repeat steps 1 to 3 for all of the above folders
+   * Hostname or IP*: `"192.168.1.0/24"`
+   * Privilege: `Read/Write`
+   * Squash: `Map all users to admin`
+   * Security: `auth_sys`
+     * Enable asynchronous: `yes`
+     * Allow connections from non-privileged ports: `yes`
+     * Allow users to access mounted subfolders: `yes`
+3. Repeat steps 1 to 2 for all of the above folders BUT NOT `ssh_key` folder
 
 ## Setting up Key Based Authentication
  I want to SSH into the synology diskstation using key-based authentication, but that seemed not supported by default. So to enable SSH key-based authentication we need to make a few tweaks. But first make sure you have your public SSH keys, commonly has a filename `id_rsa.pub`, on your PC (notebook, workstation or whatever).
