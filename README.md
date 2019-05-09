@@ -33,37 +33,37 @@ Synology NAS/
     └── proxmox
 ```
 To create shared folders log in to the Synology Desktop and:
-1. Open `"Control Panel > Shared Folder > Create"`.
+1. Open `Control Panel` > `Shared Folder` > `Create`.
 2. Set up basic information:
    Name: `"i.e backup"`
-   Description: `"leave blank"`
-   Location: `"Volume 1"`
-   Hide this shared ...: `"Off"`
-   Hide sub-folders ...: `"Off"`
+   Description: `"leave blank if you want"`
+   Location: `Volume 1`
+   Hide this shared ...: `Off`
+   Hide sub-folders ...: `Off`
    Enable Recycle Bin:
-    ├── backup `"On"`
-    ├── docker `"On"`
-    ├── download `"Off"`
-    ├── music  `"On"`
-    ├── openvpn `"On"`
-    ├── photo  `"On"`
-    ├── pxe `"On"`
-    ├── ssh_key `"On"`
-    ├── video  `"Off"`
-    ├── virtualbox `"On"`
-    └── proxmox `"On"`
+    ├── backup `On`
+    ├── docker `On`
+    ├── download `Off`
+    ├── music  `On`
+    ├── openvpn `On`
+    ├── photo  `On`
+    ├── pxe `On`
+    ├── ssh_key `On`
+    ├── video  `Off`
+    ├── virtualbox `On`
+    └── proxmox `On`
 
 ## Set up NFS Permissions
 Create NFS shares for all of the above folders. 
-1. Log in to the Synology Desktop and go to `"Control Panel" > "Shared Folder" > "Select a Folder" > "Edit" > "NFS Permissions" > "Create" `
+1. Log in to the Synology Desktop and go to `Control Panel` > `Shared Folder` > `Select a Folder` > `Edit` > `NFS Permissions` > `Create `
 2. NFS rule options:
    Hostname or IP*: `"192.168.1.0/24"`
-   Privilege: `"Read/Write"`
-   Squash: `"Map all users to admin"`
-   Security: `"auth_sys"`
-   Enable asynchronous: `"yes"`
-   Allow connections from non-privileged ports: `"yes"`
-   Allow users to access mounted subfolders: `"yes"`
+   Privilege: `Read/Write`
+   Squash: `Map all users to admin`
+   Security: `auth_sys`
+   Enable asynchronous: `yes`
+   Allow connections from non-privileged ports: `yes`
+   Allow users to access mounted subfolders: `yes`
 3. Repeat steps 1 to 3 for all of the above folders
 
 ## Setting up Key Based Authentication
