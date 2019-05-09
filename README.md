@@ -35,23 +35,23 @@ Synology NAS/
 To create shared folders log in to the Synology Desktop and:
 1. Open `Control Panel` > `Shared Folder` > `Create`.
 2. Set up basic information:
-   Name: `"i.e backup"`
-   Description: `"leave blank if you want"`
-   Location: `Volume 1`
-   Hide this shared ...: `Off`
-   Hide sub-folders ...: `Off`
-   Enable Recycle Bin:
-    ├── backup `On`
-    ├── docker `On`
-    ├── download `Off`
-    ├── music  `On`
-    ├── openvpn `On`
-    ├── photo  `On`
-    ├── pxe `On`
-    ├── ssh_key `On`
-    ├── video  `Off`
-    ├── virtualbox `On`
-    └── proxmox `On`
+   * Name: `"i.e backup"`
+   * Description: `"leave blank if you want"`
+   * Location: `Volume 1`
+   * Hide this shared ...: `Off`
+   * Hide sub-folders ...: `Off`
+   * Enable Recycle Bin:
+     * backup `On`
+     * docker `On`
+     * download `Off`
+     * music  `On`
+     * openvpn `On`
+     * photo  `On`
+     * pxe `On`
+     * ssh_key `On`
+     * video  `Off`
+     * virtualbox `On`
+     * proxmox `On`
 
 ## Set up NFS Permissions
 Create NFS shares for all of the above folders. 
