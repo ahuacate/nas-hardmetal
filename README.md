@@ -85,8 +85,8 @@ To create a new user log in to the Synology Desktop and:
 
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
-| `backup` | - | [x] | - |
-| `docker` |-| [X] | ]
+| `backup` | ☐ | ☑ |  ☐
+| `docker` | :heavy_check_mark: |
 | `download`
 | `music`
 | `openvpn`
