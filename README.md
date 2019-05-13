@@ -82,9 +82,10 @@ To create a new user log in to the Synology Desktop and:
 3. Set Join groups as follows:
      * users: `yes`
 4. Assign shared folders permissions as follows:
+
 | Name | No access | Read/Write | Read Only |
-| --- | --- | --- | --- |
-| `backup` | X | [X] | X |
+| :---  | :---: | :---: | :---: |
+| `backup` | - | [x] | - |
 | `docker` |-| [X] | ]
 | `download`
 | `music`
