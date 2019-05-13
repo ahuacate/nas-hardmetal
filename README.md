@@ -41,17 +41,17 @@ To create shared folders log in to the Synology Desktop and:
    * Hide this shared ...: `Off`
    * Hide sub-folders ...: `Off`
    * Enable Recycle Bin:
-     * backup `On`
-     * docker `On`
-     * download `Off`
-     * music  `On`
-     * openvpn `On`
-     * photo  `On`
-     * pxe `On`
-     * ssh_key `On`
-     * video  `Off`
-     * virtualbox `On`
-     * proxmox `On`
+     * backup ☑
+     * docker ☑
+     * download ☐ 
+     * music ☑
+     * openvpn ☑
+     * photo ☑
+     * pxe ☑
+     * ssh_key ☑
+     * video ☐ 
+     * virtualbox ☑
+     * proxmox ☑
 
 ## Set up NFS Permissions
 Create NFS shares for all of the above folders. 
@@ -86,16 +86,16 @@ To create a new user log in to the Synology Desktop and:
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
 | `backup` | ☐ | ☑ |  ☐
-| `docker` | :heavy_check_mark: |
-| `download`
-| `music`
-| `openvpn`
-| `photo`
-| `pxe`
-| `ssh_key`
-| `video`
-| `virtualbox`
-| `proxmox`
+| `docker` | ☐ | ☑ |  ☐
+| `download` | ☐ | ☑ |  ☐
+| `music` | ☐ | ☑ |  ☐
+| `openvpn` | ☐ | ☑ |  ☐
+| `photo` | ☐ | ☑ |  ☐
+| `pxe` | ☐ | ☑ |  ☐
+| `ssh_key` | ☐ | ☑ |  ☐
+| `video` | ☐ | ☑ |  ☐
+| `virtualbox` | ☐ | ☑ |  ☐
+| `proxmox` | ☐ | ☑ |  ☐
      
 ## Setting up Key Based Authentication
  I want to SSH into the synology diskstation using key-based authentication, but that seemed not supported by default. So to enable SSH key-based authentication we need to make a few tweaks. But first make sure you have your public SSH keys, commonly has a filename `id_rsa.pub`, on your PC (notebook, workstation or whatever).
