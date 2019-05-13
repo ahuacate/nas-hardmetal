@@ -56,7 +56,7 @@ To create shared folders log in to the Synology Desktop and:
 ## Set up NFS Permissions
 Create NFS shares for all of the above folders. 
 1. Log in to the Synology Desktop and go to `Control Panel` > `Shared Folder` > `Select a Folder` > `Edit` > `NFS Permissions` > `Create `
-2. NFS rule options:
+2. Set NFS rule options as follows:
    * Hostname or IP*: `"192.168.1.0/24"`
    * Privilege: `Read/Write`
    * Squash: `Map all users to admin`
@@ -64,8 +64,38 @@ Create NFS shares for all of the above folders.
      * Enable asynchronous: `yes`
      * Allow connections from non-privileged ports: `yes`
      * Allow users to access mounted subfolders: `yes`
-3. Repeat steps 1 to 2 for all of the above folders BUT NOT `ssh_key` folder
+3. Repeat steps 1 to 2 for all of the above folders BUT NOT `ssh_key` folder.
 
+
+# Create two new Synology Users
+To create a new user log in to the Synology Desktop and:
+1. Open `Control Panel` > `User` > `Create`
+2. Set User Information as follows:
+   * Name: `"storm"`
+   * Description: `Leave Blank`
+   * Email: `Leave blank`
+   * Password: `"As Supplied"`
+   * Conform password: `"As Supllied"`
+     * Send notification mail to the newly created user: `Off`
+     * Display user password in notification mail: `Off`
+     * Disallow the user to change account password: `Off`
+3. Set Join groups as follows:
+     * users: `yes`
+4. Assign shared folders permissions as follows:
+| Name | No access | Read/Write | Read Only |
+| --- | --- | --- | --- |
+| `backup` | X | [X] | X |
+| `docker` |-| [X] | ]
+| `download`
+| `music`
+| `openvpn`
+| `photo`
+| `pxe`
+| `ssh_key`
+| `video`
+| `virtualbox`
+| `proxmox`
+     
 ## Setting up Key Based Authentication
  I want to SSH into the synology diskstation using key-based authentication, but that seemed not supported by default. So to enable SSH key-based authentication we need to make a few tweaks. But first make sure you have your public SSH keys, commonly has a filename `id_rsa.pub`, on your PC (notebook, workstation or whatever).
  
