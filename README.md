@@ -38,8 +38,8 @@ To create shared folders log in to the Synology Desktop and:
    * Name: `"i.e backup"`
    * Description: `"leave blank if you want"`
    * Location: `Volume 1`
-   * Hide this shared ...: `Off`
-   * Hide sub-folders ...: `Off`
+   * Hide this shared ...: ☐ 
+   * Hide sub-folders ...: ☐ 
    * Enable Recycle Bin:
      * backup ☑
      * docker ☑
@@ -52,7 +52,13 @@ To create shared folders log in to the Synology Desktop and:
      * video ☐ 
      * virtualbox ☑
      * proxmox ☑
-
+3. Set up Encryption:
+     * Encrypt this shared folder: ☐ 
+4. Set up advanced:
+   * All disabled:  ☐ 
+5. Set up Permissions:
+     * Note at this point do not flag anything, just hit `Cancel`
+     
 ## Set up NFS Permissions
 Create NFS shares for all of the above folders. 
 1. Log in to the Synology Desktop and go to `Control Panel` > `Shared Folder` > `Select a Folder` > `Edit` > `NFS Permissions` > `Create `
@@ -61,13 +67,52 @@ Create NFS shares for all of the above folders.
    * Privilege: `Read/Write`
    * Squash: `Map all users to admin`
    * Security: `auth_sys`
-     * Enable asynchronous: `yes`
-     * Allow connections from non-privileged ports: `yes`
-     * Allow users to access mounted subfolders: `yes`
+     * Enable asynchronous:  ☑
+     * Allow connections from non-privileged ports:  ☑
+     * Allow users to access mounted subfolders:  ☑
 3. Repeat steps 1 to 2 for all of the above folders BUT NOT `ssh_key` folder.
 
+## Create new Synology User group
+To create a new group log in to the Synology Desktop and:
+1. Open `Control Panel` > `Group` > `Create`
+2. Set User Information as follows:
+   * Name: `"server-group"`
+   * Description: `"Server user group"`
+3. Assign shared folders permissions as follows:
 
-# Create two new Synology Users
+| Name | No access | Read/Write | Read Only |
+| :---  | :---: | :---: | :---: |
+| `backup` | ☐ | ☑ |  ☐
+| `docker` | ☐ | ☑ |  ☐
+| `homes` | ☐ | ☐ | ☐
+| `download` | ☐ | ☑ |  ☐
+| `music` | ☐ | ☑ |  ☐
+| `openvpn` | ☐ | ☑ |  ☐
+| `photo` | ☐ | ☑ |  ☐
+| `proxmox` | ☐ | ☑ |  ☐
+| `pxe` | ☐ | ☑ |  ☐
+| `ssh_key` | ☑ |  ☐ |  ☐
+| `video` | ☐ | ☑ |  ☐
+| `virtualbox` | ☐ | ☑ |  ☐
+4. Set User quota setting
+   * Enable quota:  ☐
+5. Assisgn application permissions
+
+| Name | Allow | Deny |
+| :---  | :---: | :---: |
+| `DSM` | ☐ | ☑ |  
+| `Drive` | ☐ | ☑ | 
+| `File Station` | ☐ | ☑ | 
+| `FTP` | ☐ | ☑ | 
+| `Moments` | ☐ | ☑ | 
+| `Text Editor` | ☐ | ☑ | 
+| `Universal Search` | ☐ | ☑ | 
+| `rsync` | ☑ | ☐  | 
+6. Group Speed Limit Setting
+    * All disabled
+
+## Create two new Synology Users
+### Create user "storm":
 To create a new user log in to the Synology Desktop and:
 1. Open `Control Panel` > `User` > `Create`
 2. Set User Information as follows:
@@ -75,12 +120,13 @@ To create a new user log in to the Synology Desktop and:
    * Description: `Leave Blank`
    * Email: `Leave blank`
    * Password: `"As Supplied"`
-   * Conform password: `"As Supllied"`
-     * Send notification mail to the newly created user: `Off`
-     * Display user password in notification mail: `Off`
-     * Disallow the user to change account password: `Off`
+   * Conform password: `"As Supplied"`
+     * Send notification mail to the newly created user: ☐ 
+     * Display user password in notification mail: ☐ 
+     * Disallow the user to change account password: ☐ 
 3. Set Join groups as follows:
-     * users: `yes`
+     * server-group:  ☑
+     * users:  ☑
 4. Assign shared folders permissions as follows:
 
 | Name | No access | Read/Write | Read Only |
@@ -92,11 +138,41 @@ To create a new user log in to the Synology Desktop and:
 | `openvpn` | ☐ | ☑ |  ☐
 | `photo` | ☐ | ☑ |  ☐
 | `pxe` | ☐ | ☑ |  ☐
-| `ssh_key` | ☐ | ☑ |  ☐
+| `ssh_key` | ☑ |  ☐ |  ☐
 | `video` | ☐ | ☑ |  ☐
 | `virtualbox` | ☐ | ☑ |  ☐
 | `proxmox` | ☐ | ☑ |  ☐
-     
+
+### Create user "gituser":
+To create a new user log in to the Synology Desktop and:
+1. Open `Control Panel` > `User` > `Create`
+2. Set User Information as follows:
+   * Name: `"gituser"`
+   * Description: `Leave Blank`
+   * Email: `Leave blank`
+   * Password: `"As Supplied"`
+   * Conform password: `"As Supllied"`
+     * Send notification mail to the newly created user: ☐ 
+     * Display user password in notification mail: ☐ 
+     * Disallow the user to change account password: ☐ 
+3. Set Join groups as follows:
+     * users:  ☑
+4. Assign shared folders permissions as follows:
+
+| Name | No access | Read/Write | Read Only |
+| :---  | :---: | :---: | :---: |
+| `backup` | ☑ |  ☐ |  ☐
+| `docker` | ☐ | ☑ |  ☐
+| `download` | ☑ |  ☐ |  ☐
+| `music` | ☑ |  ☐ |  ☐
+| `openvpn` | ☑ |  ☐ |  ☐
+| `photo` | ☑ |  ☐ |  ☐
+| `pxe` | ☐ | ☑ |  ☐
+| `ssh_key` | ☑ |  ☐ |  ☐
+| `video` | ☑ |  ☐ |  ☐
+| `virtualbox` | ☐ | ☑ |  ☐
+| `proxmox` | ☐ | ☑ |  ☐
+
 ## Setting up Key Based Authentication
  I want to SSH into the synology diskstation using key-based authentication, but that seemed not supported by default. So to enable SSH key-based authentication we need to make a few tweaks. But first make sure you have your public SSH keys, commonly has a filename `id_rsa.pub`, on your PC (notebook, workstation or whatever).
  
