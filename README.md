@@ -57,7 +57,7 @@ To create shared folders log in to the Synology Desktop and:
 4. Set up advanced:
    * All disabled:  ☐ 
 5. Set up Permissions:
-     * Note at this point do not flag anything, just hit `Cancel`
+     * Note, at this point do not flag anything, just hit `Cancel` to exit.
      
 ## Set up NFS Permissions
 Create NFS shares for all of the above folders. 
@@ -76,10 +76,10 @@ Create NFS shares for all of the above folders.
 To create a new group log in to the Synology Desktop and:
 1. Open `Control Panel` > `Group` > `Create`
 2. Set User Information as follows:
-   * Name: `"server-group"`
-   * Description: `"Server user group"`
+   * Name: `"homelab"`
+   * Description: `"Homelab Server group"`
 3. Assign shared folders permissions as follows:
-
+Note: Any private data you may have stored in a shared folder simply assign `No Access` to the `homelab` group.
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
 | `backup` | ☐ | ☑ |  ☐
@@ -94,22 +94,22 @@ To create a new group log in to the Synology Desktop and:
 | `ssh_key` | ☑ |  ☐ |  ☐
 | `video` | ☐ | ☑ |  ☐
 | `virtualbox` | ☐ | ☑ |  ☐
-4. Set User quota setting
+4. Set User quota setting:
    * Enable quota:  ☐
-5. Assisgn application permissions
+5. Assign application permissions:
 
 | Name | Allow | Deny |
 | :---  | :---: | :---: |
 | `DSM` | ☐ | ☑ |  
 | `Drive` | ☐ | ☑ | 
 | `File Station` | ☐ | ☑ | 
-| `FTP` | ☐ | ☑ | 
+| `FTP` | ☑ | ☐  | 
 | `Moments` | ☐ | ☑ | 
 | `Text Editor` | ☐ | ☑ | 
 | `Universal Search` | ☐ | ☑ | 
-| `rsync` | ☑ | ☐  | 
+| `rsync` | ☐ | ☑ |  
 6. Group Speed Limit Setting
-    * All disabled
+    * `default`
 
 ## Create two new Synology Users
 ### Create user "storm":
@@ -117,45 +117,63 @@ To create a new user log in to the Synology Desktop and:
 1. Open `Control Panel` > `User` > `Create`
 2. Set User Information as follows:
    * Name: `"storm"`
-   * Description: `Leave Blank`
+   * Description: `"Homelab user"`
    * Email: `Leave blank`
    * Password: `"As Supplied"`
    * Conform password: `"As Supplied"`
      * Send notification mail to the newly created user: ☐ 
      * Display user password in notification mail: ☐ 
-     * Disallow the user to change account password: ☐ 
+     * Disallow the user to change account password:  ☑
 3. Set Join groups as follows:
-     * server-group:  ☑
+     * homelab:  ☑
      * users:  ☑
 4. Assign shared folders permissions as follows:
-
+Basically leave as default as permissions are automatically obtained from the user 'group' permissions.
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
 | `backup` | ☐ | ☑ |  ☐
 | `docker` | ☐ | ☑ |  ☐
 | `download` | ☐ | ☑ |  ☐
 | `music` | ☐ | ☑ |  ☐
-| `openvpn` | ☐ | ☑ |  ☐
+| `openvpn` | ☑ |  ☐ |  ☐
 | `photo` | ☐ | ☑ |  ☐
 | `pxe` | ☐ | ☑ |  ☐
 | `ssh_key` | ☑ |  ☐ |  ☐
 | `video` | ☐ | ☑ |  ☐
 | `virtualbox` | ☐ | ☑ |  ☐
 | `proxmox` | ☐ | ☑ |  ☐
+5. Set User quota setting:
+     * `default`
+6. Assign application permissions:
+| Name | Allow | Deny |
+| :---  | :---: | :---: |
+| `DSM` | ☐ | ☑ |  
+| `Drive` | ☐ | ☑ | 
+| `File Station` | ☐ | ☑ | 
+| `FTP` | ☑ |  ☐ | 
+| `Moments` | ☐ | ☑ | 
+| `Text Editor` | ☐ | ☑ | 
+| `Universal Search` | ☐ | ☑ | 
+| `rsync` | ☐ | ☑ | 
+7. Set User Speed Limit Setting:
+     * `default`
+8. Confirm settings:
+     * `Apply`
 
 ### Create user "gituser":
 To create a new user log in to the Synology Desktop and:
 1. Open `Control Panel` > `User` > `Create`
 2. Set User Information as follows:
    * Name: `"gituser"`
-   * Description: `Leave Blank`
+   * Description: `"Homelab user"`
    * Email: `Leave blank`
    * Password: `"As Supplied"`
    * Conform password: `"As Supllied"`
      * Send notification mail to the newly created user: ☐ 
      * Display user password in notification mail: ☐ 
-     * Disallow the user to change account password: ☐ 
+     * Disallow the user to change account password:  ☑
 3. Set Join groups as follows:
+     * homelab:  ☑
      * users:  ☑
 4. Assign shared folders permissions as follows:
 
@@ -172,6 +190,14 @@ To create a new user log in to the Synology Desktop and:
 | `video` | ☑ |  ☐ |  ☐
 | `virtualbox` | ☐ | ☑ |  ☐
 | `proxmox` | ☐ | ☑ |  ☐
+5. Set User quota setting:
+     * `default`
+6. Assign application permissions:
+     * `default`
+7. Set User Speed Limit Setting:
+     * `default`
+8. Confirm settings:
+     * `Apply`
 
 ## Setting up Key Based Authentication
  I want to SSH into the synology diskstation using key-based authentication, but that seemed not supported by default. So to enable SSH key-based authentication we need to make a few tweaks. But first make sure you have your public SSH keys, commonly has a filename `id_rsa.pub`, on your PC (notebook, workstation or whatever).
