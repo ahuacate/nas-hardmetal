@@ -8,6 +8,7 @@ Prerequisites are:
 
 Tasks to be performed are:
 - [ ] Create the required Synology shared folders and NFS shares
+- [ ] Create a new user group `homelab`
 - [ ] Create two new Synology users;
   * first user named: `storm`
   * second user named: `gituser`
@@ -80,6 +81,7 @@ To create a new group log in to the Synology Desktop and:
    * Description: `"Homelab Server group"`
 3. Assign shared folders permissions as follows:
 Note: Any private data you may have stored in a shared folder simply assign `No Access` to the `homelab` group.
+
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
 | `backup` | ☐ | ☑ |  ☐
@@ -129,6 +131,7 @@ To create a new user log in to the Synology Desktop and:
      * users:  ☑
 4. Assign shared folders permissions as follows:
 Basically leave as default as permissions are automatically obtained from the user 'group' permissions.
+
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
 | `backup` | ☐ | ☑ |  ☐
@@ -145,6 +148,7 @@ Basically leave as default as permissions are automatically obtained from the us
 5. Set User quota setting:
      * `default`
 6. Assign application permissions:
+
 | Name | Allow | Deny |
 | :---  | :---: | :---: |
 | `DSM` | ☐ | ☑ |  
