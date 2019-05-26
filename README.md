@@ -1,6 +1,11 @@
 # Synobuild
 The following is for a Synology Diskstation only. Modify accordingly for your own NAS or NFS server setup.
-Prerequisites are:
+Network Prerequisites are:
+- [x] Network Gateway is `192.168.1.5`
+- [x] Network DNS server is `192.168.1.5`
+- [x] Network DHCP server is `192.168.1.5`
+
+Synology Prerequisites are:
 - [x] Synology Static IP Address is `192.168.1.10`
 - [x] Synology Hostname is `cyclone-01`
 - [x] Synology Gateway is `192.168.1.5`
