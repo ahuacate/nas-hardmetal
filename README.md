@@ -2,7 +2,7 @@
 The following is for a Synology Diskstation only. Modify accordingly for your own NAS or NFS server setup.
 Network Prerequisites are:
 - [x] Network Gateway is `192.168.1.5`
-- [x] Network DNS server is `192.168.1.5`
+- [x] Network DNS server is `192.168.1.5` (Note: set DNS server: primary '1.1.1.1' ; secondary `192.168.1.254')
 - [x] Network DHCP server is `192.168.1.5`
 
 Synology Prerequisites are:
