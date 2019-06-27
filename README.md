@@ -215,13 +215,17 @@ To create a new user log in to the Synology Desktop and:
 If your Synology model is capable we can install a Proxmox node on a Synology Diskstation using the native Synology Virtual Machine Manager application. Note, prerequisites are your Synology Diskstation has a Intel CPU and 16Gb of Ram (minimum 8Gb). Download the latest Proxmox ISO installer to your PC from  www.proxmox.com or from [HERE](https://www.proxmox.com/en/downloads/category/iso-images-pve) . 
 1. Open `Synology Package Centre` and install `Virtual Machine Manager`
 2. Open Synology `Virtual Machine Manager` > `Image` > `ISO File` > `Add` > `From Computer` and browse to your downloaded Proxmox ISO (i.e proxmox-ve_5.4-1.iso ) > `Select Storage` > `Choose your host (i.e cyclone-01)`
-3. Open Synology `Virtual Machine Manager` > `Virtual Machine` > `Create`
+3. Open Synology `Virtual Machine Manager` > `Virtual Machine` > `Create` > `Choose OS` > `Linux` > `Select Storage` > `cyclone-01` >
 Assign the following values
 
-| General | Value |
-| :---  | :---: | 
-| `Name` | typhoon-03 |
-| `CPU's` | 1 |
-| `Memory` | 7 |
-| `Video Card` | vmvga |
+| General | Value |--| Storage | Value | Options |--| Network | Value |
+| :---  | :---: | --| :---  | :---: |  :---: |--| :---  | :---: |
+| `Name` | typhoon-03 | | `Virtual Disk 1` | 120 Gb | VirtIO SCSI Controller with Space Reclamation enabled | | `Network` | Default VM Network |
+| `CPU's` | 1 | | `Virtual Disk 2` | 250 Gb | VirtIO SCSI Controller with Space Reclamation enabled
+| `Memory` | 7 | | | |
+| `Video Card` | vmvga | |  |  |
+| `Description` | (optional) | |  | |
 
+| Storage | Value |
+| :---  | :---: | 
+| `V` | typhoon-03 |
