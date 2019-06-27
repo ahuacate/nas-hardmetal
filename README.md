@@ -210,3 +210,4 @@ To create a new user log in to the Synology Desktop and:
      * `Apply`
 
 ### Install & Configure Synology Virtual Machine Manager
+Here we are going to install a Proxmox
