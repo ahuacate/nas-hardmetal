@@ -18,6 +18,7 @@ Tasks to be performed are:
   * first user named: `storm`
   * second user named: `gituser`
 - [ ] Configure Synology NAS SSH Key-based authentication for the above users.
+- [ ] Install & Configure Synology Virtual Machine Manager
 
 ## Create the required Synology Shared Folders and NFS Shares
 ### Create Shared Folders
@@ -207,3 +208,5 @@ To create a new user log in to the Synology Desktop and:
      * `default`
 8. Confirm settings:
      * `Apply`
+
+### Install & Configure Synology Virtual Machine Manager
