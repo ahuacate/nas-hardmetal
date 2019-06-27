@@ -6,6 +6,8 @@ Network Prerequisites are:
 - [x] Network DHCP server is `192.168.1.5`
 
 Synology Prerequisites are:
+- [x] Synology CPU is Intel based
+- [x] Volume is formated to BTRFS (not ext4, which cannot run Synology Virtual Machines)
 - [x] Synology Static IP Address is `192.168.1.10`
 - [x] Synology Hostname is `cyclone-01`
 - [x] Synology Gateway is `192.168.1.5`
@@ -210,4 +212,16 @@ To create a new user log in to the Synology Desktop and:
      * `Apply`
 
 ### Install & Configure Synology Virtual Machine Manager
-Here we are going to install a Proxmox
+If your Synology model is capable we can install a Proxmox node on a Synology Diskstation using the native Synology Virtual Machine Manager application. Note, prerequisites are your Synology Diskstation has a Intel CPU and 16Gb of Ram (minimum 8Gb). Download the latest Proxmox ISO installer to your PC from  www.proxmox.com or from [HERE](https://www.proxmox.com/en/downloads/category/iso-images-pve) . 
+1. Open `Synology Package Centre` and install `Virtual Machine Manager`
+2. Open Synology `Virtual Machine Manager` > `Image` > `ISO File` > `Add` > `From Computer` and browse to your downloaded Proxmox ISO (i.e proxmox-ve_5.4-1.iso ) > `Select Storage` > `Choose your host (i.e cyclone-01)`
+3. Open Synology `Virtual Machine Manager` > `Virtual Machine` > `Create`
+Assign the following values
+
+| General | Value |
+| :---  | :---: | 
+| `Name` | typhoon-03 |
+| `CPU's` | 1 |
+| `Memory` | 7 |
+| `Video Card` | vmvga |
+
