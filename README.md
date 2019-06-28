@@ -218,14 +218,31 @@ If your Synology model is capable we can install a Proxmox node on a Synology Di
 3. Open Synology `Virtual Machine Manager` > `Virtual Machine` > `Create` > `Choose OS` > `Linux` > `Select Storage` > `cyclone-01` >
 Assign the following values
 
-| General | Value |--| Storage | Value | Options |--| Network | Value |
+| (1) General | Value |--|Options or Notes|
+| :---  | :---: | --| :---  |
+| `Name` | typhoon-03 |
+| `CPU's` | 1 |
+| `Memory` | 7 | 
+| `Video Card` | vmvga |
+| `Description` | (optional) |
+| | |
+| **(2) Storage** | **Value** |--|**Options or Notes**|
+| `Virtual Disk 1` | 120 Gb |--|VirtIO SCSI Controller with Space Reclamation enabled|
+| `Virtual Disk 1` | 250 Gb |--|VirtIO SCSI Controller with Space Reclamation enabled|
+| | |
+| **(3) Network** | **Value** |--|**Options or Notes**|
+| `Network 1` | Default VM Network |--|VirtIO SCSI Controller with Space Reclamation enabled|
+| | |
+| **(4) Others** | **Value** |--|**Options or Notes**|
+| `ISO file for bootup` |i.e proxmox-ve_5.4  |--|Note: select the proxmox ISO uploaded in Step 2|
+| `Additional ISO file` | Unmounted |--|Note: bothing to to select here|
+
+
+
+| 1 General | Value |--| 2 Storage | Value | 3 Options |--| 4 Network | Value |
 | :---  | :---: | --| :---  | :---: |  :---: |--| :---  | :---: |
 | `Name` | typhoon-03 | | `Virtual Disk 1` | 120 Gb | VirtIO SCSI Controller with Space Reclamation enabled | | `Network` | Default VM Network |
 | `CPU's` | 1 | | `Virtual Disk 2` | 250 Gb | VirtIO SCSI Controller with Space Reclamation enabled
 | `Memory` | 7 | | | |
 | `Video Card` | vmvga | |  |  |
 | `Description` | (optional) | |  | |
-
-| Storage | Value |
-| :---  | :---: | 
-| `V` | typhoon-03 |
