@@ -218,7 +218,7 @@ If your Synology model is capable we can install a Proxmox node on a Synology Di
 3. Open Synology `Virtual Machine Manager` > `Virtual Machine` > `Create` > `Choose OS` > `Linux` > `Select Storage` > `cyclone-01` >
 Assign the following values
 
-| (1) General | Value |--|Options or Notes|
+| (1) Tab General | Value |--|Options or Notes|
 | :---  | :---: | --| :---  |
 | `Name` | typhoon-03 |
 | `CPU's` | 1 |
@@ -226,23 +226,25 @@ Assign the following values
 | `Video Card` | vmvga |
 | `Description` | (optional) |
 | | |
-| **(2) Storage** | **Value** |--|**Options or Notes**|
-| `Virtual Disk 1` | 120 Gb |--|VirtIO SCSI Controller with Space Reclamation enabled|
-| `Virtual Disk 1` | 250 Gb |--|VirtIO SCSI Controller with Space Reclamation enabled|
+| **(2) Tab Storage** | **Value** |--|**Options or Notes**|
+| `Virtual Disk 1` | 120 Gb |--|Options: VirtIO SCSI Controller with Space Reclamation enabled|
+| `Virtual Disk 1` | 250 Gb |--|Options: VirtIO SCSI Controller with Space Reclamation enabled|
 | | |
-| **(3) Network** | **Value** |--|**Options or Notes**|
-| `Network 1` | Default VM Network |--|VirtIO SCSI Controller with Space Reclamation enabled|
+| **(3) Tab Network** | **Value** |--|**Options or Notes**|
+| `Network 1` | Default VM Network |
 | | |
-| **(4) Others** | **Value** |--|**Options or Notes**|
+| **(4) Tab Others** | **Value** |--|**Options or Notes**|
 | `ISO file for bootup` |i.e proxmox-ve_5.4  |--|Note: select the proxmox ISO uploaded in Step 2|
-| `Additional ISO file` | Unmounted |--|Note: bothing to to select here|
-
-
-
-| 1 General | Value |--| 2 Storage | Value | 3 Options |--| 4 Network | Value |
-| :---  | :---: | --| :---  | :---: |  :---: |--| :---  | :---: |
-| `Name` | typhoon-03 | | `Virtual Disk 1` | 120 Gb | VirtIO SCSI Controller with Space Reclamation enabled | | `Network` | Default VM Network |
-| `CPU's` | 1 | | `Virtual Disk 2` | 250 Gb | VirtIO SCSI Controller with Space Reclamation enabled
-| `Memory` | 7 | | | |
-| `Video Card` | vmvga | |  |  |
-| `Description` | (optional) | |  | |
+| `Additional ISO file` | Unmounted |--|Note: nothing to to select here|
+| `Autostart` | Yes |
+| `Boot from` | Virtual Disk |
+| `BIOS` | Legacy BIOS (Recommended) |
+| `Keyboard Layout` | Default (en-us) |
+| `Virtual USB Controller` | Disabled |
+| `USB Device` | Unmounted |
+| | |
+| **(5) Tab Permissions** | **Value** |--|**Options or Notes**|
+| `administrators` | ☑ |--|Note: select from 'Local groups'|
+| `homelab` | ☑ | --|Note: select from 'Local groups'|
+| `http` | ☐ | 
+| `users` | ☐ | 
