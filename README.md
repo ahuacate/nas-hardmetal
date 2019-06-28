@@ -212,7 +212,7 @@ To create a new user log in to the Synology Desktop and:
      * `Apply`
 
 ### Install & Configure Synology Virtual Machine Manager
-If your Synology model is capable we can install a Proxmox node on a Synology Diskstation using the native Synology Virtual Machine Manager application. Note, prerequisites are your Synology Diskstation has a Intel CPU and 16Gb of Ram (minimum 8Gb). Download the latest Proxmox ISO installer to your PC from  www.proxmox.com or from [HERE](https://www.proxmox.com/en/downloads/category/iso-images-pve) . 
+If your Synology model is capable we can install a Proxmox node on a Synology Diskstation using the native Synology Virtual Machine Manager application. Note, prerequisites are your Synology Diskstation has a Intel CPU and 16Gb of Ram (minimum 8Gb). Download the latest Proxmox ISO installer to your PC from  www.proxmox.com or [HERE](https://www.proxmox.com/en/downloads/category/iso-images-pve) . 
 1. Open `Synology Package Centre` and install `Virtual Machine Manager`
 2. Open Synology `Virtual Machine Manager` > `Image` > `ISO File` > `Add` > `From Computer` and browse to your downloaded Proxmox ISO (i.e proxmox-ve_5.4-1.iso ) > `Select Storage` > `Choose your host (i.e cyclone-01)`
 3. Open Synology `Virtual Machine Manager` > `Virtual Machine` > `Create` > `Choose OS` > `Linux` > `Select Storage` > `cyclone-01` >
@@ -248,3 +248,7 @@ Assign the following values
 | `homelab` | ☑ | --|Note: select from 'Local groups'|
 | `http` | ☐ | 
 | `users` | ☐ | 
+
+4. Final steo is to install Proxmox:
+   * Open Synology `Virtual Machine Manager` > `Virtual Machine` > `Power On` and wait for the `status` to show `running`.
+   * Open Synology `Virtual Machine Manager` > `Virtual Machine` > `Connect` and a new browser tab should open showing the Proxmox installation script. Now follow our Github instructions for installing Proxmox using node ID `typhoon-03` from [HERE](https://github.com/ahuacate/proxmox-node).
