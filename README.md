@@ -236,7 +236,7 @@ Assign the following values
 | **(4) Tab Others** | **Value** |--|**Options or Notes**|
 | `ISO file for bootup` |i.e proxmox-ve_5.4  |--|Note: select the proxmox ISO uploaded in Step 2|
 | `Additional ISO file` | Unmounted |--|Note: nothing to to select here|
-| `Autostart` | Yes |
+| `Autostart` | Last State |
 | `Boot from` | Virtual Disk |
 | `BIOS` | Legacy BIOS (Recommended) |
 | `Keyboard Layout` | Default (en-us) |
