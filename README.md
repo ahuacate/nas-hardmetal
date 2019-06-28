@@ -211,7 +211,7 @@ To create a new user log in to the Synology Desktop and:
 8. Confirm settings:
      * `Apply`
 
-### Install & Configure Synology Virtual Machine Manager
+## Install & Configure Synology Virtual Machine Manager
 If your Synology model is capable we can install a Proxmox node on a Synology Diskstation using the native Synology Virtual Machine Manager application. Note, prerequisites are your Synology Diskstation has a Intel CPU and 16Gb of Ram (minimum 8Gb). Download the latest Proxmox ISO installer to your PC from  www.proxmox.com or [HERE](https://www.proxmox.com/en/downloads/category/iso-images-pve) . 
 1. Open `Synology Package Centre` and install `Virtual Machine Manager`
 2. Open Synology `Virtual Machine Manager` > `Image` > `ISO File` > `Add` > `From Computer` and browse to your downloaded Proxmox ISO (i.e proxmox-ve_5.4-1.iso ) > `Select Storage` > `Choose your host (i.e cyclone-01)`
