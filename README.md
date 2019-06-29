@@ -12,11 +12,18 @@ Synology Prerequisites are:
 - [x] Synology Hostname is `cyclone-01`
 - [x] Synology Gateway is `192.168.1.5`
 - [x] Synology DNS Server is `192.168.1.5`
-- [x] Synology DDNS is working with your hostname ID at `hostnameID.synology.me`
+- [x] Synology DDNS is working with your chosen hostname ID at `hostnameID.synology.me`
 
 Tasks to be performed are:
+- [ ] Install the required Synology applications
+  * `Drive` - a Synology remote access tool
+  * `WebDAV Server` - a Synology remote access tool
+  * `Virtual Machine Manager` - a Synology virtualisation tool
+  * 
 - [ ] Create the required Synology shared folders and NFS shares
-- [ ] Create a new user group `homelab` & `privatelab`
+- [ ] Create a new user groups:
+  * `homelab` user group
+  * `privatelab` user group
 - [ ] Create two new Synology users;
   * first user named: `storm`
   * second user named: `gituser`
@@ -69,7 +76,7 @@ To create shared folders log in to the Synology Desktop and:
 5. Set up Permissions:
      * Note, at this point do not flag anything, just hit `Cancel` to exit.
      
-## Set up NFS Permissions
+### Create NFS Shares
 Create NFS shares for the following folders:
 
 | Folder Name | NFS Share |
@@ -93,12 +100,14 @@ To create NFS shares log in to the Synology Desktop and:
      * Allow users to access mounted subfolders:  ☑
 3. Repeat steps 1 to 2 for all of the above six folders.
 
-## Create new Synology User group "homelab"
+## Create new Synology User groups
+### Create "homelab" user group
+This is a user group for predominately your smart home and home media management software. This is not for personal or private data.
 To create a new group log in to the Synology Desktop and:
 1. Open `Control Panel` > `Group` > `Create`
 2. Set User Information as follows:
    * Name: `"homelab"`
-   * Description: `"Homelab Server group"`
+   * Description: `"Homelab group"`
 3. Assign shared folders permissions as follows:
 Note: Any oersonal or private data you may have stored in a shared folder simply assign `No Access` to the `homelab` group.
 
@@ -106,7 +115,7 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 | :---  | :---: | :---: | :---: |
 | `backup`  | ☑ |  ☐ |  ☐
 | `docker` | ☐ | ☑ |  ☐
-| `github` | ☐ | ☑ |  ☐
+| `github` | ☐ | ☐ | ☑ |  
 | `music` | ☐ | ☑ |  ☐
 | `openvpn` | ☑ |  ☐ |  ☐
 | `photo` | ☐ | ☑ |  ☐
@@ -134,6 +143,48 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 6. Group Speed Limit Setting
     * `default`
 
+### Create "privatelab" user group
+This is a user group for your private and personal data.
+To create a new group log in to the Synology Desktop and:
+1. Open `Control Panel` > `Group` > `Create`
+2. Set User Information as follows:
+   * Name: `"privatelab"`
+   * Description: `"Privatelab group"`
+3. Assign shared folders permissions as follows:
+Note: Any oersonal or private data you may have stored in a shared folder simply assign `No Access` to the `homelab` group.
+
+| Name | No access | Read/Write | Read Only |
+| :---  | :---: | :---: | :---: |
+| `backup` | ☐ | ☑ |  ☐
+| `docker` | ☐ | ☑ |  ☐
+| `github` | ☐ | ☑ |  ☐
+| `music` | ☐ | ☑ |  ☐
+| `openvpn` | ☐ | ☑ |  ☐
+| `photo` | ☐ | ☑ |  ☐
+| `proxmox` | ☐ | ☑ |  ☐
+| `pxe` | ☐ | ☑ |  ☐
+| `ssh_key` | ☐ | ☑ |  ☐
+| `video` | ☐ | ☑ |  ☐
+| `virtualbox` | ☐ | ☑ |  ☐
+4. Set User quota setting:
+   * Enable quota:  ☐
+5. Assign application permissions:
+
+| Name | Allow | Deny |
+| :---  | :---: | :---: |
+| `DSM` | ☑ | ☐  | 
+| `Drive` | ☑ | ☐  | 
+| `File Station` | ☑ | ☐  | 
+| `FTP` | ☑ | ☐  | 
+| `Moments` | ☑ | ☐  | 
+| `Text Editor` | ☑ | ☐  | 
+| `Universal Search` | ☑ | ☐  | 
+| `Virtual Machine Manager` | ☑ | ☐  | 
+| `WebDAV Server` | ☑ | ☐  | 
+| `rsync` | ☑ | ☐  | 
+6. Group Speed Limit Setting
+    * `default`
+
 ## Create two new Synology Users
 ### Create user "storm":
 To create a new user log in to the Synology Desktop and:
@@ -151,37 +202,38 @@ To create a new user log in to the Synology Desktop and:
      * homelab:  ☑
      * users:  ☑
 4. Assign shared folders permissions as follows:
-Basically leave as default as permissions are automatically obtained from the user 'group' permissions.
+Leave as default as permissions are automatically obtained from the chosen user 'group' permissions.
 
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
-| `backup` | ☐ | ☑ |  ☐
+| `backup`  | ☑ |  ☐ |  ☐
 | `docker` | ☐ | ☑ |  ☐
-| `download` | ☐ | ☑ |  ☐
-| `github` | ☐ | ☑ |  ☐
-| `homes` | ☐ | ☐ | ☐
+| `github` | ☐ | ☐ | ☑ |  
 | `music` | ☐ | ☑ |  ☐
 | `openvpn` | ☑ |  ☐ |  ☐
 | `photo` | ☐ | ☑ |  ☐
+| `proxmox` | ☐ | ☑ |  ☐
 | `pxe` | ☐ | ☑ |  ☐
 | `ssh_key` | ☑ |  ☐ |  ☐
 | `video` | ☐ | ☑ |  ☐
 | `virtualbox` | ☐ | ☑ |  ☐
-| `proxmox` | ☐ | ☑ |  ☐
 5. Set User quota setting:
      * `default`
 6. Assign application permissions:
+Leave as default as application permissions are automatically obtained from the chosen user 'group' permissions.
 
 | Name | Allow | Deny |
 | :---  | :---: | :---: |
-| `DSM` | ☐ | ☑ |  
-| `Drive` | ☐ | ☑ | 
-| `File Station` | ☐ | ☑ | 
-| `FTP` | ☑ |  ☐ | 
-| `Moments` | ☐ | ☑ | 
-| `Text Editor` | ☐ | ☑ | 
-| `Universal Search` | ☐ | ☑ | 
-| `rsync` | ☐ | ☑ | 
+| `DSM` | ☑ | ☐  | 
+| `Drive` | ☑ | ☐  | 
+| `File Station` | ☑ | ☐  | 
+| `FTP` | ☑ | ☐  | 
+| `Moments` | ☑ | ☐  | 
+| `Text Editor` | ☑ | ☐  | 
+| `Universal Search` | ☑ | ☐  | 
+| `Virtual Machine Manager` | ☑ | ☐  | 
+| `WebDAV Server` | ☑ | ☐  | 
+| `rsync` | ☑ | ☐  | 
 7. Set User Speed Limit Setting:
      * `default`
 8. Confirm settings:
