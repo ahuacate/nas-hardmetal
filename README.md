@@ -15,11 +15,13 @@ Synology Prerequisites are:
 - [x] Synology DDNS is working with your chosen hostname ID at `hostnameID.synology.me`
 
 Tasks to be performed are:
-- [ ] Install the required Synology applications
+- [ ] Install the required Synology applications:
   * `Drive` - a Synology remote access tool
+  * `Moments` - Synology photo manager
   * `WebDAV Server` - a Synology remote access tool
   * `Virtual Machine Manager` - a Synology virtualisation tool
-  * 
+  * `VPN Server` - Synology VPN access server
+  * `Git Server` - have local branch of Github
 - [ ] Create the required Synology shared folders and NFS shares
 - [ ] Create a new user groups:
   * `homelab` user group
