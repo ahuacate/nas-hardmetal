@@ -12,10 +12,11 @@ Synology Prerequisites are:
 - [x] Synology Hostname is `cyclone-01`
 - [x] Synology Gateway is `192.168.1.5`
 - [x] Synology DNS Server is `192.168.1.5`
+- [x] Synology DDNS is working with your hostname ID at `hostnameID.synology.me`
 
 Tasks to be performed are:
 - [ ] Create the required Synology shared folders and NFS shares
-- [ ] Create a new user group `homelab`
+- [ ] Create a new user group `homelab` & `privatelab`
 - [ ] Create two new Synology users;
   * first user named: `storm`
   * second user named: `gituser`
@@ -31,7 +32,7 @@ Synology NAS/
 └──  volume1/
     ├── backup
     ├── docker
-    ├── download
+    ├── github
     ├── music 
     ├── openvpn
     ├── photo 
@@ -52,7 +53,7 @@ To create shared folders log in to the Synology Desktop and:
    * Enable Recycle Bin:
      * backup ☑
      * docker ☑
-     * download ☐ 
+     * github ☑
      * music ☑
      * openvpn ☑
      * photo ☑
@@ -69,7 +70,18 @@ To create shared folders log in to the Synology Desktop and:
      * Note, at this point do not flag anything, just hit `Cancel` to exit.
      
 ## Set up NFS Permissions
-Create NFS shares for all of the above folders. 
+Create NFS shares for the following folders:
+
+| Folder Name | NFS Share |
+| :---  | :---: |
+| `docker` | ☑ |
+| `github` | ☑ |
+| `music` | ☑ |
+| `photo` | ☑ |
+| `proxmox`  | ☑ |
+| `video`  | ☑ |
+
+To create NFS shares log in to the Synology Desktop and:
 1. Log in to the Synology Desktop and go to `Control Panel` > `Shared Folder` > `Select a Folder` > `Edit` > `NFS Permissions` > `Create `
 2. Set NFS rule options as follows:
    * Hostname or IP*: `"192.168.1.0/24"`
@@ -79,25 +91,24 @@ Create NFS shares for all of the above folders.
      * Enable asynchronous:  ☑
      * Allow connections from non-privileged ports:  ☑
      * Allow users to access mounted subfolders:  ☑
-3. Repeat steps 1 to 2 for all of the above folders BUT NOT `ssh_key` folder.
+3. Repeat steps 1 to 2 for all of the above six folders.
 
-## Create new Synology User group
+## Create new Synology User group "homelab"
 To create a new group log in to the Synology Desktop and:
 1. Open `Control Panel` > `Group` > `Create`
 2. Set User Information as follows:
    * Name: `"homelab"`
    * Description: `"Homelab Server group"`
 3. Assign shared folders permissions as follows:
-Note: Any private data you may have stored in a shared folder simply assign `No Access` to the `homelab` group.
+Note: Any oersonal or private data you may have stored in a shared folder simply assign `No Access` to the `homelab` group.
 
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
-| `backup` | ☐ | ☑ |  ☐
+| `backup`  | ☑ |  ☐ |  ☐
 | `docker` | ☐ | ☑ |  ☐
-| `homes` | ☐ | ☐ | ☐
-| `download` | ☐ | ☑ |  ☐
+| `github` | ☐ | ☑ |  ☐
 | `music` | ☐ | ☑ |  ☐
-| `openvpn` | ☐ | ☑ |  ☐
+| `openvpn` | ☑ |  ☐ |  ☐
 | `photo` | ☐ | ☑ |  ☐
 | `proxmox` | ☐ | ☑ |  ☐
 | `pxe` | ☐ | ☑ |  ☐
@@ -112,11 +123,13 @@ Note: Any private data you may have stored in a shared folder simply assign `No 
 | :---  | :---: | :---: |
 | `DSM` | ☐ | ☑ |  
 | `Drive` | ☐ | ☑ | 
-| `File Station` | ☐ | ☑ | 
-| `FTP` | ☑ | ☐  | 
+| `File Station` | ☑ | ☐  | 
+| `FTP` | ☐ | ☑ |  
 | `Moments` | ☐ | ☑ | 
 | `Text Editor` | ☐ | ☑ | 
 | `Universal Search` | ☐ | ☑ | 
+| `Virtual Machine Manager` | ☑ | ☐  | 
+| `WebDAV Server` | ☑ | ☐  | 
 | `rsync` | ☐ | ☑ |  
 6. Group Speed Limit Setting
     * `default`
@@ -145,6 +158,8 @@ Basically leave as default as permissions are automatically obtained from the us
 | `backup` | ☐ | ☑ |  ☐
 | `docker` | ☐ | ☑ |  ☐
 | `download` | ☐ | ☑ |  ☐
+| `github` | ☐ | ☑ |  ☐
+| `homes` | ☐ | ☐ | ☐
 | `music` | ☐ | ☑ |  ☐
 | `openvpn` | ☑ |  ☐ |  ☐
 | `photo` | ☐ | ☑ |  ☐
@@ -192,16 +207,18 @@ To create a new user log in to the Synology Desktop and:
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
 | `backup` | ☑ |  ☐ |  ☐
-| `docker` | ☐ | ☑ |  ☐
+| `docker` | ☑ |  ☐ |  ☐
 | `download` | ☑ |  ☐ |  ☐
+| `github` | ☐ | ☑ |  ☐
+| `homes` | ☐ | ☐ | ☐
 | `music` | ☑ |  ☐ |  ☐
 | `openvpn` | ☑ |  ☐ |  ☐
 | `photo` | ☑ |  ☐ |  ☐
 | `pxe` | ☐ | ☑ |  ☐
 | `ssh_key` | ☑ |  ☐ |  ☐
 | `video` | ☑ |  ☐ |  ☐
-| `virtualbox` | ☐ | ☑ |  ☐
-| `proxmox` | ☐ | ☑ |  ☐
+| `virtualbox`  | ☑ |  ☐ |  ☐
+| `proxmox` | ☑ |  ☐ |  ☐
 5. Set User quota setting:
      * `default`
 6. Assign application permissions:
