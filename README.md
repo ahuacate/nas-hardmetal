@@ -15,14 +15,12 @@ Synology Prerequisites are:
 - [x] Synology DDNS is working with your chosen hostname ID at `hostnameID.synology.me`
 
 Tasks to be performed are:
-- [ ] Install the required Synology applications:
+- [ ] Create the required Synology shared folders and NFS shares
+- [ ] Install the following Synology applications:
   * `Drive` - a Synology remote access tool
   * `Moments` - Synology photo manager
-  * `WebDAV Server` - a Synology remote access tool
   * `Virtual Machine Manager` - a Synology virtualisation tool
   * `VPN Server` - Synology VPN access server
-  * `Git Server` - have local branch of Github
-- [ ] Create the required Synology shared folders and NFS shares
 - [ ] Create a new user groups:
   * `homelab` user group
   * `privatelab` user group
@@ -41,7 +39,6 @@ Synology NAS/
 └──  volume1/
     ├── backup
     ├── docker
-    ├── github
     ├── music 
     ├── openvpn
     ├── photo 
@@ -62,7 +59,6 @@ To create shared folders log in to the Synology Desktop and:
    * Enable Recycle Bin:
      * backup ☑
      * docker ☑
-     * github ☑
      * music ☑
      * openvpn ☑
      * photo ☑
@@ -84,7 +80,6 @@ Create NFS shares for the following folders:
 | Folder Name | NFS Share |
 | :---  | :---: |
 | `docker` | ☑ |
-| `github` | ☑ |
 | `music` | ☑ |
 | `photo` | ☑ |
 | `proxmox`  | ☑ |
@@ -117,7 +112,6 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 | :---  | :---: | :---: | :---: |
 | `backup`  | ☑ |  ☐ |  ☐
 | `docker` | ☐ | ☑ |  ☐
-| `github` | ☐ | ☐ | ☑ |  
 | `music` | ☐ | ☑ |  ☐
 | `openvpn` | ☑ |  ☐ |  ☐
 | `photo` | ☐ | ☑ |  ☐
@@ -140,7 +134,6 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 | `Text Editor` | ☐ | ☑ | 
 | `Universal Search` | ☐ | ☑ | 
 | `Virtual Machine Manager` | ☑ | ☐  | 
-| `WebDAV Server` | ☑ | ☐  | 
 | `rsync` | ☐ | ☑ |  
 6. Group Speed Limit Setting
     * `default`
@@ -159,7 +152,6 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 | :---  | :---: | :---: | :---: |
 | `backup` | ☐ | ☑ |  ☐
 | `docker` | ☐ | ☑ |  ☐
-| `github` | ☐ | ☑ |  ☐
 | `music` | ☐ | ☑ |  ☐
 | `openvpn` | ☐ | ☑ |  ☐
 | `photo` | ☐ | ☑ |  ☐
@@ -182,12 +174,11 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 | `Text Editor` | ☑ | ☐  | 
 | `Universal Search` | ☑ | ☐  | 
 | `Virtual Machine Manager` | ☑ | ☐  | 
-| `WebDAV Server` | ☑ | ☐  | 
 | `rsync` | ☑ | ☐  | 
 6. Group Speed Limit Setting
     * `default`
 
-## Create two new Synology Users
+## Create a new Synology Users
 ### Create user "storm":
 To create a new user log in to the Synology Desktop and:
 1. Open `Control Panel` > `User` > `Create`
@@ -210,7 +201,6 @@ Leave as default as permissions are automatically obtained from the chosen user 
 | :---  | :---: | :---: | :---: |
 | `backup`  | ☑ |  ☐ |  ☐
 | `docker` | ☐ | ☑ |  ☐
-| `github` | ☐ | ☐ | ☑ |  
 | `music` | ☐ | ☑ |  ☐
 | `openvpn` | ☑ |  ☐ |  ☐
 | `photo` | ☐ | ☑ |  ☐
@@ -234,49 +224,7 @@ Leave as default as application permissions are automatically obtained from the 
 | `Text Editor` | ☑ | ☐  | 
 | `Universal Search` | ☑ | ☐  | 
 | `Virtual Machine Manager` | ☑ | ☐  | 
-| `WebDAV Server` | ☑ | ☐  | 
 | `rsync` | ☑ | ☐  | 
-7. Set User Speed Limit Setting:
-     * `default`
-8. Confirm settings:
-     * `Apply`
-
-### Create user "gituser":
-To create a new user log in to the Synology Desktop and:
-1. Open `Control Panel` > `User` > `Create`
-2. Set User Information as follows:
-   * Name: `"gituser"`
-   * Description: `"Homelab user"`
-   * Email: `Leave blank`
-   * Password: `"As Supplied"`
-   * Conform password: `"As Supllied"`
-     * Send notification mail to the newly created user: ☐ 
-     * Display user password in notification mail: ☐ 
-     * Disallow the user to change account password:  ☑
-3. Set Join groups as follows:
-     * homelab:  ☑
-     * users:  ☑
-4. Assign shared folders permissions as follows:
-
-| Name | No access | Read/Write | Read Only |
-| :---  | :---: | :---: | :---: |
-| `backup` | ☑ |  ☐ |  ☐
-| `docker` | ☑ |  ☐ |  ☐
-| `download` | ☑ |  ☐ |  ☐
-| `github` | ☐ | ☑ |  ☐
-| `homes` | ☐ | ☐ | ☐
-| `music` | ☑ |  ☐ |  ☐
-| `openvpn` | ☑ |  ☐ |  ☐
-| `photo` | ☑ |  ☐ |  ☐
-| `pxe` | ☐ | ☑ |  ☐
-| `ssh_key` | ☑ |  ☐ |  ☐
-| `video` | ☑ |  ☐ |  ☐
-| `virtualbox`  | ☑ |  ☐ |  ☐
-| `proxmox` | ☑ |  ☐ |  ☐
-5. Set User quota setting:
-     * `default`
-6. Assign application permissions:
-     * `default`
 7. Set User Speed Limit Setting:
      * `default`
 8. Confirm settings:
