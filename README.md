@@ -24,9 +24,8 @@ Tasks to be performed are:
 - [ ] Create a new user groups:
   * `homelab` user group
   * `privatelab` user group
-- [ ] Create two new Synology users;
-  * first user named: `storm`
-  * second user named: `gituser`
+- [ ] Create a new Synology user;
+  * user named: `storm`
 - [ ] Configure Synology NAS SSH Key-based authentication for the above users.
 - [ ] Install & Configure Synology Virtual Machine Manager
 
@@ -42,6 +41,7 @@ Synology NAS/
     ├── music 
     ├── openvpn
     ├── photo 
+    ├── public
     ├── pxe
     ├── ssh_key
     ├── video
@@ -62,6 +62,7 @@ To create shared folders log in to the Synology Desktop and:
      * music ☑
      * openvpn ☑
      * photo ☑
+     * public ☑
      * pxe ☑
      * ssh_key ☑
      * video ☐ 
@@ -82,6 +83,7 @@ Create NFS shares for the following folders:
 | `docker` | ☑ |
 | `music` | ☑ |
 | `photo` | ☑ |
+| `public` | ☑ |
 | `proxmox`  | ☑ |
 | `video`  | ☑ |
 
@@ -115,6 +117,7 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 | `music` | ☐ | ☑ |  ☐
 | `openvpn` | ☑ |  ☐ |  ☐
 | `photo` | ☐ | ☑ |  ☐
+| `public` | ☐ | ☑ |  ☐
 | `proxmox` | ☐ | ☑ |  ☐
 | `pxe` | ☐ | ☑ |  ☐
 | `ssh_key` | ☑ |  ☐ |  ☐
@@ -155,6 +158,7 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 | `music` | ☐ | ☑ |  ☐
 | `openvpn` | ☐ | ☑ |  ☐
 | `photo` | ☐ | ☑ |  ☐
+| `public` | ☐ | ☑ |  ☐
 | `proxmox` | ☐ | ☑ |  ☐
 | `pxe` | ☐ | ☑ |  ☐
 | `ssh_key` | ☐ | ☑ |  ☐
@@ -204,6 +208,7 @@ Leave as default as permissions are automatically obtained from the chosen user 
 | `music` | ☐ | ☑ |  ☐
 | `openvpn` | ☑ |  ☐ |  ☐
 | `photo` | ☐ | ☑ |  ☐
+| `public` | ☐ | ☑ |  ☐
 | `proxmox` | ☐ | ☑ |  ☐
 | `pxe` | ☐ | ☑ |  ☐
 | `ssh_key` | ☑ |  ☐ |  ☐
