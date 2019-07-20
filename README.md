@@ -13,6 +13,9 @@ Synology Prerequisites are:
 - [x] Synology Gateway is `192.168.1.5`
 - [x] Synology DNS Server is `192.168.1.5`
 - [x] Synology DDNS is working with your chosen hostname ID at `hostnameID.synology.me`
+**Note: A prerequisite to running VMs on your Synology NAS is your volumes are in the BTRFS file system. If they are not then you CANNOT install VM's. In my experience the best way forward is base upon backing up data on an external disk (USB) or another internal volume (be careful and know what you are doing), deleting and recreating /volume1 via DSM and restoring your backup data. I recommend using Synology Hyper Backup to backup your data and settings.**
+
+**Its a lengthy topic and the procedures can be found by seaching on the internet. So the following assumes your Volume 1 was created with the BTRFS file system.**
 
 Tasks to be performed are:
 - [ ] Create the required Synology shared folders and NFS shares
@@ -29,8 +32,10 @@ Tasks to be performed are:
 - [ ] Configure Synology NAS SSH Key-based authentication for the above users.
 - [ ] Install & Configure Synology Virtual Machine Manager
 
-## Create the required Synology Shared Folders and NFS Shares
-### Create Shared Folders
+## 1.0 Create the required Synology Shared Folders and NFS Shares
+The following are the minimum set of folder shares required for my configuration and needed for this build and for the scripts to work.
+
+### 1.1 Create Shared Folders
 We need the following shared folder tree, in addition to your standard default tree, on the Synology NAS:
 ```
 Synology NAS/
@@ -75,7 +80,7 @@ To create shared folders log in to the Synology Desktop and:
 5. Set up Permissions:
      * Note, at this point do not flag anything, just hit `Cancel` to exit.
      
-### Create NFS Shares
+### 1.2 Create NFS Shares
 Create NFS shares for the following folders:
 
 | Folder Name | NFS Share |
@@ -99,12 +104,15 @@ To create NFS shares log in to the Synology Desktop and:
      * Allow users to access mounted subfolders:  ☑
 3. Repeat steps 1 to 2 for all of the above six folders.
 
-## Create new Synology User groups
-### Create "homelab" user group
-This is a user group for predominately your smart home and home media management software. This is not for personal or private data.
-To create a new group log in to the Synology Desktop and:
+## 2.0 Create new Synology User groups
+For ease of management I have created a specific user and group explicitly for Proxmox and Virtual Machines in my cluster. 
+
+### 2.1 Create "homelab" user group
+This is a user group for your smart home and home media management software. This user group and users are not for personal or private data.
+
+To create a new group log in to the Synology WebGUI interface and:
 1. Open `Control Panel` > `Group` > `Create`
-2. Set User Information as follows:
+2. Set User Information fields as follows:
    * Name: `"homelab"`
    * Description: `"Homelab group"`
 3. Assign shared folders permissions as follows:
@@ -141,9 +149,10 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 6. Group Speed Limit Setting
     * `default`
 
-### Create "privatelab" user group
+### 2.2 Create "privatelab" user group
 This is a user group for your private and personal data.
-To create a new group log in to the Synology Desktop and:
+
+To create a new group log in to the Synology WebGUI interface and:
 1. Open `Control Panel` > `Group` > `Create`
 2. Set User Information as follows:
    * Name: `"privatelab"`
@@ -182,9 +191,11 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 6. Group Speed Limit Setting
     * `default`
 
-## Create a new Synology Users
-### Create user "storm":
-To create a new user log in to the Synology Desktop and:
+## 3.0 Create a new Synology Users
+Here you create a user named `storm` which will be used for Proxmox and Virtual Machines your my cluster.
+
+### 3.1 Create user "storm":
+To create a new user log in to the Synology WebGUI interface and:
 1. Open `Control Panel` > `User` > `Create`
 2. Set User Information as follows:
    * Name: `"storm"`
@@ -235,14 +246,25 @@ Leave as default as application permissions are automatically obtained from the 
 8. Confirm settings:
      * `Apply`
 
-## Install & Configure Synology Virtual Machine Manager
+## 4.0 Install & Configure Synology Virtual Machine Manager
 If your Synology NAS model is capable you can install a Proxmox node on your Synology Diskstation using the native Synology Virtual Machine Manager application.
 
 I recommend your Synology Diskstation has a Intel CPU type of a Atom, Pentium, Celeron or Xeon of at least 2 Cores (really a Quad Core is recommended) and 16Gb of Ram (minimum 8Gb). 
 
-Download the latest Proxmox ISO installer to your PC from  www.proxmox.com or [HERE](https://www.proxmox.com/en/downloads/category/iso-images-pve) . 
+### 4.1 Download the Proxmox installer ISO
+Download the latest Proxmox ISO installer to your PC from  www.proxmox.com or [HERE](https://www.proxmox.com/en/downloads/category/iso-images-pve).
+
+### 4.2 Install Synology Virtual Machine Manager on your NAS
+A prerequisite to running VMs on your Synology NAS is your volumes are in the BTRFS file system. If they are not then you CANNOT install VM's. In my experience the best way forward is base upon backing up data on an external disk (USB) or another internal volume (be careful and know what you are doing), deleting and recreating /volume1 via DSM and restoring backup data. I recommend using Synology Hyper Backup to backup your data and settings.
+
+Its a lengthy topic and the procedures can be found by seaching on the internet. So the following assumes your Volume 1 was created with the BTRFS file system.
+
+To install Synology Virtual Machine Manager login to the Synology WebGUI interface and:
 1. Open `Synology Package Centre` and install `Virtual Machine Manager`
-2. Open Synology `Virtual Machine Manager` > `Image` > `ISO File` > `Add` > `From Computer` and browse to your downloaded Proxmox ISO (i.e proxmox-ve_5.4-1.iso ) > `Select Storage` > `Choose your host (i.e cyclone-01)`
+
+### 4.3 Configure Synology Virtual Machine Manager
+Using the Synology WebGUI interface:
+1. Click on Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Image` > `ISO File` > `Add` > `From Computer` and browse to your downloaded Proxmox ISO (i.e proxmox-ve_5.4-1.iso ) > `Select Storage` > `Choose your host (i.e cyclone-01)`
 3. Open Synology `Virtual Machine Manager` > `Virtual Machine` > `Create` > `Choose OS` > `Linux` > `Select Storage` > `cyclone-01` > and assign the following values
 
 | (1) Tab General | Value |--|Options or Notes|
