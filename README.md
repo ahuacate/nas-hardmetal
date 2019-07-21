@@ -397,12 +397,12 @@ Note: If your choose to use a ZFS Raid for storage redundancy change accordingly
 If you have gotten this far and completed Steps 4.0 through to 7.2 you can proceed to manually build your nodes or simply use a CLI build bash scripts.
 
 So you have two choices to finish configuration your `typhoon-03` Proxmox node:
-*  Use the premade script, Script (B) `typhoon-0X-Single_NIC-setup-01.sh`, with instructions shown [HERE](https://github.com/ahuacate/proxmox-node#30-easy-installation-option). Or,
+*  Use the premade script, Script (C) `typhoon-0X-VM-setup-01.sh`, with instructions shown [HERE](https://github.com/ahuacate/proxmox-node#30-easy-installation-option). Or,
 *  Finish the build manually by following the instructions shown [HERE](https://github.com/ahuacate/proxmox-node#41--create-nfs-mounts-to-nas)
 
 Its much easier to use the CLI bash script available on Github. To execute the script use the Proxmox web interface `typhoon-02/03/04` > `>_ Shell` and cut & paste the following into the CLI terminal window and press ENTER:
 ```
-wget https://raw.githubusercontent.com/ahuacate/proxmox-node/master/scripts/typhoon-0X-Single_NIC-setup-01.sh -P /tmp && chmod +x /tmp/typhoon-0X-Single_NIC-setup-01.sh && bash /tmp/typhoon-0X-Single_NIC-setup-01.sh; rm -rf /tmp/typhoon-0X-Single_NIC-setup-01.sh
+wget https://raw.githubusercontent.com/ahuacate/proxmox-node/master/scripts/typhoon-0X-VM-setup-01.sh -P /tmp && chmod +x /tmp/typhoon-0X-VM-setup-01.sh && bash /tmp/typhoon-0X-VM-setup-01.sh; rm -rf /tmp/typhoon-0X-VM-setup-01.sh.sh
 ```
 
 Finished. Your Synology Proxmox VM node is ready.
