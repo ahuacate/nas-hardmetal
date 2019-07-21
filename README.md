@@ -291,7 +291,7 @@ For Disk 2 (sdx) I recommend a 250 Gb SSD which will be used as a Proxmox ZFS sh
 ### 5.1 Add the Proxmox VE ISO image to your Synology
 Using the Synology WebGUI interface click on Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Image` > `ISO File` > `Add` > `From Computer` and browse to your downloaded Proxmox ISO (i.e proxmox-ve_5.4-1.iso ) > `Select Storage` > `Choose your host (i.e cyclone-01)`
 
-### 5.2 Create the Proxmox VM
+### 5.2 Create a Proxmox VM 
 Using the Synology WebGUI interface Open Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Virtual Machine` > `Create` > `Choose OS` > `Linux` > `Select Storage` > `cyclone-01` > and assign the following values:
 
 | (1) Tab General | Value |--|Options or Notes|
@@ -334,7 +334,7 @@ Using the Synology WebGUI interface Open Synology `Main Menu` (top left box icon
 | `Description` | cyclone-01 - VM Storage 1 | 
 | `Virtual Disk 1` | cyclone-01 - VM Storage 1 | 
 | `Virtual Disk 2` | cyclone-01 - VM Storage 1 | 
-| `Power on the virtual machine after creation` | ☐ | *Uncheck*
+| `Power on the virtual machine after creation` | ☐ | -- | *Note: Uncheck*
 
 And hit `Apply`.
 
@@ -353,7 +353,7 @@ To start the install, on the new browser tab, use your keyboard arrow keys with 
 
 Your first user prompt will probably be a window saying "No support for KVM virtualisation detected. Check BIOS settings for Intel VT/AMD-V/SVM" so click `OK` then to the End User Agreement click `I Agree`.
 
-Now follow our Github instructions for installing Proxmox using node ID `typhoon-03` values from [HERE](https://github.com/ahuacate/proxmox-node). Also shown below.
+Now configure the installation fields for the node as follows:
    
 | Option | Typhoon-03 Value | Options or Notes |
 | :---  | :---: | :--- |
@@ -371,3 +371,29 @@ Now follow our Github instructions for installing Proxmox using node ID `typhoon
 | `Netmask` |255.255.255.0|
 | `Gateway` |192.168.1.5|
 | `DNS Server` |192.168.1.5|
+
+Finally click `Reboot` and your VM Proxmox node will reboot.
+
+## 7.0  Configure the Proxmox VM
+Further configuration is done via the Proxmox web interface. Just point your browser to the IP address given during installation (https://192.168.1.103:8006) and ignore the security warning by clicking `Advanced` then `Accept the Risk and Continue` -- this is the warning I get in Firefox. Default login is "root" (realm PAM) and the root password you defined during the installation process.
+
+### 7.1 Update Proxmox OS VM and enable turnkeylinux templates
+Using the web interface `updates` > `refresh` search for all the latest required updates. You will get a few errors which ignore.
+Next install the updates using the web interface `updates` > `_upgrade` - a pop up terminal will show the installation steps of all your required updates and it will prompt you to type `Y` so do so.
+
+Next install turnkeylinux container templates by using the web interface CLI `shell` and type
+`pveam update`
+
+### 7.2 Create Disk Two - your shared storage
+Create Disk 2 using the web interface `Disks` > `ZFS` > `Create: ZFS` and configure each node as follows:
+
+| Option | Node 1 Value | Node 2 Value | Node 3 Value |
+| :---  | :---: | :---: | :---: |
+| `Name` |typhoon-share|typhoon-share|typhoon-share
+| `RAID Level` |Single Disk|Single Disk|Single Disk
+| `Compression` |on|on|on
+| `ashift` |12|12|12
+| `Device` |/dev/sdx|/dev/sdx|/dev/sdx
+
+Note: If your choose to use a ZFS Raid for storage redundancy change accordingly per node but your must retain the Name ID **typhoon-share**.
+
