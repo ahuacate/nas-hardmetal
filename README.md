@@ -356,7 +356,7 @@ Your first user prompt will probably be a window saying "No support for KVM virt
 Now follow our Github instructions for installing Proxmox using node ID `typhoon-03` values from [HERE](https://github.com/ahuacate/proxmox-node). Also shown below.
    
 | Option | Node 3 Value | Options or Notes |
-| :---  | :---: |
+| :---  | :---: | :--- |
 | Hardware Type | Synology VM |
 | `Target Disk` | /dev/sda (120GB, iSCSI Storage) |*Not the 250GB Disk*
 | `Target Disk - Option` | ext4 | *Leave Default - ext4 etc*
