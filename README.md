@@ -261,10 +261,12 @@ A prerequisite to running VMs on your Synology NAS is your volumes are in the BT
 Its a lengthy topic and the procedures can be found by seaching on the internet. So the following assumes your Volume 1 was created with the BTRFS file system.
 
 To install Synology Virtual Machine Manager login to the Synology WebGUI interface and:
+
 1. Open `Synology Package Centre` and install `Virtual Machine Manager`
 
 ### 4.3 Configure Synology Virtual Machine Manager
 Using the Synology WebGUI interface:
+
 1. Click on Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Storage` > `Add` and follow the prompts and configure as follows:
 
 | Tab Title | Value |--|Options or Notes|
@@ -279,10 +281,18 @@ Using the Synology WebGUI interface:
 
 And hit `Apply`.
 
-### 
+## 5.0 Create the Proxmox VM
+Just like a hardmetal installation each Synology VM installation of Proxmox requires two hard disks. Basically one is for the Proxmox OS and the other disk is configured as a Proxmox ZFS shared storage disk.
 
-1. Click on Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Image` > `ISO File` > `Add` > `From Computer` and browse to your downloaded Proxmox ISO (i.e proxmox-ve_5.4-1.iso ) > `Select Storage` > `Choose your host (i.e cyclone-01)`
-3. Open Synology `Virtual Machine Manager` > `Virtual Machine` > `Create` > `Choose OS` > `Linux` > `Select Storage` > `cyclone-01` > and assign the following values
+Each Proxmox VM node requires a OS SSD disk, disk 1, which I size at 120 Gb SSD disk.
+
+For Disk 2 (sdx) I recommend a 250 Gb SSD which will be used as a Proxmox ZFS shared storage disk for the cluster.
+
+### 5.1 Add the Proxmox VE ISO image to your Synology
+Using the Synology WebGUI interface click on Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Image` > `ISO File` > `Add` > `From Computer` and browse to your downloaded Proxmox ISO (i.e proxmox-ve_5.4-1.iso ) > `Select Storage` > `Choose your host (i.e cyclone-01)`
+
+### 5.2 Create the Proxmox VM
+Using the Synology WebGUI interface Open Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Virtual Machine` > `Create` > `Choose OS` > `Linux` > `Select Storage` > `cyclone-01` > and assign the following values:
 
 | (1) Tab General | Value |--|Options or Notes|
 | :---  | :---: | --| :---  |
@@ -293,15 +303,15 @@ And hit `Apply`.
 | `Description` | (optional) |
 | | |
 | **(2) Tab Storage** | **Value** |--|**Options or Notes**|
-| `Virtual Disk 1` | 120 Gb |--|Options: VirtIO SCSI Controller with Space Reclamation enabled|
-| `Virtual Disk 1` | 250 Gb |--|Options: VirtIO SCSI Controller with Space Reclamation enabled|
+| `Virtual Disk 1` | 120 Gb |--|Settings Options: VirtIO SCSI Controller with Space Reclamation enabled|
+| `Virtual Disk 1` | 250 Gb |--|Settings Options: VirtIO SCSI Controller with Space Reclamation enabled|
 | | |
 | **(3) Tab Network** | **Value** |--|**Options or Notes**|
 | `Network 1` | Default VM Network |
 | | |
 | **(4) Tab Others** | **Value** |--|**Options or Notes**|
-| `ISO file for bootup` |i.e proxmox-ve_5.4  |--|Note: select the proxmox ISO uploaded in Step 2|
-| `Additional ISO file` | Unmounted |--|Note: nothing to to select here|
+| `ISO file for bootup` |i.e proxmox-ve_5.4  |--|*Note: select the proxmox ISO uploaded in Step 2*|
+| `Additional ISO file` | Unmounted |--|*Note: nothing to to select here*|
 | `Autostart` | Last State |
 | `Boot from` | Virtual Disk |
 | `BIOS` | Legacy BIOS (Recommended) |
@@ -310,11 +320,54 @@ And hit `Apply`.
 | `USB Device` | Unmounted |
 | | |
 | **(5) Tab Permissions** | **Value** |--|**Options or Notes**|
-| `administrators` | ☑ |--|Note: select from 'Local groups'|
-| `homelab` | ☑ | --|Note: select from 'Local groups'|
+| `administrators` | ☑ |--|*Note: select from 'Local groups'*|
+| `homelab` | ☑ | --|*Note: select from 'Local groups'*|
 | `http` | ☐ | 
 | `users` | ☐ | 
+| | |
+| **(6) Summary** | **Value** |--|**Options or Notes**|
+| `Storage` | cyclone-01 - VM Storage 1 |
+| `Name` | cyclone-01 - VM Storage 1 | 
+| `CPU(s)` | cyclone-01 - VM Storage 1 | 
+| `Memory` | cyclone-01 - VM Storage 1 | 
+| `Video Card` | cyclone-01 - VM Storage 1 | 
+| `Description` | cyclone-01 - VM Storage 1 | 
+| `Virtual Disk 1` | cyclone-01 - VM Storage 1 | 
+| `Virtual Disk 2` | cyclone-01 - VM Storage 1 | 
+| `Power on the virtual machine after creation` | ☐ | *Uncheck*
 
-4. Final step is to install Proxmox:
-   * Open Synology `Virtual Machine Manager` > `Virtual Machine` > `Power On` and wait for the `status` to show `running`.
-   * Open Synology `Virtual Machine Manager` > `Virtual Machine` > `Connect` and a new browser tab should open showing the Proxmox installation script. Now follow our Github instructions for installing Proxmox using node ID `typhoon-03` from [HERE](https://github.com/ahuacate/proxmox-node).
+And hit `Apply`.
+
+## 6.0 Install Proxmox OS
+Now your are going to install Proxmox OS using the installation ISO media. 
+
+### 6.1 Power-on Typhoon-03 VM
+Using the Synology WebGUI interface Open Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Virtual Machine` > `Power On` and wait for the `status` to show `running`.
+
+This is like hitting the power-on button on any hardmetal machine --- but a virtual boot.
+
+### 6.2 Run the Proxmox ISO Installation
+Using the Synology WebGUI interface Open Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Virtual Machine` > `Connect` and a new browser tab should open showing the Proxmox installation script. The installation is much the same as a hardmetal installation you would've performed for typhoon-01 or typhoon-02.
+
+To start the install, on the new browser tab, use your keyboard arrow keys with `Install Proxmox VE` selected hit your `ENTER` key to begin the installation script.
+
+Your first user prompt will probably be a window saying "No support for KVM virtualisation detected. Check BIOS settings for Intel VT/AMD-V/SVM" so click `OK` then to the End User Agreement click `I Agree`.
+
+Now follow our Github instructions for installing Proxmox using node ID `typhoon-03` values from [HERE](https://github.com/ahuacate/proxmox-node). Also shown below.
+   
+| Option | Node 3 Value | Options or Notes |
+| :---  | :---: |
+| Hardware Type | Synology VM |
+| `Target Disk` | /dev/sda (120GB, iSCSI Storage) |*Not the 250GB Disk*
+| `Target Disk - Option` | ext4 | *Leave Default - ext4 etc*
+| `Country` | "Type your Country"
+| `Timezone` |"select"|"select"|"select"
+| `Keymap` |en-us|en-us|en-us
+| `Password`| Enter your new password | *Same password as you used on your other nodes*
+| `E-mail` |Enter your email | *If you dont want to enter a valid email type mail@example.com*
+| `Management interface` |Leave Default
+| `Hostname` |typhoon-03.localdomain|
+|`IP Address` |192.168.1.103|
+| `Netmask` |255.255.255.0|
+| `Gateway` |192.168.1.5|
+| `DNS Server` |192.168.1.5|
