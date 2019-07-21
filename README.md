@@ -355,14 +355,14 @@ Your first user prompt will probably be a window saying "No support for KVM virt
 
 Now follow our Github instructions for installing Proxmox using node ID `typhoon-03` values from [HERE](https://github.com/ahuacate/proxmox-node). Also shown below.
    
-| Option | Node 3 Value | Options or Notes |
+| Option | Typhoon-03 Value | Options or Notes |
 | :---  | :---: | :--- |
 | Hardware Type | Synology VM |
 | `Target Disk` | /dev/sda (120GB, iSCSI Storage) |*Not the 250GB Disk*
 | `Target Disk - Option` | ext4 | *Leave Default - ext4 etc*
 | `Country` | "Type your Country"
-| `Timezone` |"select"|"select"|"select"
-| `Keymap` |en-us|en-us|en-us
+| `Timezone` | Select |
+| `Keymap` |en-us|
 | `Password`| Enter your new password | *Same password as you used on your other nodes*
 | `E-mail` |Enter your email | *If you dont want to enter a valid email type mail@example.com*
 | `Management interface` |Leave Default
