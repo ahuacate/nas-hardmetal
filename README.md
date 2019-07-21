@@ -13,6 +13,7 @@ Synology Prerequisites are:
 - [x] Synology Gateway is `192.168.1.5`
 - [x] Synology DNS Server is `192.168.1.5`
 - [x] Synology DDNS is working with your chosen hostname ID at `hostnameID.synology.me`
+
 **Note: A prerequisite to running VMs on your Synology NAS is your volumes are in the BTRFS file system. If they are not then you CANNOT install VM's. In my experience the best way forward is base upon backing up data on an external disk (USB) or another internal volume (be careful and know what you are doing), deleting and recreating /volume1 via DSM and restoring your backup data. I recommend using Synology Hyper Backup to backup your data and settings.**
 
 **Its a lengthy topic and the procedures can be found by seaching on the internet. So the following assumes your Volume 1 was created with the BTRFS file system.**
@@ -264,6 +265,22 @@ To install Synology Virtual Machine Manager login to the Synology WebGUI interfa
 
 ### 4.3 Configure Synology Virtual Machine Manager
 Using the Synology WebGUI interface:
+1. Click on Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Storage` > `Add` and follow the prompts and configure as follows:
+
+| Tab Title | Value |--|Options or Notes|
+| :---  | :---: | --| :---  |
+| `Create a Storage Resource` | NEXT |
+| `Create Storage` | Select/Highlight cyclone-01/Volume 1 and Click NEXT |
+| **Configure General Specifications** 
+| `Name` | cyclone-01 - VM Storage 1 |
+| `Full` | Leave Default |
+| `Low on Space` | 10% |
+| `Notify me each time the free space ...` | [x] |
+
+And hit `Apply`.
+
+### 
+
 1. Click on Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Image` > `ISO File` > `Add` > `From Computer` and browse to your downloaded Proxmox ISO (i.e proxmox-ve_5.4-1.iso ) > `Select Storage` > `Choose your host (i.e cyclone-01)`
 3. Open Synology `Virtual Machine Manager` > `Virtual Machine` > `Create` > `Choose OS` > `Linux` > `Select Storage` > `cyclone-01` > and assign the following values
 
