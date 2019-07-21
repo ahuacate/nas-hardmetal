@@ -360,7 +360,7 @@ Now follow our Github instructions for installing Proxmox using node ID `typhoon
 | Hardware Type | Synology VM |
 | `Target Disk` | /dev/sda (120GB, iSCSI Storage) |*Not the 250GB Disk*
 | `Target Disk - Option` | ext4 | *Leave Default - ext4 etc*
-| `Country` | "Type your Country"
+| `Country` | Type your Country
 | `Timezone` | Select |
 | `Keymap` |en-us|
 | `Password`| Enter your new password | *Same password as you used on your other nodes*
