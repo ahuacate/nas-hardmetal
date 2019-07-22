@@ -268,7 +268,7 @@ Using the Synology WebGUI interface `Main Menu` (top left box icon) > `Virtual M
 | `Name` | cyclone-01 - VM Storage 1 |
 | `Full` | Leave Default |
 | `Low on Space` | 10% |
-| `Notify me each time the free space ...` | [x] | *Check*
+| `Notify me each time the free space ...` | [x] |--| *Check*
 
 And hit `Apply`.
 
