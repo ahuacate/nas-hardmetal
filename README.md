@@ -1,9 +1,11 @@
 # Synobuild
 The following is for a Synology Diskstation only. Modify accordingly for your own NAS or NFS server setup.
 Network Prerequisites are:
+- [x] Layer 2 Network Switches
 - [x] Network Gateway is `192.168.1.5`
 - [x] Network DNS server is `192.168.1.5` (Note: set DNS server: primary DNS `192.168.1.254` which is your static PiHole server IP address ; secondary DNS `1.1.1.1`)
 - [x] Network DHCP server is `192.168.1.5`
+- [x] A DDNS service is fully configured and enabled (I recommend you use the free Synology DDNS service)
 
 Synology Prerequisites are:
 - [x] Synology CPU is Intel based
