@@ -14,24 +14,19 @@ Synology Prerequisites are:
 - [x] Synology DNS Server is `192.168.1.5`
 - [x] Synology DDNS is working with your chosen hostname ID at `hostnameID.synology.me`
 
-**Note: A prerequisite to running VMs on your Synology NAS is your volumes are in the BTRFS file system. If they are not then you CANNOT install VM's. In my experience the best way forward is base upon backing up data on an external disk (USB) or another internal volume (be careful and know what you are doing), deleting and recreating /volume1 via DSM and restoring your backup data. I recommend using Synology Hyper Backup to backup your data and settings.**
+**Note: A prerequisite to running VMs on your Synology NAS is your volumes are in the BTRFS file system. If they are not then you CANNOT install VM's. In my experience the best way forward is base upon backing up data to a external disk (USB) or another internal volume (be careful and know what you are doing), deleting and recreating /volume1 via DSM and restoring your backup data. I recommend using Synology Hyper Backup to backup your data and settings.**
 
-**Its a lengthy topic and the procedures can be found by seaching on the internet. So the following assumes your Volume 1 was created with the BTRFS file system.**
+**Its a lengthy topic and the procedures can be found by seaching on the internet. So the following assumes your Volume 1 is in the BTRFS file system format.**
 
 Tasks to be performed are:
-- [ ] Create the required Synology shared folders and NFS shares
-- [ ] Install the following Synology applications:
-  * `Drive` - a Synology remote access tool
-  * `Moments` - Synology photo manager
-  * `Virtual Machine Manager` - a Synology virtualisation tool
-  * `VPN Server` - Synology VPN access server
-- [ ] Create a new user groups:
-  * `homelab` user group
-  * `privatelab` user group
-- [ ] Create a new Synology user;
-  * user named: `storm`
-- [ ] Configure Synology NAS SSH Key-based authentication for the above users.
-- [ ] Install & Configure Synology Virtual Machine Manager
+- [ ] 1.0 Create the required Synology Shared Folders and NFS Shares
+- [ ] 2.0 Create new Synology User groups
+- [ ] 3.0 Create a new Synology Users
+- [ ] 4.0 Install & Configure Synology Virtual Machine Manager
+- [ ] 5.0 Create the Proxmox VM
+- [ ] 6.0 Install Proxmox OS
+- [ ] 7.0 Configure the Proxmox VM
+- [ ] 8.0 Easy Proxmox Installation Option
 
 ## 1.0 Create the required Synology Shared Folders and NFS Shares
 The following are the minimum set of folder shares required for my configuration and needed for this build and for the scripts to work.
