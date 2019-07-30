@@ -143,7 +143,7 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 | Text Editor | ☐ | `☑` | 
 | Universal Search | ☐ | `☑` | 
 | Virtual Machine Manage | `☑` | ☐  | 
-| rsync | ☐ | ☑ |  
+| rsync | ☐ | `☑` |  
 6. Group Speed Limit Setting
     * `default`
 
@@ -289,15 +289,15 @@ Using the Synology WebGUI interface Open Synology `Main Menu` (top left box icon
 
 | (1) Tab General | Value |--|Options or Notes|
 | :---  | :---: | --| :---  |
-| Name | typhoon-03 |
-| CPU's | 1 |
-| Memory | 7 | 
-| Video Card | vmvga |
+| Name | `typhoon-03` |
+| CPU's | `1` |
+| Memory | `7` | 
+| Video Card | `vmvga` |
 | Description | (optional) |
 | | |
 | **(2) Tab Storage** | **Value** |--|**Options or Notes**|
-| Virtual Disk 1 | 120 Gb |--|Settings Options: VirtIO SCSI Controller with Space Reclamation enabled|
-| Virtual Disk 1 | 250 Gb |--|Settings Options: VirtIO SCSI Controller with Space Reclamation enabled|
+| Virtual Disk 1 | `120 Gb` |--|Settings Options: VirtIO SCSI Controller with Space Reclamation enabled|
+| Virtual Disk 1 | `250 Gb` |--|Settings Options: VirtIO SCSI Controller with Space Reclamation enabled|
 | | |
 | **(3) Tab Network** | **Value** |--|**Options or Notes**|
 | Network 1 | Default VM Network |
@@ -305,16 +305,16 @@ Using the Synology WebGUI interface Open Synology `Main Menu` (top left box icon
 | **(4) Tab Others** | **Value** |--|**Options or Notes**|
 | ISO file for bootup |i.e proxmox-ve_5.4  |--|*Note: select the proxmox ISO uploaded in Step 2*|
 | Additional ISO file | Unmounted |--|*Note: nothing to to select here*|
-| Autostart | Last State |
-| Boot from | Virtual Disk |
-| BIOS | Legacy BIOS (Recommended) |
-| Keyboard Layout | Default (en-us) |
-| Virtual USB Controller | Disabled |
-| USB Device | Unmounted |
+| Autostart | `Last State` |
+| Boot from | `Virtual Disk` |
+| BIOS | `Legacy BIOS (Recommended)` |
+| Keyboard Layout | `Default (en-us)` |
+| Virtual USB Controller | `Disabled` |
+| USB Device | `Unmounted` |
 | | |
 | **(5) Tab Permissions** | **Value** |--|**Options or Notes**|
-| administrators | ☑ |--|*Note: select from 'Local groups'*|
-| homelab | ☑ | --|*Note: select from 'Local groups'*|
+| administrators | `☑` |--|*Note: select from 'Local groups'*|
+| homelab | `☑` | --|*Note: select from 'Local groups'*|
 | http | ☐ | 
 | users | ☐ | 
 | | |
