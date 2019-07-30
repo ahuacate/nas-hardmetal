@@ -60,21 +60,21 @@ To create shared folders log in to the Synology Desktop and:
    * Hide this shared ...: ☐ 
    * Hide sub-folders ...: ☐ 
    * Enable Recycle Bin:
-     * backup ☑
-     * docker ☑
-     * music ☑
-     * openvpn ☑
-     * photo ☑
-     * public ☑
-     * pxe ☑
-     * ssh_key ☑
-     * video ☐ 
-     * virtualbox ☑
-     * proxmox ☑
+     * backup `☑`
+     * docker `☑`
+     * music `☑`
+     * openvpn `☑`
+     * photo `☑`
+     * public `☑`
+     * pxe `☑`
+     * ssh_key `☑`
+     * video `☐` 
+     * virtualbox `☑`
+     * proxmox `☑`
 3. Set up Encryption:
-     * Encrypt this shared folder: ☐ 
+     * Encrypt this shared folder: `☐` 
 4. Set up advanced:
-   * All disabled:  ☐ 
+   * All disabled:  `☐` 
 5. Set up Permissions:
      * Note, at this point do not flag anything, just hit `Cancel` to exit.
      
@@ -83,12 +83,12 @@ Create NFS shares for the following folders:
 
 | Folder Name | NFS Share |
 | :---  | :---: |
-| `docker` | ☑ |
-| `music` | ☑ |
-| `photo` | ☑ |
-| `public` | ☑ |
-| `proxmox`  | ☑ |
-| `video`  | ☑ |
+| docker | `☑` |
+| music | `☑` |
+| photo | `☑` |
+| public | `☑` |
+| proxmox  | `☑` |
+| video  | `☑` |
 
 To create NFS shares log in to the Synology Desktop and:
 1. Log in to the Synology Desktop and go to `Control Panel` > `Shared Folder` > `Select a Folder` > `Edit` > `NFS Permissions` > `Create `
@@ -97,9 +97,9 @@ To create NFS shares log in to the Synology Desktop and:
    * Privilege: `Read/Write`
    * Squash: `Map all users to admin`
    * Security: `auth_sys`
-     * Enable asynchronous:  ☑
-     * Allow connections from non-privileged ports:  ☑
-     * Allow users to access mounted subfolders:  ☑
+     * Enable asynchronous:  `☑`
+     * Allow connections from non-privileged ports:  `☑`
+     * Allow users to access mounted subfolders: `☑`
 3. Repeat steps 1 to 2 for all of the above six folders.
 
 ## 2.0 Create new Synology User groups
@@ -118,32 +118,32 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
-| `backup`  | ☑ |  ☐ |  ☐
-| `docker` | ☐ | ☑ |  ☐
-| `music` | ☐ | ☑ |  ☐
-| `openvpn` | ☑ |  ☐ |  ☐
-| `photo` | ☐ | ☑ |  ☐
-| `public` | ☐ | ☑ |  ☐
-| `proxmox` | ☐ | ☑ |  ☐
-| `pxe` | ☐ | ☑ |  ☐
-| `ssh_key` | ☑ |  ☐ |  ☐
-| `video` | ☐ | ☑ |  ☐
-| `virtualbox` | ☐ | ☑ |  ☐
+| backup  | `☑` |  ☐ |  ☐
+| docker | ☐ | `☑` |  ☐
+| music | ☐ | `☑` |  ☐
+| openvpn | `☑` |  ☐ |  ☐
+| photo | ☐ | `☑` |  ☐
+| public | ☐ | `☑` |  ☐
+| proxmox | ☐ | `☑` |  ☐
+| pxe | ☐ | `☑` |  ☐
+| ssh_key | `☑` |  ☐ |  ☐
+| video | ☐ | `☑` |  ☐
+| virtualbox | ☐ | `☑` |  ☐
 4. Set User quota setting:
    * Enable quota:  ☐
 5. Assign application permissions:
 
 | Name | Allow | Deny |
 | :---  | :---: | :---: |
-| `DSM` | ☐ | ☑ |  
-| `Drive` | ☐ | ☑ | 
-| `File Station` | ☑ | ☐  | 
-| `FTP` | ☐ | ☑ |  
-| `Moments` | ☐ | ☑ | 
-| `Text Editor` | ☐ | ☑ | 
-| `Universal Search` | ☐ | ☑ | 
-| `Virtual Machine Manager` | ☑ | ☐  | 
-| `rsync` | ☐ | ☑ |  
+| DSM | ☐ | `☑` |  
+| Drive | ☐ | `☑` | 
+| File Station | `☑` | ☐  | 
+| FTP | ☐ |` ☑` |  
+| Moments | ☐ | `☑` | 
+| Text Editor | ☐ | `☑` | 
+| Universal Search | ☐ | `☑` | 
+| Virtual Machine Manage | `☑` | ☐  | 
+| rsync | ☐ | ☑ |  
 6. Group Speed Limit Setting
     * `default`
 
@@ -160,32 +160,32 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
-| `backup` | ☐ | ☑ |  ☐
-| `docker` | ☐ | ☑ |  ☐
-| `music` | ☐ | ☑ |  ☐
-| `openvpn` | ☐ | ☑ |  ☐
-| `photo` | ☐ | ☑ |  ☐
-| `public` | ☐ | ☑ |  ☐
-| `proxmox` | ☐ | ☑ |  ☐
-| `pxe` | ☐ | ☑ |  ☐
-| `ssh_key` | ☐ | ☑ |  ☐
-| `video` | ☐ | ☑ |  ☐
-| `virtualbox` | ☐ | ☑ |  ☐
+| backup | ☐ | `☑` |  ☐
+| docker | ☐ | `☑` |  ☐
+| music | ☐ | `☑` |  ☐
+| openvpn | ☐ | `☑` |  ☐
+| photo | ☐ | `☑` |  ☐
+| public | ☐ | `☑` |  ☐
+| proxmox | ☐ | `☑` |  ☐
+| pxe | ☐ | `☑` |  ☐
+| ssh_key | ☐ | `☑` |  ☐
+| video | ☐ | `☑` |  ☐
+| virtualbox | ☐ | `☑` |  ☐
 4. Set User quota setting:
    * Enable quota:  ☐
 5. Assign application permissions:
 
 | Name | Allow | Deny |
 | :---  | :---: | :---: |
-| `DSM` | ☑ | ☐  | 
-| `Drive` | ☑ | ☐  | 
-| `File Station` | ☑ | ☐  | 
-| `FTP` | ☑ | ☐  | 
-| `Moments` | ☑ | ☐  | 
-| `Text Editor` | ☑ | ☐  | 
-| `Universal Search` | ☑ | ☐  | 
-| `Virtual Machine Manager` | ☑ | ☐  | 
-| `rsync` | ☑ | ☐  | 
+| DSM | `☑` | ☐  | 
+| Drive | `☑` | ☐  | 
+| File Station | `☑` | ☐  | 
+| FTP | `☑` | ☐  | 
+| Moments | `☑` | ☐  | 
+| Text Editor | `☑` | ☐  | 
+| Universal Search | `☑` | ☐  | 
+| Virtual Machine Manager | `☑` | ☐  | 
+| rsync | `☑` | ☐  | 
 6. Group Speed Limit Setting
     * `default`
 
@@ -196,33 +196,33 @@ Here you create a user named `storm` which will be used for Proxmox and Virtual 
 To create a new user log in to the Synology WebGUI interface and:
 1. Open `Control Panel` > `User` > `Create`
 2. Set User Information as follows:
-   * Name: `"storm"`
-   * Description: `"Homelab user"`
+   * Name: `storm`
+   * Description: `Homelab user`
    * Email: `Leave blank`
-   * Password: `"As Supplied"`
-   * Conform password: `"As Supplied"`
+   * Password: `As Supplied`
+   * Conform password: `As Supplied`
      * Send notification mail to the newly created user: ☐ 
      * Display user password in notification mail: ☐ 
-     * Disallow the user to change account password:  ☑
+     * Disallow the user to change account password:  `☑`
 3. Set Join groups as follows:
-     * homelab:  ☑
-     * users:  ☑
+     * homelab:  `☑`
+     * users:  `☑`
 4. Assign shared folders permissions as follows:
 Leave as default as permissions are automatically obtained from the chosen user 'group' permissions.
 
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
-| `backup`  | ☑ |  ☐ |  ☐
-| `docker` | ☐ | ☑ |  ☐
-| `music` | ☐ | ☑ |  ☐
-| `openvpn` | ☑ |  ☐ |  ☐
-| `photo` | ☐ | ☑ |  ☐
-| `public` | ☐ | ☑ |  ☐
-| `proxmox` | ☐ | ☑ |  ☐
-| `pxe` | ☐ | ☑ |  ☐
-| `ssh_key` | ☑ |  ☐ |  ☐
-| `video` | ☐ | ☑ |  ☐
-| `virtualbox` | ☐ | ☑ |  ☐
+| backup  | `☑` |  ☐ |  ☐
+| docker | ☐ | `☑` |  ☐
+| music | ☐ | `☑` |  ☐
+| openvpn | `☑` |  ☐ |  ☐
+| photo | ☐ | `☑` |  ☐
+| public | ☐ | `☑` |  ☐
+| proxmox | ☐ | `☑` |  ☐
+| pxe | ☐ | `☑` |  ☐
+| ssh_key | `☑` |  ☐ |  ☐
+| video | ☐ | `☑` |  ☐
+| virtualbox | ☐ | `☑` |  ☐
 5. Set User quota setting:
      * `default`
 6. Assign application permissions:
@@ -230,15 +230,15 @@ Leave as default as application permissions are automatically obtained from the 
 
 | Name | Allow | Deny |
 | :---  | :---: | :---: |
-| `DSM` | ☑ | ☐  | 
-| `Drive` | ☑ | ☐  | 
-| `File Station` | ☑ | ☐  | 
-| `FTP` | ☑ | ☐  | 
-| `Moments` | ☑ | ☐  | 
-| `Text Editor` | ☑ | ☐  | 
-| `Universal Search` | ☑ | ☐  | 
-| `Virtual Machine Manager` | ☑ | ☐  | 
-| `rsync` | ☑ | ☐  | 
+| DSM | `☑` | ☐  | 
+| Drive | `☑`| ☐  | 
+| File Station | `☑` | ☐  | 
+| FTP | `☑` | ☐  | 
+| Moments | `☑` | ☐  | 
+| Text Editor | `☑` | ☐  | 
+| Universal Search | `☑` | ☐  | 
+| Virtual Machine Manager | `☑` | ☐  | 
+| rsync | `☑` | ☐  | 
 7. Set User Speed Limit Setting:
      * `default`
 8. Confirm settings:
@@ -264,13 +264,13 @@ Using the Synology WebGUI interface `Main Menu` (top left box icon) > `Virtual M
 
 | Tab Title | Value |--|Options or Notes|
 | :---  | :---: | --| :---  |
-| `Create a Storage Resource` | NEXT |
-| `Create Storage` | Select/Highlight `cyclone-01/Volume 1` and Click `NEXT` |
+| Create a Storage Resource | `NEXT` |
+| Create Storage | Select/Highlight `cyclone-01/Volume 1` and Click `NEXT` |
 | **Configure General Specifications** 
-| `Name` | cyclone-01 - VM Storage 1 |
-| `Full` | Leave Default |
-| `Low on Space` | 10% |
-| `Notify me each time the free space ...` | [x] |--| *Check*
+| Name | `cyclone-01 - VM Storage 1` |
+| Full | Leave Default |
+| Low on Space | `10%` |
+| Notify me each time the free space ... | `☑` |--| *Check*
 
 And hit `Apply`.
 
@@ -289,45 +289,45 @@ Using the Synology WebGUI interface Open Synology `Main Menu` (top left box icon
 
 | (1) Tab General | Value |--|Options or Notes|
 | :---  | :---: | --| :---  |
-| `Name` | typhoon-03 |
-| `CPU's` | 1 |
-| `Memory` | 7 | 
-| `Video Card` | vmvga |
-| `Description` | (optional) |
+| Name | typhoon-03 |
+| CPU's | 1 |
+| Memory | 7 | 
+| Video Card | vmvga |
+| Description | (optional) |
 | | |
 | **(2) Tab Storage** | **Value** |--|**Options or Notes**|
-| `Virtual Disk 1` | 120 Gb |--|Settings Options: VirtIO SCSI Controller with Space Reclamation enabled|
-| `Virtual Disk 1` | 250 Gb |--|Settings Options: VirtIO SCSI Controller with Space Reclamation enabled|
+| Virtual Disk 1 | 120 Gb |--|Settings Options: VirtIO SCSI Controller with Space Reclamation enabled|
+| Virtual Disk 1 | 250 Gb |--|Settings Options: VirtIO SCSI Controller with Space Reclamation enabled|
 | | |
 | **(3) Tab Network** | **Value** |--|**Options or Notes**|
-| `Network 1` | Default VM Network |
+| Network 1 | Default VM Network |
 | | |
 | **(4) Tab Others** | **Value** |--|**Options or Notes**|
-| `ISO file for bootup` |i.e proxmox-ve_5.4  |--|*Note: select the proxmox ISO uploaded in Step 2*|
-| `Additional ISO file` | Unmounted |--|*Note: nothing to to select here*|
-| `Autostart` | Last State |
-| `Boot from` | Virtual Disk |
-| `BIOS` | Legacy BIOS (Recommended) |
-| `Keyboard Layout` | Default (en-us) |
-| `Virtual USB Controller` | Disabled |
-| `USB Device` | Unmounted |
+| ISO file for bootup |i.e proxmox-ve_5.4  |--|*Note: select the proxmox ISO uploaded in Step 2*|
+| Additional ISO file | Unmounted |--|*Note: nothing to to select here*|
+| Autostart | Last State |
+| Boot from | Virtual Disk |
+| BIOS | Legacy BIOS (Recommended) |
+| Keyboard Layout | Default (en-us) |
+| Virtual USB Controller | Disabled |
+| USB Device | Unmounted |
 | | |
 | **(5) Tab Permissions** | **Value** |--|**Options or Notes**|
-| `administrators` | ☑ |--|*Note: select from 'Local groups'*|
-| `homelab` | ☑ | --|*Note: select from 'Local groups'*|
-| `http` | ☐ | 
-| `users` | ☐ | 
+| administrators | ☑ |--|*Note: select from 'Local groups'*|
+| homelab | ☑ | --|*Note: select from 'Local groups'*|
+| http | ☐ | 
+| users | ☐ | 
 | | |
 | **(6) Summary** | **Value** |--|**Options or Notes**|
-| `Storage` | cyclone-01 - VM Storage 1 |
-| `Name` | cyclone-01 - VM Storage 1 | 
-| `CPU(s)` | cyclone-01 - VM Storage 1 | 
-| `Memory` | cyclone-01 - VM Storage 1 | 
-| `Video Card` | cyclone-01 - VM Storage 1 | 
-| `Description` | cyclone-01 - VM Storage 1 | 
-| `Virtual Disk 1` | cyclone-01 - VM Storage 1 | 
-| `Virtual Disk 2` | cyclone-01 - VM Storage 1 | 
-| `Power on the virtual machine after creation` | ☐ | -- | *Note: Uncheck*
+| Storage | `cyclone-01 - VM Storage 1` |
+| Name | `cyclone-01 - VM Storage 1` | 
+| CPU(s) | `cyclone-01 - VM Storage 1` | 
+| Memory | `cyclone-01 - VM Storage 1` | 
+| Video Card | `cyclone-01 - VM Storage 1` | 
+| Description | `cyclone-01 - VM Storage 1` | 
+| Virtual Disk 1 | `cyclone-01 - VM Storage 1` | 
+| Virtual Disk 2 | `cyclone-01 - VM Storage 1` | 
+| Power on the virtual machine after creation | `☐` | -- | *Note: Uncheck*
 
 And hit `Apply`.
 
@@ -351,19 +351,19 @@ Now configure the installation fields for the node as follows:
 | Option | Typhoon-03 Value | Options or Notes |
 | :---  | :---: | :--- |
 | Hardware Type | Synology VM |
-| `Target Disk` | /dev/sda (120GB, iSCSI Storage) |*Not the 250GB Disk*
-| `Target Disk - Option` | ext4 | *Leave Default - ext4 etc*
-| `Country` | Type your Country
-| `Timezone` | Select |
-| `Keymap` |en-us|
-| `Password`| Enter your new password | *Same password as you used on your other nodes*
-| `E-mail` |Enter your email | *If you dont want to enter a valid email type mail@example.com*
-| `Management interface` |Leave Default
-| `Hostname` |typhoon-03.localdomain|
-|`IP Address` |192.168.1.103|
-| `Netmask` |255.255.255.0|
-| `Gateway` |192.168.1.5|
-| `DNS Server` |192.168.1.5|
+| Target Disk | `/dev/sda (120GB, iSCSI Storage)` |*Not the 250GB Disk*
+| Target Disk - Option | `ext4` | *Leave Default - ext4 etc*
+| Country | Type your Country
+| Timezone | Select |
+| Keymap |`en-us`|
+| Password| Enter your new password | *Same password as you used on your other nodes*
+| E-mail |Enter your email | *If you dont want to enter a valid email type mail@example.com*
+| Management interface |Leave Default
+| Hostname |`typhoon-03.localdomain` |
+| IP Address |`192.168.1.103`|
+| Netmask |`255.255.255.0`|
+| Gateway |`192.168.1.5`|
+| DNS Server |`192.168.1.5`|
 
 Finally click `Reboot` and your VM Proxmox node will reboot.
 
@@ -382,11 +382,11 @@ Create Disk 2 using the web interface `Disks` > `ZFS` > `Create: ZFS` and config
 
 | Option | Node 1 Value | Node 2 Value | Node 3 Value |
 | :---  | :---: | :---: | :---: |
-| `Name` |typhoon-share|typhoon-share|typhoon-share
-| `RAID Level` |Single Disk|Single Disk|Single Disk
-| `Compression` |on|on|on
-| `ashift` |12|12|12
-| `Device` |/dev/sdx|/dev/sdx|/dev/sdx
+| Name |`typhoon-share`|`typhoon-share`|`typhoon-share`
+| RAID Level |`Single Disk`|`Single Disk`|`Single Disk`
+| Compression |`on`|`on`|`on`
+| ashift |`12`|`12`|`12`
+| Device |`/dev/sdx`|`/dev/sdx`|`/dev/sdx`
 
 Note: If your choose to use a ZFS Raid for storage redundancy change accordingly per node but your must retain the Name ID **typhoon-share**.
 
