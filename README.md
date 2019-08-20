@@ -39,7 +39,9 @@ We need the following shared folder tree, in addition to your standard default t
 Synology NAS/
 │
 └──  volume1/
+    ├── audio
     ├── backup
+    ├── books
     ├── docker
     ├── music 
     ├── openvpn
@@ -60,7 +62,9 @@ To create shared folders log in to the Synology Desktop and:
    * Hide this shared ...: ☐ 
    * Hide sub-folders ...: ☐ 
    * Enable Recycle Bin:
+     * audio `☑`
      * backup `☑`
+     * books `☑`
      * docker `☑`
      * music `☑`
      * openvpn `☑`
@@ -83,6 +87,8 @@ Create NFS shares for the following folders:
 
 | Folder Name | NFS Share |
 | :---  | :---: |
+| audio | `☑` |
+| books | `☑` |
 | docker | `☑` |
 | music | `☑` |
 | photo | `☑` |
@@ -118,7 +124,9 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
+| audio | ☐ | `☑` |  ☐
 | backup  | `☑` |  ☐ |  ☐
+| books | ☐ | `☑` |  ☐
 | docker | ☐ | `☑` |  ☐
 | music | ☐ | `☑` |  ☐
 | openvpn | `☑` |  ☐ |  ☐
@@ -160,7 +168,9 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
+| audio | ☐ | `☑` |  ☐
 | backup | ☐ | `☑` |  ☐
+| books | ☐ | `☑` |  ☐
 | docker | ☐ | `☑` |  ☐
 | music | ☐ | `☑` |  ☐
 | openvpn | ☐ | `☑` |  ☐
@@ -212,7 +222,9 @@ Leave as default as permissions are automatically obtained from the chosen user 
 
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
+| audio | ☐ | `☑` |  ☐
 | backup  | `☑` |  ☐ |  ☐
+| books | ☐ | `☑` |  ☐
 | docker | ☐ | `☑` |  ☐
 | music | ☐ | `☑` |  ☐
 | openvpn | `☑` |  ☐ |  ☐
