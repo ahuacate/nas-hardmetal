@@ -16,9 +16,9 @@ Synology Prerequisites are:
 - [x] Synology DNS Server is `192.168.1.5`
 - [x] Synology DDNS is working with your chosen hostname ID at `hostnameID.synology.me`
 
->  **Note: A prerequisite to running VMs on your Synology NAS is your volumes must use the BTRFS file system. If they are not then you CANNOT install VM's. In my experience the best way forward is base upon backing up data to a external disk (USB) or another internal volume (be careful and know what you are doing), deleting and recreating /volume1 via DSM and restoring your backup data. I recommend using Synology Hyper Backup to backup your data and settings.**
+>  **Note: A prerequisite to running VMs on your Synology NAS is your volumes must use the BTRFS file system - without BTRFS you CANNOT install VM's. In my experience the best way forward is based upon backing up your data to a external disk (USB) or another internal volume (be careful and know what you are doing), deleting and recreating /volume1 via DSM and restoring your backup data. I recommend using Synology Hyper Backup for backuping your data and settings.**
 
->  **Its a lengthy topic and the procedures can be found by seaching on the internet. So the following assumes your Volume 1 is in the BTRFS file system format.**
+>  **Its a lengthy topic and the procedures can be found by seaching on the internet. The following tutorials assumes your Volume 1 is in the BTRFS file system format.**
 
 Tasks to be performed are:
 - [ ] 1.0 Create the required Synology Shared Folders and NFS Shares
