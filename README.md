@@ -42,6 +42,7 @@ Synology NAS/
     ├── audio
     ├── backup
     ├── books
+    ├── cloudstorage
     ├── docker
     ├── music 
     ├── openvpn
@@ -62,9 +63,10 @@ To create shared folders log in to the Synology Desktop and:
    * Hide this shared ...: ☐ 
    * Hide sub-folders ...: ☐ 
    * Enable Recycle Bin:
-     * audio `☑`
+     * audio `☐`
      * backup `☑`
-     * books `☑`
+     * books `☐`
+     * cloudstorage `☑`
      * docker `☑`
      * music `☑`
      * openvpn `☑`
@@ -89,6 +91,7 @@ Create NFS shares for the following folders:
 | :---  | :---: |
 | audio | `☑` |
 | books | `☑` |
+| cloudstorage | `☑` |
 | docker | `☑` |
 | music | `☑` |
 | photo | `☑` |
@@ -127,6 +130,7 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 | audio | ☐ | `☑` |  ☐
 | backup  | `☑` |  ☐ |  ☐
 | books | ☐ | `☑` |  ☐
+| cloudstorage | ☐ | `☑` |  ☐
 | docker | ☐ | `☑` |  ☐
 | music | ☐ | `☑` |  ☐
 | openvpn | `☑` |  ☐ |  ☐
@@ -170,6 +174,7 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 | :---  | :---: | :---: | :---: |
 | audio | ☐ | `☑` |  ☐
 | backup | ☐ | `☑` |  ☐
+| cloudstorage | ☐ | `☑` |  ☐
 | books | ☐ | `☑` |  ☐
 | docker | ☐ | `☑` |  ☐
 | music | ☐ | `☑` |  ☐
@@ -225,6 +230,7 @@ Leave as default as permissions are automatically obtained from the chosen user 
 | audio | ☐ | `☑` |  ☐
 | backup  | `☑` |  ☐ |  ☐
 | books | ☐ | `☑` |  ☐
+| cloudstorage | ☐ | `☑` |  ☐
 | docker | ☐ | `☑` |  ☐
 | music | ☐ | `☑` |  ☐
 | openvpn | `☑` |  ☐ |  ☐
