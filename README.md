@@ -30,10 +30,10 @@ Tasks to be performed are:
 - [ ] 7.0 Configure the Proxmox VM
 - [ ] 8.0 Easy Proxmox Installation Option
 
-## 1.0 Create the required Synology Shared Folders and NFS Shares
+## 1.00 Create the required Synology Shared Folders and NFS Shares
 The following are the minimum set of folder shares required for my configuration and needed for this build and for the scripts to work.
 
-### 1.1 Create Shared Folders
+### 1.01 Create Shared Folders
 We need the following shared folder tree, in addition to your standard default tree, on the Synology NAS:
 ```
 Synology NAS/
@@ -44,15 +44,17 @@ Synology NAS/
     ├── books
     ├── cloudstorage
     ├── docker
+    ├── downloads
+    ├── hass
     ├── music 
     ├── openvpn
-    ├── photo 
+    ├── photo
+    ├── proxmox
     ├── public
     ├── pxe
     ├── ssh_key
     ├── video
-    ├── virtualbox
-    └── proxmox
+    └── virtualbox
 ```
 To create shared folders log in to the Synology Desktop and:
 1. Open `Control Panel` > `Shared Folder` > `Create`.
@@ -68,15 +70,17 @@ To create shared folders log in to the Synology Desktop and:
      * books `☐`
      * cloudstorage `☑`
      * docker `☑`
+     * downloads `☐`
+     * hass `☑`
      * music `☑`
      * openvpn `☑`
      * photo `☑`
+     * proxmox `☑`
      * public `☑`
      * pxe `☑`
      * ssh_key `☑`
      * video `☐` 
      * virtualbox `☑`
-     * proxmox `☑`
 3. Set up Encryption:
      * Encrypt this shared folder: `☐` 
 4. Set up advanced:
@@ -84,7 +88,7 @@ To create shared folders log in to the Synology Desktop and:
 5. Set up Permissions:
      * Note, at this point do not flag anything, just hit `Cancel` to exit.
      
-### 1.2 Create NFS Shares
+### 1.02 Create NFS Shares
 Create NFS shares for the following folders:
 
 | Folder Name | NFS Share |
@@ -93,6 +97,8 @@ Create NFS shares for the following folders:
 | books | `☑` |
 | cloudstorage | `☑` |
 | docker | `☑` |
+| downloads | `☑` |
+| hass | `☑` |
 | music | `☑` |
 | photo | `☑` |
 | public | `☑` |
@@ -109,13 +115,62 @@ To create NFS shares log in to the Synology Desktop and:
      * Enable asynchronous:  `☑`
      * Allow connections from non-privileged ports:  `☑`
      * Allow users to access mounted subfolders: `☑`
-3. Repeat steps 1 to 2 for all of the above six folders.
+3. Repeat steps 1 to 2 for all of the above eleven folders.
 
-## 2.0 Create new Synology User groups
-For ease of management I have created a specific user and group explicitly for Proxmox and Virtual Machines in my cluster. 
+## 2.00 Create new Synology User groups
+For ease of management we create specific users and groups for Proxmox LXC's and VM's. The content and application groups are:
 
-### 2.1 Create "homelab" user group
-This is a user group for your smart home and home media management software. This user group and users are not for personal or private data.
+*  **medialab** - Everything to do with TV series and Movies;
+*  **homelab** - Everything to do with your smart home;
+*  **privatelab** - All your private data.
+
+### 2.01 Create "medialab" user group
+This is a user group for home media content and applications only.
+
+To create a new group log in to the Synology WebGUI interface and:
+1. Open `Control Panel` > `Group` > `Create`
+2. Set User Information fields as follows:
+   * Name: `"medialab"`
+   * Description: `"Medialab group"`
+3. Assign shared folders permissions as follows:
+Note: Any oersonal or private data you may have stored in a shared folder simply assign `No Access` to the `homelab` group.
+
+| Name | No access | Read/Write | Read Only |
+| :---  | :---: | :---: | :---: |
+| audio | ☐ | `☑` |  ☐
+| backup | `☑` |  ☐ |  ☐
+| books | ☐ | `☑` |  ☐
+| cloudstorage | `☑` |  ☐ |  ☐
+| docker | ☐ | `☑` |  ☐
+| music | ☐ | `☑` |  ☐
+| openvpn | `☑` |  ☐ |  ☐
+| photo | ☐ | `☑` |  ☐
+| public | ☐ | `☑` |  ☐
+| proxmox | ☐ | `☑` |  ☐
+| pxe | `☑` |  ☐ |  ☐
+| ssh_key | `☑` |  ☐ |  ☐
+| video | ☐ | `☑` |  ☐
+| virtualbox | `☑` |  ☐ |  ☐
+4. Set User quota setting:
+   * Enable quota:  ☐
+5. Assign application permissions:
+
+| Name | Allow | Deny |
+| :---  | :---: | :---: |
+| DSM | ☐ | `☑` |  
+| Drive | ☐ | `☑` | 
+| File Station | `☑` | ☐  | 
+| FTP | ☐ |` ☑` |  
+| Moments | ☐ | `☑` | 
+| Text Editor | ☐ | `☑` | 
+| Universal Search | ☐ | `☑` | 
+| Virtual Machine Manage | `☑` | ☐  | 
+| rsync | ☐ | `☑` |  
+6. Group Speed Limit Setting
+    * `default`
+    
+### 2.02 Create "homelab" user group
+This is a user group for smart home applications and general non-critical private user data.
 
 To create a new group log in to the Synology WebGUI interface and:
 1. Open `Control Panel` > `Group` > `Create`
@@ -123,12 +178,12 @@ To create a new group log in to the Synology WebGUI interface and:
    * Name: `"homelab"`
    * Description: `"Homelab group"`
 3. Assign shared folders permissions as follows:
-Note: Any oersonal or private data you may have stored in a shared folder simply assign `No Access` to the `homelab` group.
+Note: Any personal or private data you may have stored in a shared folder simply assign `No Access` to the `homelab` group.
 
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
 | audio | ☐ | `☑` |  ☐
-| backup  | `☑` |  ☐ |  ☐
+| backup | ☐ | `☑` |  ☐
 | books | ☐ | `☑` |  ☐
 | cloudstorage | ☐ | `☑` |  ☐
 | docker | ☐ | `☑` |  ☐
@@ -159,8 +214,8 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 6. Group Speed Limit Setting
     * `default`
 
-### 2.2 Create "privatelab" user group
-This is a user group for your private and personal data.
+### 2.03 Create "privatelab" user group
+This is a user group for your private, personal and strictly confidential data.
 
 To create a new group log in to the Synology WebGUI interface and:
 1. Open `Control Panel` > `Group` > `Create`
@@ -204,10 +259,67 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 6. Group Speed Limit Setting
     * `default`
 
-## 3.0 Create a new Synology Users
-Here you create a user named `storm` which will be used for Proxmox and Virtual Machines your my cluster.
+## 3.00 Create new Synology Users
+Here we create the following new Synology users:
+*  **media** - username `media` is the user for Proxmox LXC's and VM's use to run media applications (i.e jellyfin, sonarr, radarr, lidarr etc);
+*  **storm** - username `storm` is the user for Proxmox LXC's and VM's use to run homelab applications (i.e syncthing, unifi, nextcloud, home assistant/smart home applications etc).
 
-### 3.1 Create user "storm":
+### 3.01 Create user "media"
+To create a new user log in to the Synology WebGUI interface and:
+1. Open `Control Panel` > `User` > `Create`
+2. Set User Information as follows:
+   * Name: `media`
+   * Description: `Medialab user`
+   * Email: `Leave blank`
+   * Password: `As Supplied`
+   * Confirm password: `As Supplied`
+     * Send notification mail to the newly created user: ☐ 
+     * Display user password in notification mail: ☐ 
+     * Disallow the user to change account password:  `☑`
+3. Set Join groups as follows:
+     * medialab:  `☑`
+     * users:  `☑`
+4. Assign shared folders permissions as follows:
+Leave as default as permissions are automatically obtained from the chosen user 'group' permissions.
+
+| Name | No access | Read/Write | Read Only |
+| :---  | :---: | :---: | :---: |
+| audio | ☐ | `☑` |  ☐
+| backup  | `☑` |  ☐ |  ☐
+| books | ☐ | `☑` |  ☐
+| cloudstorage | ☐ | `☑` |  ☐
+| docker | ☐ | `☑` |  ☐
+| music | ☐ | `☑` |  ☐
+| openvpn | `☑` |  ☐ |  ☐
+| photo | ☐ | `☑` |  ☐
+| public | ☐ | `☑` |  ☐
+| proxmox | ☐ | `☑` |  ☐
+| pxe | ☐ | `☑` |  ☐
+| ssh_key | `☑` |  ☐ |  ☐
+| video | ☐ | `☑` |  ☐
+| virtualbox | ☐ | `☑` |  ☐
+5. Set User quota setting:
+     * `default`
+6. Assign application permissions:
+Leave as default as application permissions are automatically obtained from the chosen user 'group' permissions.
+
+| Name | Allow | Deny |
+| :---  | :---: | :---: |
+| DSM | `☑` | ☐  | 
+| Drive | `☑`| ☐  | 
+| File Station | `☑` | ☐  | 
+| FTP | `☑` | ☐  | 
+| Moments | `☑` | ☐  | 
+| Text Editor | `☑` | ☐  | 
+| Universal Search | `☑` | ☐  | 
+| Virtual Machine Manager | `☑` | ☐  | 
+| rsync | `☑` | ☐  | 
+7. Set User Speed Limit Setting:
+     * `default`
+8. Confirm settings:
+     * `Apply`
+     
+### 3.01 Create user "storm":
 To create a new user log in to the Synology WebGUI interface and:
 1. Open `Control Panel` > `User` > `Create`
 2. Set User Information as follows:
