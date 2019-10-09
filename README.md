@@ -44,7 +44,7 @@ Synology NAS/
     ├── books
     ├── cloudstorage
     ├── docker
-    ├── downloads
+    ├── download
     ├── hass
     ├── music 
     ├── openvpn
@@ -70,7 +70,7 @@ To create shared folders log in to the Synology Desktop and:
      * books `☐`
      * cloudstorage `☑`
      * docker `☑`
-     * downloads `☐`
+     * download `☐`
      * hass `☑`
      * music `☑`
      * openvpn `☑`
@@ -97,7 +97,7 @@ Create NFS shares for the following folders:
 | books | `☑` |
 | cloudstorage | `☑` |
 | docker | `☑` |
-| downloads | `☑` |
+| download | `☑` |
 | hass | `☑` |
 | music | `☑` |
 | photo | `☑` |
@@ -142,9 +142,11 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 | books | ☐ | `☑` |  ☐
 | cloudstorage | `☑` |  ☐ |  ☐
 | docker | ☐ | `☑` |  ☐
+| download | ☐ | `☑` |  ☐
+| hass | `☑` | ☐ |  ☐
 | music | ☐ | `☑` |  ☐
 | openvpn | `☑` |  ☐ |  ☐
-| photo | ☐ | `☑` |  ☐
+| photo | ☐ |  ☐  | `☑`
 | public | ☐ | `☑` |  ☐
 | proxmox | ☐ | `☑` |  ☐
 | pxe | `☑` |  ☐ |  ☐
@@ -187,6 +189,8 @@ Note: Any personal or private data you may have stored in a shared folder simply
 | books | ☐ | `☑` |  ☐
 | cloudstorage | ☐ | `☑` |  ☐
 | docker | ☐ | `☑` |  ☐
+| download | ☐ | `☑` |  ☐
+| hass | ☐ | `☑` |  ☐
 | music | ☐ | `☑` |  ☐
 | openvpn | `☑` |  ☐ |  ☐
 | photo | ☐ | `☑` |  ☐
@@ -223,7 +227,7 @@ To create a new group log in to the Synology WebGUI interface and:
    * Name: `"privatelab"`
    * Description: `"Privatelab group"`
 3. Assign shared folders permissions as follows:
-Note: Any oersonal or private data you may have stored in a shared folder simply assign `No Access` to the `homelab` group.
+Note: Any personal or private data you may have stored in a shared folder simply assign `No Access` to the `homelab` group.
 
 | Name | No access | Read/Write | Read Only |
 | :---  | :---: | :---: | :---: |
@@ -232,6 +236,8 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 | cloudstorage | ☐ | `☑` |  ☐
 | books | ☐ | `☑` |  ☐
 | docker | ☐ | `☑` |  ☐
+| download | ☐ | `☑` |  ☐
+| hass | ☐ | `☑` |  ☐
 | music | ☐ | `☑` |  ☐
 | openvpn | ☐ | `☑` |  ☐
 | photo | ☐ | `☑` |  ☐
@@ -261,8 +267,9 @@ Note: Any oersonal or private data you may have stored in a shared folder simply
 
 ## 3.00 Create new Synology Users
 Here we create the following new Synology users:
-*  **media** - username `media` is the user for Proxmox LXC's and VM's use to run media applications (i.e jellyfin, sonarr, radarr, lidarr etc);
-*  **storm** - username `storm` is the user for Proxmox LXC's and VM's use to run homelab applications (i.e syncthing, unifi, nextcloud, home assistant/smart home applications etc).
+*  **media** - username `media` is the user for Proxmox LXC's and VM's used to run media applications (i.e jellyfin, sonarr, radarr, lidarr etc);
+*  **storm** - username `storm` is the user for Proxmox LXC's and VM's used to run homelab applications (i.e syncthing, unifi, nextcloud, home assistant/smart home etc);
+*  **typhoon** - username `typhoon` is the user for Proxmox LXC's and VM's used to run privatelab applications (i.e mailserver, messaging etc);
 
 ### 3.01 Create user "media"
 To create a new user log in to the Synology WebGUI interface and:
@@ -280,46 +287,17 @@ To create a new user log in to the Synology WebGUI interface and:
      * medialab:  `☑`
      * users:  `☑`
 4. Assign shared folders permissions as follows:
-Leave as default as permissions are automatically obtained from the chosen user 'group' permissions.
-
-| Name | No access | Read/Write | Read Only |
-| :---  | :---: | :---: | :---: |
-| audio | ☐ | `☑` |  ☐
-| backup  | `☑` |  ☐ |  ☐
-| books | ☐ | `☑` |  ☐
-| cloudstorage | ☐ | `☑` |  ☐
-| docker | ☐ | `☑` |  ☐
-| music | ☐ | `☑` |  ☐
-| openvpn | `☑` |  ☐ |  ☐
-| photo | ☐ | `☑` |  ☐
-| public | ☐ | `☑` |  ☐
-| proxmox | ☐ | `☑` |  ☐
-| pxe | ☐ | `☑` |  ☐
-| ssh_key | `☑` |  ☐ |  ☐
-| video | ☐ | `☑` |  ☐
-| virtualbox | ☐ | `☑` |  ☐
+     * Leave as default because all permissions are automatically obtained from the medialab user 'group' permissions.
 5. Set User quota setting:
      * `default`
 6. Assign application permissions:
-Leave as default as application permissions are automatically obtained from the chosen user 'group' permissions.
-
-| Name | Allow | Deny |
-| :---  | :---: | :---: |
-| DSM | `☑` | ☐  | 
-| Drive | `☑`| ☐  | 
-| File Station | `☑` | ☐  | 
-| FTP | `☑` | ☐  | 
-| Moments | `☑` | ☐  | 
-| Text Editor | `☑` | ☐  | 
-| Universal Search | `☑` | ☐  | 
-| Virtual Machine Manager | `☑` | ☐  | 
-| rsync | `☑` | ☐  | 
+     * Leave as default because all application permissions are automatically obtained from the medialab user 'group' permissions.
 7. Set User Speed Limit Setting:
      * `default`
 8. Confirm settings:
      * `Apply`
      
-### 3.01 Create user "storm":
+### 3.02 Create user "storm":
 To create a new user log in to the Synology WebGUI interface and:
 1. Open `Control Panel` > `User` > `Create`
 2. Set User Information as follows:
@@ -335,45 +313,48 @@ To create a new user log in to the Synology WebGUI interface and:
      * homelab:  `☑`
      * users:  `☑`
 4. Assign shared folders permissions as follows:
-Leave as default as permissions are automatically obtained from the chosen user 'group' permissions.
-
-| Name | No access | Read/Write | Read Only |
-| :---  | :---: | :---: | :---: |
-| audio | ☐ | `☑` |  ☐
-| backup  | `☑` |  ☐ |  ☐
-| books | ☐ | `☑` |  ☐
-| cloudstorage | ☐ | `☑` |  ☐
-| docker | ☐ | `☑` |  ☐
-| music | ☐ | `☑` |  ☐
-| openvpn | `☑` |  ☐ |  ☐
-| photo | ☐ | `☑` |  ☐
-| public | ☐ | `☑` |  ☐
-| proxmox | ☐ | `☑` |  ☐
-| pxe | ☐ | `☑` |  ☐
-| ssh_key | `☑` |  ☐ |  ☐
-| video | ☐ | `☑` |  ☐
-| virtualbox | ☐ | `☑` |  ☐
+     * Leave as default because all permissions are automatically obtained from the homelab user 'group' permissions.
 5. Set User quota setting:
      * `default`
 6. Assign application permissions:
-Leave as default as application permissions are automatically obtained from the chosen user 'group' permissions.
-
-| Name | Allow | Deny |
-| :---  | :---: | :---: |
-| DSM | `☑` | ☐  | 
-| Drive | `☑`| ☐  | 
-| File Station | `☑` | ☐  | 
-| FTP | `☑` | ☐  | 
-| Moments | `☑` | ☐  | 
-| Text Editor | `☑` | ☐  | 
-| Universal Search | `☑` | ☐  | 
-| Virtual Machine Manager | `☑` | ☐  | 
-| rsync | `☑` | ☐  | 
+     * Leave as default because all application permissions are automatically obtained from the homelab user 'group' 
 7. Set User Speed Limit Setting:
      * `default`
 8. Confirm settings:
      * `Apply`
+     
+### 3.03 Create user "typhoon":
+To create a new user log in to the Synology WebGUI interface and:
+1. Open `Control Panel` > `User` > `Create`
+2. Set User Information as follows:
+   * Name: `typhoon`
+   * Description: `Privatelab user`
+   * Email: `Leave blank`
+   * Password: `As Supplied`
+   * Conform password: `As Supplied`
+     * Send notification mail to the newly created user: ☐ 
+     * Display user password in notification mail: ☐ 
+     * Disallow the user to change account password:  `☑`
+3. Set Join groups as follows:
+     * privatelab:  `☑`
+     * users:  `☑`
+4. Assign shared folders permissions as follows:
+     * Leave as default because all permissions are automatically obtained from the privatelab user 'group' permissions.
+5. Set User quota setting:
+     * `default`
+6. Assign application permissions:
+     * Leave as default because all application permissions are automatically obtained from the privatelab user 'group' 
+7. Set User Speed Limit Setting:
+     * `default`
+8. Confirm settings:
+     * `Apply`
+     
+### 3.04 Edit Synology NAS user UID's
+We need to set the user UID's for users media, storm and typhoon. This must be done after you have completed Steps 3.01 --> 3.03.
 
+To edit Synology user UID's you must SSH connect to the synology. Also I recommend installing a nano editor like Entware nano package.
+
+A)  
 ## 4.0 Install & Configure Synology Virtual Machine Manager
 If your Synology NAS model is capable you can install a Proxmox node on your Synology Diskstation using the native Synology Virtual Machine Manager application.
 
@@ -533,3 +514,19 @@ wget https://raw.githubusercontent.com/ahuacate/proxmox-node/master/scripts/typh
 ```
 
 Finished. Your Synology Proxmox VM node is ready.
+
+---
+
+## 00.00 Patches and Fixes
+
+### 00.01 Install Nano
+Install Nano as a SynoCommunity package.
+
+Log in to the Synology Desktop and go to `Package Center` > `Settings` > `Package Sources` > `Add` and complete the fields as follows:
+
+| Option | Value
+| :---  | :---: 
+| Name | `SynoCommunity`
+| Location | `http://packages.synocommunity.com/`
+
+And click `OK`. Then type in the serach bar 'nano' and install Nano.
