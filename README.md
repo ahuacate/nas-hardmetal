@@ -350,11 +350,47 @@ To create a new user log in to the Synology WebGUI interface and:
      * `Apply`
      
 ### 3.04 Edit Synology NAS user UID's
-We need to set the user UID's for users media, storm and typhoon. This must be done after you have completed Steps 3.01 --> 3.03.
+We need to edit the user UID's for users media, storm and typhoon. This must be done after you have completed Steps 3.01 --> 3.03.
 
-To edit Synology user UID's you must SSH connect to the synology. Also I recommend installing a nano editor like Entware nano package.
+| Username | Old UID | ==>> | New UID |
+| :---  | ---: | :---: | :--- |
+| **media** | 10XX | ==>> | 1105
+| **storm** | 10XX | ==>> | 1106
+| **typhoon** | 10XX | ==>> | 1107
 
-A)  
+To edit Synology user UID's you must SSH connect to the synology (cannot be done via WebGUI). Prerequisites for the next steps are:
+*  You must have a nano editor installed as instructed [HERE](https://github.com/ahuacate/synobuild/blob/master/README.md#0001-install-nano).;
+*  Synology SSH is enabled: `Control Panel` > `Terminal & SNMP` > `Enable SSH service` state is on.
+
+Using a CLI terminal connect to your connect to your Synology:
+```
+ssh admin@192.168.1.10
+```
+Login as 'admin' and enter your Synology admin password at the prompt. The CLI terminal will show `admin@cyclone-01:~$` if successful.
+
+Synology DSM is Linux so we need switch user `root`. In the CLI terminal type the following to switch to `root@cyclone-01:~#` :
+```
+sudo -i
+```
+And next type the following to change all the UID's:
+```
+# Edit Media User ID
+userid=$(id -u media) &&
+sed -i 's|media:x:.*|media:x:1105:100:Medialab user:/var/services/homes/media:/sbin/nologin|g' /etc/passwd &&
+find / -uid $userid -exec chown storm "{}" \; &&
+unset userid &&
+# Edit Storm User ID
+userid=$(id -u storm) &&
+sed -i 's|storm:x:.*|storm:x:1106:100:Homelab user:/var/services/homes/storm:/sbin/nologin|g' /etc/passwd &&
+find / -uid $userid -exec chown storm "{}" \; &&
+unset userid &&
+# Edit Typhoon User ID
+userid=$(id -u typhoon) &&
+sed -i 's|typhoon:x:.*|typhoon:x:1107:100:Privatelab user:/var/services/homes/typhoon:/sbin/nologin|g' /etc/passwd &&
+find / -uid $userid -exec chown typhoon "{}" \; &&
+unset userid
+```
+
 ## 4.0 Install & Configure Synology Virtual Machine Manager
 If your Synology NAS model is capable you can install a Proxmox node on your Synology Diskstation using the native Synology Virtual Machine Manager application.
 
