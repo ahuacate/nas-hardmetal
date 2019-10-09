@@ -352,15 +352,15 @@ To create a new user log in to the Synology WebGUI interface and:
 ### 3.04 Edit Synology NAS user UID's
 We need to edit the user UID's for users media, storm and typhoon. This must be done after you have completed Steps 3.01 --> 3.03.
 
-| Username | Old UID | ==>> | New UID |
+| Synology Username | Old UID | | New UID |
 | :---  | ---: | :---: | :--- |
 | **media** | 10XX | ==>> | 1105
 | **storm** | 10XX | ==>> | 1106
 | **typhoon** | 10XX | ==>> | 1107
 
 To edit Synology user UID's you must SSH connect to the synology (cannot be done via WebGUI). Prerequisites for the next steps are:
-*  You must have a nano editor installed as instructed [HERE](https://github.com/ahuacate/synobuild/blob/master/README.md#0001-install-nano).;
-*  Synology SSH is enabled: `Control Panel` > `Terminal & SNMP` > `Enable SSH service` state is on.
+*  You must have a nano editor installed if you want to manually edit the UID's. To install a nano editor see instructions [HERE](https://github.com/ahuacate/synobuild/blob/master/README.md#0001-install-nano).;
+*  Synology SSH is enabled: `Control Panel` > `Terminal & SNMP` > `Enable SSH service` state is on .
 
 Using a CLI terminal connect to your connect to your Synology:
 ```
