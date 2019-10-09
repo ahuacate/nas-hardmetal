@@ -297,7 +297,7 @@ To create a new user log in to the Synology WebGUI interface and:
 8. Confirm settings:
      * `Apply`
      
-### 3.02 Create user "storm":
+### 3.02 Create user "storm"
 To create a new user log in to the Synology WebGUI interface and:
 1. Open `Control Panel` > `User` > `Create`
 2. Set User Information as follows:
@@ -323,7 +323,7 @@ To create a new user log in to the Synology WebGUI interface and:
 8. Confirm settings:
      * `Apply`
      
-### 3.03 Create user "typhoon":
+### 3.03 Create user "typhoon"
 To create a new user log in to the Synology WebGUI interface and:
 1. Open `Control Panel` > `User` > `Create`
 2. Set User Information as follows:
@@ -350,7 +350,9 @@ To create a new user log in to the Synology WebGUI interface and:
      * `Apply`
      
 ### 3.04 Edit Synology NAS user UID's
-We need to edit the user UID's for users media, storm and typhoon. This must be done after you have completed Steps 3.01 --> 3.03.
+Synology DSM WebGUI Control Panel interface does'nt allow assigning a UID number when creating any new users. Each new user is assigned a random UID upwards of 1027.
+
+It seems Synology We need to edit the user UID's for users media, storm and typhoon so they are known. This must be done after you have completed Steps 3.01 --> 3.03.
 
 | Synology Username | Old UID | | New UID |
 | :---  | ---: | :---: | :--- |
