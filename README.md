@@ -265,6 +265,43 @@ Note: Any personal or private data you may have stored in a shared folder simply
 6. Group Speed Limit Setting
     * `default`
 
+### 2.04 Edit Synology NAS user GID's
+Synology DSM WebGUI Control Panel interface does'nt allow assigning a GID number when creating any new groups. Each new group is assigned a random UID upwards of 65536.
+
+We need to edit the user GID's for groups medialab, homelab and privatelab so they are known GID's. This must be done after you have completed Steps 2.01 --> 2.03.
+
+| Synology Group | Old GID | | New GID |
+| :---  | ---: | :---: | :--- |
+| **medialab** | 10XX | ==>> | 65605
+| **homelab** | 10XX | ==>> | 65606
+| **privatelab** | 10XX | ==>> | 65607
+
+To edit Synology user GID's you must SSH connect to the synology (cannot be done via WebGUI). Prerequisites for the next steps are:
+*  You must have a nano editor installed if you want to manually edit the UID's. To install a nano editor see instructions [HERE](https://github.com/ahuacate/synobuild/blob/master/README.md#0001-install-nano).;
+*  Synology SSH is enabled: `Control Panel` > `Terminal & SNMP` > `Enable SSH service` state is on .
+
+Using a CLI terminal connect to your connect to your Synology:
+```
+ssh admin@192.168.1.10
+```
+Login as 'admin' and enter your Synology admin password at the prompt. The CLI terminal will show `admin@cyclone-01:~$` if successful.
+
+Synology DSM is Linux so we need switch user `root`. In the CLI terminal type the following to switch to `root@cyclone-01:~#` :
+```
+sudo -i
+```
+And next type the following to change all the UID's:
+```
+# Edit Medialab GID ID
+sed -i 's|medialab:x:.*|medialab:x:65605:media|g' /etc/group &&
+# Edit Homelab GID ID
+sed -i 's|homelablab:x:.*|homelab:x:65606:storm|g' /etc/group &&
+# Edit Privatelab GID ID
+sed -i 's|privatelab:x:.*|privatelab:x:65607:typhoon|g' /etc/group &&
+# Rebuild the Users
+synouser --rebuild all
+```
+
 ## 3.00 Create new Synology Users
 Here we create the following new Synology users:
 *  **media** - username `media` is the user for Proxmox LXC's and VM's used to run media applications (i.e jellyfin, sonarr, radarr, lidarr etc);
@@ -390,7 +427,9 @@ unset userid &&
 userid=$(id -u typhoon) &&
 sed -i 's|typhoon:x:.*|typhoon:x:1107:100:Privatelab user:/var/services/homes/typhoon:/sbin/nologin|g' /etc/passwd &&
 find / -uid $userid -exec chown typhoon "{}" \; &&
-unset userid
+unset userid &&
+# Rebuild the Users
+synouser --rebuild all
 ```
 
 ## 4.0 Install & Configure Synology Virtual Machine Manager
