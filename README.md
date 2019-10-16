@@ -293,11 +293,11 @@ sudo -i
 And next type the following to change all the UID's:
 ```
 # Edit Medialab GID ID
-sed -i 's|medialab:x:.*|medialab:x:65605:media|g' /etc/group &&
+sed -i 's|medialab:x:*:.*|medialab:x:65605:media,storm,typhoon|g' /etc/group &&
 # Edit Homelab GID ID
-sed -i 's|homelablab:x:.*|homelab:x:65606:storm|g' /etc/group &&
+sed -i 's|homelab:x:*:.*|homelab:x:65606:storm,typhoon|g' /etc/group &&
 # Edit Privatelab GID ID
-sed -i 's|privatelab:x:.*|privatelab:x:65607:typhoon|g' /etc/group &&
+sed -i 's|privatelab:x:*:.*|privatelab:x:65607:typhoon|g' /etc/group &&
 # Rebuild the Users
 synouser --rebuild all
 ```
@@ -393,9 +393,9 @@ It seems Synology We need to edit the user UID's for users media, storm and typh
 
 | Synology Username | Old UID | | New UID |
 | :---  | ---: | :---: | :--- |
-| **media** | 10XX | ==>> | 1105
-| **storm** | 10XX | ==>> | 1106
-| **typhoon** | 10XX | ==>> | 1107
+| **media** | 10XX | ==>> | 1605
+| **storm** | 10XX | ==>> | 1606
+| **typhoon** | 10XX | ==>> | 1607
 
 To edit Synology user UID's you must SSH connect to the synology (cannot be done via WebGUI). Prerequisites for the next steps are:
 *  You must have a nano editor installed if you want to manually edit the UID's. To install a nano editor see instructions [HERE](https://github.com/ahuacate/synobuild/blob/master/README.md#0001-install-nano).;
@@ -415,17 +415,17 @@ And next type the following to change all the UID's:
 ```
 # Edit Media User ID
 userid=$(id -u media) &&
-sed -i 's|media:x:.*|media:x:1105:100:Medialab user:/var/services/homes/media:/sbin/nologin|g' /etc/passwd &&
+sed -i 's|media:x:.*|media:x:1605:100:Medialab user:/var/services/homes/media:/sbin/nologin|g' /etc/passwd &&
 find / -uid $userid -exec chown storm "{}" \; &&
 unset userid &&
 # Edit Storm User ID
 userid=$(id -u storm) &&
-sed -i 's|storm:x:.*|storm:x:1106:100:Homelab user:/var/services/homes/storm:/sbin/nologin|g' /etc/passwd &&
+sed -i 's|storm:x:.*|storm:x:1606:100:Homelab user:/var/services/homes/storm:/sbin/nologin|g' /etc/passwd &&
 find / -uid $userid -exec chown storm "{}" \; &&
 unset userid &&
 # Edit Typhoon User ID
 userid=$(id -u typhoon) &&
-sed -i 's|typhoon:x:.*|typhoon:x:1107:100:Privatelab user:/var/services/homes/typhoon:/sbin/nologin|g' /etc/passwd &&
+sed -i 's|typhoon:x:.*|typhoon:x:1607:100:Privatelab user:/var/services/homes/typhoon:/sbin/nologin|g' /etc/passwd &&
 find / -uid $userid -exec chown typhoon "{}" \; &&
 unset userid &&
 # Rebuild the Users
