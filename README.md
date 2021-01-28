@@ -1,4 +1,4 @@
-<h2> OEM NAS BUILDS</h2>
+<h2> OEM NAS Setup</h2>
 
 This guide is about setting up your OEM Linux NAS ready for all our Easy Scripts and CT builds. 
 
