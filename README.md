@@ -1,5 +1,13 @@
-# Synobuild
-The following is for a Synology Diskstation only. Modify accordingly for your own NAS or NFS server setup.
+<h2> OEM NAS BUILDS</h2>
+
+This guide is about setting up your OEM Linux NAS ready for all our Easy Scripts and CT builds. 
+
+A OEM NAS could be a Synology, QNap, FreeNAS, OMV or whatever open source Linux NAS build you use. The Linux basics should be easily interpreted to suit your NAS OS.
+
+More emphasis has been given to the Synology DiskStation only because I had one on my network. Personally I recommend
+
+A 
+The following is for a Synology DiskStation only. Modify accordingly for your own NAS or NFS server setup.
 Network Prerequisites are:
 - [x] Layer 2 Network Switches
 - [x] Network Gateway is `192.168.1.5`
