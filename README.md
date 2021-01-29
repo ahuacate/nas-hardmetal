@@ -1,42 +1,34 @@
 <h2> OEM NAS Setup</h2>
 
-This guide is about setting up your OEM Linux NAS ready for all our Easy Scripts and CT builds. 
+This guide is about setting up a OEM Linux based NAS ready for our PVE hosts, Easy Scripts and our suite of PVE CT applications. 
 
-A OEM NAS could be a Synology, QNap, FreeNAS, OMV or whatever open source Linux NAS build you use. The Linux basics should be easily interpreted to suit your NAS OS.
+A OEM NAS could be a Synology, QNap, FreeNAS, OMV or whatever flavour of Linux your NAS uses. The Linux basics should be easily interpreted to suit your particular NAS. Modify accordingly for your own NAS or NFS server setup.
 
-More emphasis has been given to the Synology DiskStation only because I had one on my network. Personally I recommend
+More emphasis has been given to the Synology DiskStation only because I had one on my network. Personally I recommend our [PVE NAS](https://github.com/ahuacate/pve-zfs-nas) solution.
 
-A 
-The following is for a Synology DiskStation only. Modify accordingly for your own NAS or NFS server setup.
 Network Prerequisites are:
-- [x] Layer 2 Network Switches
-- [x] Network Gateway is `192.168.1.5`
-- [x] Network DNS server is `192.168.1.5` (Note: set DNS server: primary DNS `192.168.1.254` which is your static PiHole server IP address ; secondary DNS `1.1.1.1`)
-- [x] Network DHCP server is `192.168.1.5`
-- [x] A DDNS service is fully configured and enabled (I recommend you use the free Synology DDNS service)
+- [x] Layer 2/3 Network Switches
+- [x] Network Gateway is `XXX.XXX.XXX.5` ( *default is 192.168.1.5* )
+- [x] Network DNS server is `XXX.XXX.XXX.5` ( *default is 192.168.1.5* )
+- [x] Network DHCP server is `XXX.XXX.XXX.5` ( *default is 192.168.1.5* )
 
-Synology Prerequisites are:
-- [x] Synology CPU is Intel based
-- [x] Volume is formated to BTRFS (not ext4, which cannot run Synology Virtual Machines)
-- [x] Synology Static IP Address is `192.168.1.10`
-- [x] Synology Hostname is `cyclone-01`
-- [x] Synology Gateway is `192.168.1.5`
-- [x] Synology DNS Server is `192.168.1.5`
-- [x] Synology DDNS is working with your chosen hostname ID at `hostnameID.synology.me`
+OEM NAS Prerequisites are:
+- [x] x86 CPU (Intel or AMD) (only required if running PVE VMs, otherwise ARM works too)
+- [x] Volume is formatted to BTRFS (not ext4, which cannot run Synology Virtual Machines)
+- [x] Synology Static IP Address is `XXX.XXX.XXX.10` ( *default NAS-01 is 192.168.1.10* )
+- [x] Synology Hostname is `nas-01`
+- [x] Synology Gateway is `XXX.XXX.XXX.5` ( *default is 192.168.1.5* )
+- [x] Synology DNS server is `XXX.XXX.XXX.5` ( *default is 192.168.1.5* )
 
->  **Note: A prerequisite to running VMs on your Synology NAS is your volumes must use the BTRFS file system - without BTRFS you CANNOT install VM's. In my experience the best way forward is based upon backing up your data to a external disk (USB) or another internal volume (be careful and know what you are doing), deleting and recreating /volume1 via DSM and restoring your backup data. I recommend using Synology Hyper Backup for backuping your data and settings.**
+Synology DiskStation Prerequisites are:
+- [x] x86 CPU Intel CPU (only required if running VMs)
+- [x] Volume is formatted to BTRFS (not ext4, which cannot run Synology Virtual Machines)
+
+>  **Note: A prerequisite to running VMs on a Synology DiskStation NAS is your volumes must use the BTRFS file system - without BTRFS you CANNOT install VM's. In my experience the best way forward is based upon backing up your data to a external disk (USB) or another internal volume (be careful and know what you are doing), deleting and recreating /volume1 via DSM and restoring your backup data. I recommend using Synology Hyper Backup for backuping your data and settings.**
 
 >  **Its a lengthy topic and the procedures can be found by seaching on the internet. The following tutorials assumes your Volume 1 is in the BTRFS file system format.**
 
-Tasks to be performed are:
-- [ ] 1.0 Create the required Synology Shared Folders and NFS Shares
-- [ ] 2.0 Create new Synology User groups
-- [ ] 3.0 Create a new Synology Users
-- [ ] 4.0 Install & Configure Synology Virtual Machine Manager
-- [ ] 5.0 Create the Proxmox VM
-- [ ] 6.0 Install Proxmox OS
-- [ ] 7.0 Configure the Proxmox VM
-- [ ] 8.0 Easy Proxmox Installation Option
+<hr>
 
 ## 1.00 Create the required Synology Shared Folders and NFS Shares
 The following are the minimum set of folder shares required for my configuration and needed for this build and for the scripts to work.
