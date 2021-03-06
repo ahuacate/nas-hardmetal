@@ -676,7 +676,8 @@ Create the following User groups.
 
 *  **medialab** - For media Apps (Sonarr, Radar, Jellyfin etc)
 *  **homelab** -  For everything to do with your Smart Home (CCTV, Home Assistant)
-*  **privatelab** - Power, trusted, admin Users
+*  **privatelab** - Power, trusted, admin users
+*  **chrootjail** - Chrootjail restricted users
 
 
 ### 3.3.1. Create "medialab" User Group
@@ -784,6 +785,7 @@ Up to the you.
 
 ### 3.3.4. Create "chrootjail" User Group
 This user group is for chrootjail users. Users are restricted or jailed within their own home folder. But they they have read only access to medialab folders.
+
 Open `Control Panel` > `Group` > `Create` and Group Creation Wizard will open.
 
 #### 3.3.4.1. Group information
@@ -959,6 +961,7 @@ We need to define each GUID to a known number.
 | **medialab** | 10XX | ==>> | 65605
 | **homelab** | 10XX | ==>> | 65606
 | **privatelab** | 10XX | ==>> | 65607
+| **chrootjail** | 10XX | ==>> | 65608
 
 Using a CLI terminal connect to your Synology:
 ```
@@ -979,7 +982,8 @@ sed -i 's|medialab:x:*:.*|medialab:x:65605:media,home,private|g' /etc/group &&
 sed -i 's|homelab:x:*:.*|homelab:x:65606:home,private|g' /etc/group &&
 # Edit Privatelab GID ID
 sed -i 's|privatelab:x:*:.*|privatelab:x:65607:private|g' /etc/group &&
-
+# Edit Chrootjail GID ID
+sed -i 's|chrootjail:x:*:.*|chrootjail:x:65608:|g' /etc/group &&
 # Rebuild the Users
 synouser --rebuild all
 ```
