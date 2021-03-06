@@ -781,6 +781,39 @@ Open `Control Panel` > `Group` > `Create` and Group Creation Wizard will open.
 #### 3.3.3.3. User quota setting
 Up to the you.
 
+
+### 3.3.4. Create "chrootjail" User Group
+This user group is for chrootjail users. Users are restricted or jailed within their own home folder. But they they have read only access to medialab folders.
+Open `Control Panel` > `Group` > `Create` and Group Creation Wizard will open.
+
+#### 3.3.4.1. Group information
+* Name: `chrootjail`
+* Description: `Chrootjail group`
+
+#### 3.3.4.2. Assign shared folders permissions
+
+| Name | No access | Read/Write | Read Only | Custom
+| :---  | :---: | :---: | :---: |:---: |
+| audio |  |  |☑ |  
+| backup |  |  |  |  
+| books |  |  | ☑ |  
+| cloudstorage |   |  |  |  
+| docker |  |  |  |  
+| downloads |  |  |  |  
+| git |   |  |  |  
+| homes |   |  |  
+| music |  |  | ☑ |  
+| openvpn |  |  |  |  
+| photo |  |  | ☑ |  
+| public |  |  | ☑ |  
+| proxmox |  |  |  |  
+| public |  |  | ☑ |  
+| ssh_key |  |  |  |  
+| video |  |  | ☑ |  
+
+#### 3.3.4.3. User quota setting
+Up to the you.
+
 ## 3.4. Create new Synology Users
 Here we create the following new Synology users:
 *  **media** - username `media` is the user for PVE CT's and VM's used to run media applications (i.e jellyfin, sonarr, radarr, lidarr etc);
