@@ -353,7 +353,7 @@ section "$SECTION_HEAD - Creating and Setting Folder Permissions."
 
 # Create NAS Share points
 echo
-box_out '#### PLEASE READ CAREFULLY - SHARED FOLDERS ####' '' 'Shared folders are the basic directories where you can store files and folders on your NAS.' 'Below is a list of our default shared folders that are created by this script:'  '' '  --  /BASE_FOLDER/"audio"' '  --  /BASE_FOLDER/"audio/audiobooks"' '  --  /BASE_FOLDER/"backup"' '  --  /BASE_FOLDER/"books"' '  --  /BASE_FOLDER/"cloudstorage"' '  --  /BASE_FOLDER/"docker"' '  --  /BASE_FOLDER/"downloads"' '  --  /BASE_FOLDER/"git"' '  --  /BASE_FOLDER/"homes"' '  --  /BASE_FOLDER/"music"' '  --  /BASE_FOLDER/"openvpn"' '  --  /BASE_FOLDER/"photo"' '  --  /BASE_FOLDER/"proxmox"' '  --  /BASE_FOLDER/"public"' '  --  /BASE_FOLDER/"sshkey"' '  --  /BASE_FOLDER/"video"' '  --  /BASE_FOLDER/"video/cctv"' '  --  /BASE_FOLDER/"video/documentary"' '  --  /BASE_FOLDER/"video/homevideo"' '  --  /BASE_FOLDER/"video/movies"' '  --  /BASE_FOLDER/"video/musicvideo"' '  --  /BASE_FOLDER/"video/pron"' '  --  /BASE_FOLDER/"video/tv"' '  --  /BASE_FOLDER/"video/transcode"' '' 'You can also create custom shared folders in the coming steps.'
+box_out '#### PLEASE READ CAREFULLY - SHARED FOLDERS ####' '' 'Shared folders are the basic directories where you can store files and folders on your NAS.' 'Below is a list of our default shared folders that are created by this script:'  '' '  --  /BASE_FOLDER/"audio"' '  --  /BASE_FOLDER/"audio/audiobooks"' '  --  /BASE_FOLDER/"backup"' '  --  /BASE_FOLDER/"books"' '  --  /BASE_FOLDER/"cloudstorage"' '  --  /BASE_FOLDER/"docker"' '  --  /BASE_FOLDER/"downloads"' '  --  /BASE_FOLDER/"git"' '  --  /BASE_FOLDER/"homes"' '  --  /BASE_FOLDER/"music"' '  --  /BASE_FOLDER/"openvpn"' '  --  /BASE_FOLDER/"photo"' '  --  /BASE_FOLDER/"proxmox"' '  --  /BASE_FOLDER/"public"' '  --  /BASE_FOLDER/"sshkey"' '  --  /BASE_FOLDER/"video"' '  --  /BASE_FOLDER/"video/cctv"' '  --  /BASE_FOLDER/"video/documentary"' '  --  /BASE_FOLDER/"video/homevideo"' '  --  /BASE_FOLDER/"video/movies"' '  --  /BASE_FOLDER/"video/musicvideo"' '  --  /BASE_FOLDER/"video/pron"' '  --  /BASE_FOLDER/"video/series"' '  --  /BASE_FOLDER/"video/transcode"' '' 'You can also create custom shared folders in the coming steps.'
 echo
 echo
 touch pve_zfs_nas_base_folder_setup-xtra
@@ -378,7 +378,7 @@ while true; do
     done
     msg "Select your new shared folders group permission rights."
     XTRA_SHARE01="Standard User - For restricted jailed users (GID: chrootjail)." >/dev/null
-    XTRA_SHARE02="Medialab - Photos, TV, movies, music and general media content only." >/dev/null
+    XTRA_SHARE02="Medialab - Photos, series, movies, music and general media content only." >/dev/null
     XTRA_SHARE03="Homelab - Everything to do with your smart home." >/dev/null
     XTRA_SHARE04="Privatelab - User has access to all NAS data." >/dev/null
     PS3="Select your new shared folders group permission rights (entering numeric) : "
