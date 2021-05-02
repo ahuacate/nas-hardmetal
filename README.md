@@ -682,7 +682,11 @@ Create the following User groups.
 
 *  **medialab** - For media Apps (Sonarr, Radar, Jellyfin etc)
 *  **homelab** -  For everything to do with your Smart Home (CCTV, Home Assistant)
+<<<<<<< HEAD
 *  **privatelab** - Power, trusted, admin Users
+=======
+*  **privatelab** - Power, trusted, admin users
+>>>>>>> 82374a1da423daaa1a6f49b9ab609ae5a4a0f2f5
 *  **chrootjail** - Chrootjail restricted users
 
 
@@ -990,7 +994,10 @@ sed -i 's|homelab:x:*:.*|homelab:x:65606:home,private|g' /etc/group &&
 sed -i 's|privatelab:x:*:.*|privatelab:x:65607:private|g' /etc/group &&
 # Edit Chrootjail GID ID
 sed -i 's|chrootjail:x:*:.*|chrootjail:x:65608:|g' /etc/group &&
+<<<<<<< HEAD
 
+=======
+>>>>>>> 82374a1da423daaa1a6f49b9ab609ae5a4a0f2f5
 # Rebuild the Users
 synouser --rebuild all
 ```
