@@ -90,6 +90,10 @@ bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/nas-oem-setup/
             - [3.3.3.1. Group information](#3331-group-information)
             - [3.3.3.2. Assign shared folders permissions](#3332-assign-shared-folders-permissions)
             - [3.3.3.3. User quota setting](#3333-user-quota-setting)
+        - [3.3.4. Create "chrootjail" User Group](#334-create-chrootjail-user-group)
+            - [3.3.4.1. Group information](#3341-group-information)
+            - [3.3.4.2. Assign shared folders permissions](#3342-assign-shared-folders-permissions)
+            - [3.3.4.3. User quota setting](#3343-user-quota-setting)
     - [3.4. Create new Synology Users](#34-create-new-synology-users)
         - [3.4.1. Create user "media"](#341-create-user-media)
             - [3.4.1.1. User information](#3411-user-information)
@@ -117,6 +121,8 @@ bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/nas-oem-setup/
         - [3.6.1. Prepare your Synology](#361-prepare-your-synology)
         - [3.6.2. Edit Synology NAS GUID (Groups)](#362-edit-synology-nas-guid-groups)
         - [3.6.3. Edit Synology NAS UID (Users)](#363-edit-synology-nas-uid-users)
+    - [3.7 Set PVE Folder ACL Permissions](#37-set-pve-folder-acl-permissions)
+        - [3.7.1 Set Folder ACL using Synology DSM WebGUI](#371-set-folder-acl-using-synology-dsm-webgui)
 - [4. Synology Virtual Machine Manager](#4-synology-virtual-machine-manager)
     - [4.1. Download the Proxmox installer ISO](#41-download-the-proxmox-installer-iso)
     - [4.2. Install Synology Virtual Machine Manager on your NAS](#42-install-synology-virtual-machine-manager-on-your-nas)
@@ -677,6 +683,7 @@ Create the following User groups.
 *  **medialab** - For media Apps (Sonarr, Radar, Jellyfin etc)
 *  **homelab** -  For everything to do with your Smart Home (CCTV, Home Assistant)
 *  **privatelab** - Power, trusted, admin Users
+*  **chrootjail** - Chrootjail restricted users
 
 
 ### 3.3.1. Create "medialab" User Group
@@ -781,6 +788,40 @@ Open `Control Panel` > `Group` > `Create` and Group Creation Wizard will open.
 #### 3.3.3.3. User quota setting
 Up to the you.
 
+
+### 3.3.4. Create "chrootjail" User Group
+This user group is for chrootjail users. Users are restricted or jailed within their own home folder. But they they have read only access to medialab folders.
+
+Open `Control Panel` > `Group` > `Create` and Group Creation Wizard will open.
+
+#### 3.3.4.1. Group information
+* Name: `chrootjail`
+* Description: `Chrootjail group`
+
+#### 3.3.4.2. Assign shared folders permissions
+
+| Name | No access | Read/Write | Read Only | Custom
+| :---  | :---: | :---: | :---: |:---: |
+| audio |  |  |☑ |  
+| backup |  |  |  |  
+| books |  |  | ☑ |  
+| cloudstorage |   |  |  |  
+| docker |  |  |  |  
+| downloads |  |  |  |  
+| git |   |  |  |  
+| homes |   |  |  
+| music |  |  | ☑ |  
+| openvpn |  |  |  |  
+| photo |  |  | ☑ |  
+| public |  |  | ☑ |  
+| proxmox |  |  |  |  
+| public |  |  | ☑ |  
+| ssh_key |  |  |  |  
+| video |  |  | ☑ |  
+
+#### 3.3.4.3. User quota setting
+Up to the you.
+
 ## 3.4. Create new Synology Users
 Here we create the following new Synology users:
 *  **media** - username `media` is the user for PVE CT's and VM's used to run media applications (i.e jellyfin, sonarr, radarr, lidarr etc);
@@ -863,7 +904,7 @@ Open `Control Panel` > `User` > `Create` and User Creation Wizard will open.
 * Send notification mail to the newly created user ☐ 
 * Display user password in notification mail ☐ 
 * Disallow the user to change account password ☑
-* Password is allways valid ☑
+* Password is always valid ☑
 
 #### 3.4.3.2. Join groups
 * medialab ☑
@@ -926,6 +967,7 @@ We need to define each GUID to a known number.
 | **medialab** | 10XX | ==>> | 65605
 | **homelab** | 10XX | ==>> | 65606
 | **privatelab** | 10XX | ==>> | 65607
+| **chrootjail** | 10XX | ==>> | 65608
 
 Using a CLI terminal connect to your Synology:
 ```
@@ -946,6 +988,8 @@ sed -i 's|medialab:x:*:.*|medialab:x:65605:media,home,private|g' /etc/group &&
 sed -i 's|homelab:x:*:.*|homelab:x:65606:home,private|g' /etc/group &&
 # Edit Privatelab GID ID
 sed -i 's|privatelab:x:*:.*|privatelab:x:65607:private|g' /etc/group &&
+# Edit Chrootjail GID ID
+sed -i 's|chrootjail:x:*:.*|chrootjail:x:65608:|g' /etc/group &&
 
 # Rebuild the Users
 synouser --rebuild all
@@ -996,6 +1040,85 @@ synouser --rebuild all
 
 Your Synology is now ready to be your PVE hosts shared storage.
 
+
+## 3.7 Set PVE Folder ACL Permissions
+
+Synology DSM WebGUI Control Panel interface allows you to enable and set Folder ACL permissions. Each shared folder must have its ACL permissions set as shown in the table below.
+
+Set your new PVE folder ACL permissions as shown.
+
+| Folder            | Owner    | Permissions | ACL                                                            |
+|-------------------|----------|-------------|----------------------------------------------------------------|
+| audio             | root     | 750         | g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx                |
+| audio/audiobooks  | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:rx  |
+| backup            | root     | 1750        | g:medialab:rwx,g:homelab:rwx,g:privatelab:rwx                  |
+| books             | root     | 755         | g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx                |
+| cloudstorage      | root     | 1750        | g:homelab:rwx,g:privatelab:rwx                                 |
+| docker            | root     | 750         | g:medialab:rwx,g:homelab:rwx,g:privatelab:rwx                  |
+| downloads         | root     | 755         | g:medialab:rwx,g:privatelab:rwx                                |
+| git               | root     | 750         | g:privatelab:rwx                                               |
+| homes             | root     | 755         |                                                                |
+| music             | root     | 755         | g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx                |
+| openvpn           | root     | 750         | g:privatelab:rwx                                               |
+| photo             | root     | 750         | g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rwx               |
+| proxmox           | root     | 750         | g:privatelab:rwx,g:homelab:rwx                                 |
+| public            | root     | 1777        | g:medialab:rwx,g:homelab:rwx,g:privatelab:rwx,g:chrootjail:rwx |
+| sshkey            | root     | 1750        | g:privatelab:rwx                                               |
+| video             | root     | 750         | g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx                |
+| video/cctv        | medialab | 750         | g:medialab:rx,g:privatelab:rwx,g:homelab:rwx,g:chrootjail:000  |
+| video/documentary | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:rx  |
+| video/homevideo   | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:rwx |
+| video/movies      | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:rx  |
+| video/musicvideo  | medialab | 750         | g:medialab:rwx,g:homelab:000,g:privatelab:rwx,g:chrootjail:rwx |
+| video/pron        | medialab | 750         | g:medialab:rwx,g:homelab:000,g:privatelab:rwx,g:chrootjail:rwx |
+| video/tv          | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:rx  |
+| video/transcode   | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:000 |
+
+### 3.7.1 Set Folder ACL using Synology DSM WebGUI
+To set your folder ACLs using Synology DSM WebGUI go to `Control Panel` > `Shared Folder` > `Select your folder to edit` > `Edit` > `Advanced Permissions` > and Enable advanced share permissions.
+
+Click on `Advanced Share Permissions` > `Local groups` and set each folder ACLs according to the above table.
+
+Below is an example for setting your `audio` shared folder with ACL set at: g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx
+
+| Permission||||
+|:-------------------|:----------:|:-------------:|:-------------:|
+| ***Local groups***
+| **Name**           | **No access**     | **Read/Write**         | **Read only**
+| administrators |☐|:heavy_check_mark:|☐
+| chrootjail |☐|☐|:heavy_check_mark:
+| homelab |☐|:heavy_check_mark:|☐
+| http |☐|☐|☐
+| medialab |☐|:heavy_check_mark:|☐
+| privatelab |☐|:heavy_check_mark:|☐
+| users |☐|:heavy_check_mark:|☐
+
+And subfolder `audio/audiobooks` is also set using the Synology DSM WebGUI `File Station` > `audio` > `highlight audiobooks` > `Action` > `Properties`: g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:rx 
+
+| Properties|||
+|:-------------------|:----------:|:-------------:|
+| ***General***
+| Name | `audiobooks`
+| Location | /volume1/audio/audiobooks
+| Owner | `medialab`
+| ***Permission***
+|**User or group**|**Type**|**Permission**
+|administrators|Allow|Read & Write
+|chrootjail|Allow|Read
+|medialab|Allow|Read & Write
+|privatelab|Allow|Read & Write
+
+
+
+Here is the Linux CLI example for the task audio:
+```
+# Set VAR
+BASE_FOLDER="insert full path (i.e /dir1/dir2)"
+
+sudo chgrp -R root $BASE_FOLDER/audio
+sudo chmod -R 750 $BASE_FOLDER/audio
+sudo setfacl -Rm g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx  $BASE_FOLDER/audio
+```
 <hr>
 
 # 4. Synology Virtual Machine Manager
