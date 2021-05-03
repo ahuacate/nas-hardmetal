@@ -17,3 +17,4 @@ PVE_SOURCE="$DIR/../../common/pve/source"
 info "Here is DIR: ${YELLOW}${DIR}${NC}"
 info "Here is PVE_SOURCE: ${PVE_SOURCE}"
 info "Here is TEMP_DIR: ${TEMP_DIR}"
+cleanup
