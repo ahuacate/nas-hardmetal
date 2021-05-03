@@ -24,9 +24,3 @@ wget https://github.com/ahuacate/nas-oem-setup/archive/refs/heads/master.tar.gz
 tar -zxvf master.tar.gz
 
 source ${TEMP_DIR}/nas-oem-setup-master/scripts/test.sh
-
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
-PVE_SOURCE="$DIR/../../common/pve/source"
-echo "Here is DIR: ${DIR}"
-PVE_SOURCE="$DIR/../../common/pve/source"
-echo "Here is DIR: ${PVE_SOURCE}"
