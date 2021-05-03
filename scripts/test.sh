@@ -16,3 +16,4 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PVE_SOURCE="$DIR/../../common/pve/source"
 echo "Here is DIR: ${DIR}"
 echo "Here is PVE_SOURCE: ${PVE_SOURCE}"
+echo "Here is TEMP_DIR: ${TEMP_DIR}"
