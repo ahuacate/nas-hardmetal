@@ -10,15 +10,7 @@
 
 #---- Source -----------------------------------------------------------------------
 
-# Set Temp Folder
-if [ -z "${TEMP_DIR+x}" ]; then
-  TEMP_DIR=$(mktemp -d)
-  cd $TEMP_DIR >/dev/null
-else
-  if [ $(pwd -P) != $TEMP_DIR ]; then
-    cd $TEMP_DIR >/dev/null
-  fi
-fi
+source <(curl -s https://raw.githubusercontent.com/ahuacate/common/master/pve/source/pvesource_bash_defaults.sh)
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PVE_SOURCE="$DIR/../../common/pve/source"
