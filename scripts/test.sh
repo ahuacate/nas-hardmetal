@@ -9,8 +9,6 @@
 #bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/pve-medialab/master/scripts/pve_medialab_ct_kodi-rsync_serveraddclient.sh)"
 
 #---- Source -----------------------------------------------------------------------
-
-script="`readlink -f "${BASH_SOURCE[0]}"`"
-dir="`dirname "$script"`"
-
-echo ${dir}
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
+PVE_SOURCE="$DIR/../../common/pve/source"
+echo ${DIR}
