@@ -14,6 +14,6 @@ source <(curl -s https://raw.githubusercontent.com/ahuacate/common/master/pve/so
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PVE_SOURCE="$DIR/../../common/pve/source"
-echo "Here is DIR: ${DIR}"
-echo "Here is PVE_SOURCE: ${PVE_SOURCE}"
-echo "Here is TEMP_DIR: ${TEMP_DIR}"
+info "Here is DIR: ${YELLOW}${DIR}${NC}"
+info "Here is PVE_SOURCE: ${PVE_SOURCE}"
+info "Here is TEMP_DIR: ${TEMP_DIR}"
