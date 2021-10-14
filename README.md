@@ -1,14 +1,12 @@
-<h2> OEM NAS + Linux Filer Server Setup</h2>
+<h2> OEM NAS Brands - Linux based NAS Servers</h2>
 
-This guide is for setting up a OEM NAS or a Linux based File Server as network storage (NAS) for our PVE hosts and PVE CT applications. If you are using our PVE NAS solution, where storage is on a PVE host machine, then this guide is not relevant to you.
+This guide is for setting up any OEM Linux based NAS ( Synology, Qnap or whatever Linux flavour etc ) to support our PVE host nodes, PVE CT/VM applications and all our installation Easy Scripts.
 
-If you require a NAS solution try our [PVE NAS](https://github.com/ahuacate/pve-zfs-nas) which has a Easy Script for building a fully functional and pre-configured NAS hosted by Proxmox. 
+This is not for Users who have installed our PVE based NAS solution. Or if you require a NAS server try our [PVE NAS](https://github.com/ahuacate/pve-nas) which is fully turnkey and operational ready. 
 
-A OEM NAS is a manufactured NAS appliance by Synology, QNap, FreeNAS, OMV or whatever flavour of NAS you have. Many are Linux based. Our guides include Linux commands to assist you. 
+> For owners of third party NAS servers its important you strictly follow this guide. Our PVE CT and VMs all have specific UIDs and GUIDs, Linux file permissions including ACLs and NAS needs.
 
-> It's important you follow this guide because all our PVE CT applications, whether it be Sonarr or Home Assistant applications, require NAS storage based on UIDs and GUIDs and Linux file permissions including ACLs.
-
-A section of this guide is dedicated to Synology DiskStations. With the Synology DiskStation OS you CANNOT assign UIDs and GUIDs using the WebGui. I have written a guide how to use CLI to modify and set the UIDs and GUIDs. If you use a Synology DiskStation NAS with our PVE hosts builds then your MUST follow our guide.
+A section of this guide is dedicated to Synology DiskStations. This is because Synology DiskStation web management interface is restricted and does not permit assignment of UIDs and GUIDs. So I have written a section about how to modify and set Synology DiskStations UIDs and GUIDs ( must be done ), ACLs using SSH CLI.
 
 Network Prerequisites are:
 - [x] Layer 2/3 Network Switches
@@ -24,10 +22,10 @@ NAS Prerequisites are:
 - [x] NAS DNS server is `XXX.XXX.XXX.5` ( *default is 192.168.1.5* )
 
 Synology DiskStation Prerequisites are:
-- [x] x86 CPU Intel CPU (only required if running VMs)
+- [ ] x86 CPU Intel CPU (only required if running VMs)
 - [x] Volume is formatted to BTRFS (not ext4, which doesn't support Synology Virtual Machines)
 
->  **Note: A prerequisite to running any VMs on a Synology DiskStation NAS is your volumes must use the BTRFS file system - without BTRFS you CANNOT install VM's. In my experience the best way forward is based upon backing up your data to a external disk (USB) or another internal volume (be careful and know what you are doing), deleting and recreating /volume1 via DSM and restoring your backup data. I recommend using Synology Hyper Backup for backing up your data and settings.**
+>  **Note: A prerequisite to running any VMs on a Synology DiskStation NAS is your volumes must use the BTRFS file system - without BTRFS you CANNOT install VM's. In my experience the best way forward is based upon backing up your existing data to a external disk (USB) or another internal volume (be careful and know what you are doing), deleting and recreating /volume1 via DSM and restoring your backup data. I recommend using Synology Hyper Backup for backing up your data and settings.**
 >  **Its a lengthy topic and the procedures can be found by searching on the internet. The following tutorials assumes your Volume 1 is in the BTRFS file system format.**
 
 <h4>Easy Script</h4>
@@ -144,79 +142,35 @@ bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/nas-oem-setup/
 
 # 1. Introduction
 
-All our PVE CT applications require backend storage pools. A backend storage pools is a NFS or CIFS mount point to your NAS appliance folder shares (nas-01). Backend storage pools are ONLY setup on your primary PVE node (pve-01).
+All our PVE CT & VM applications require backend storage pools. A backend storage pools is a NFS or CIFS mount point to your NAS appliance folder shares (nas-01). Backend storage pools are only setup on your primary PVE node ( pve-01 ).
 
 This is a shared storage pool system because all backend storage pools get automatically mounted and distributed to all PVE cluster nodes. Because all PVE nodes share the same storage configuration the backend storage mount points are available on all PVE nodes. Every backend storage pool can be physically different, either a NFS or CIFS mount, or a combination of both NFS and CIFS, and are individually labelled accessing different content.
 
 Once your PVE backend storage is setup a PVE CT application local disk storage is actually disk storage space on your network NAS appliance.
 
 There are basically four task levels in setting up your NAS.
-1. Install NFS and CIFS/SMB on your NAS
-2. Create our default set of Users and Groups each with our UIDs and GUIDs
-2. Create our default set of shared folders
-3. Set folder permissions
+1. Install NFS and CIFS/SMB on your NAS.
+2. Create our default set of Users and Groups each with our UIDs and GUIDs.
+2. Create our default set of shared folders.
+3. Set folder permissions including ACLs.
 
 
-# 2. Preparing a OEM NAS or Linux Server
-This is a basic guide and assumes the installer has some Linux skills. There are lots of online guides about how to configure a OEM NAS and Linux networking.
-
-If you have a Ubuntu Filer Server then best use our Easy Script.
+# 2. Prerequisites
+Its assumed the installer has some Linux skills. There are lots of online guides about how to configure OEM NAS brands and Linux networking.
 
 Most OEM NAS have a Web Management interface for all configuration tasks.
 
-## 2.1. NFS Prerequisites
+## 2.1. NFS Support
 Your NAS NFS server must support NFSv3/v4.
 
-## 2.2. CIFS/SMB Prerequisites
-Your NAS CIFS/SMB server must support SMB3 protocol (PVE default). SMB1 is NOT supported.
+## 2.2. SMB/CIFS Support
+Your NAS SMB/CIFS server must support SMB3 protocol (PVE default). SMB1 is NOT supported.
 
-## 2.3. ACL Prerequisites
-Access control list (ACL) provides an additional, more flexible permission mechanism for your PVE storage pools. It is designed to assist with UNIX file permissions. ACL allows you to give permissions for any user or group to any disc resource. Best install ACL.
+## 2.3. ACL Support
+Access control list (ACL) provides an additional, more flexible permission mechanism for your PVE storage pools. It is designed to assist with UNIX file permissions. ACL allows you to give permissions for any user or group to any disc resource. Best install and enable ACL.
 
-## 2.4. PVE Folder Structure
-You need to create a set of PVE folders in a storage volume on your NAS. You should choose the volume with the most Gb of storage space. On a NAS this is usually a Raid volume consisting of more than disk. It depends on your NAS.
-
-The new folders are your PVE hosts NFS and CIFS mount points for creating your PVE host backend storage (pve-01).
-
-We refer to this storage volume as your NAS "base folder".
-
-> For example, on a Synology the default volume is `/volume1`. So on a Synology we would create our "base folder" here: `/volume1`.
-
-Your NAS may already have some of the folder structure. Then create the sub-directory where applicable.
-
-Create the following folders on your NAS.
-```
-Your NAS (nas-01)
-│
-└──  base volume/
-    ├── audio
-    │    └── audiobooks
-    ├── backup
-    ├── books
-    ├── cloudstorage
-    ├── docker
-    ├── downloads
-    ├── git
-    ├── homes
-    ├── music 
-    ├── openvpn
-    ├── photo
-    ├── proxmox
-    ├── public
-    ├── sshkey
-    └── video
-          ├── cctv
-          ├── documentary
-          ├── homevideo
-          ├── movies
-          ├── musicvideo
-          ├── pron
-          ├── tv
-          └── transcode
-```
-
-## 2.5. Create our PVE Users and Groups
-Create the following exactly as shown. All our PVE CT applications require a specific set of UID and GUID to work properly. So make sure your UIDs and GUIDs exactly match our guide.
+# 3. Create PVE Users and Groups
+All our PVE CT applications require a specific set of UID and GUID to work properly. So make sure your UIDs and GUIDs exactly match our guide.
 
 | Defaults                | Description             | Notes                                                                                                                |
 |-------------------------|-------------------------|----------------------------------------------------------------------------------------------------------------------|
@@ -230,24 +184,17 @@ Create the following exactly as shown. All our PVE CT applications require a spe
 |                         | home - UID 1606         | Member of group homelab. Supplementary member of group medialab                                                      |
 |                         | private - UID 1607      | Member of group private lab. Supplementary member of group medialab, homelab                                         |
 
-### 2.5.1. PVE Linux Groups
-The critical part is the GUID of each Linux Group. They are high in number value only because of the peculiar Synology DiskStation OS UID and GUID numbering convention (low GUIDs cannot be created on a Synology). Our GUID should work with any other Linux OEM NAS or Linux File Server.
 
-#### 2.5.1.1. Create PVE Groups
-Create the following Linux Groups.
+## 3.1. Create PVE Groups
+Create the following Groups.
 
 | Group Name | GUID  |
 |------------|-------|
 | medialab   | 65605 |
 | homelab    | 65606 |
 | privatelab | 65607 |
-| chrootjail | 65608 |
 
-
-### 2.5.2. PVE Linux Users
-Again the critical part is the UID for each Linux User. It must be set as shown.
-
-#### 2.5.2.1. Change the NAS Home folder permissions (optional)
+## 3.2. Change the NAS Home folder permissions (optional)
 Proceed with caution. If you are NOT sure skip this step. This is for Linux File Servers not OEM NAS boxes.
 
 Linux `/etc/adduser.conf` has a `DIR_MODE` setting which sets a Users HOME directory when its first created. The default mode likely 0755.
@@ -263,8 +210,8 @@ sed -i "s/DIR_MODE=.*/DIR_MODE=0750/g" /etc/adduser.conf
 
 Running the above command will change only all new Users HOME folder permissions to `0750` globally on your NAS.
 
-#### 2.5.2.2. Modify PVE Users Home Folder
-Set `/base_folder/homes` permissions.
+## 3.3. Modify PVE Users Home Folder
+Set `/base_folder/homes` permissions for Users media. home and private.
 
 | Owner | Permissions |
 |-------|-------------|
@@ -276,12 +223,12 @@ Here is the Linux CLI for the task:
 # Set VAR
 BASE_FOLDER="insert full path (i.e /dir1/dir2/homes)"
 
-sudo mkdir -p $BASE_FOLDER/homes
-sudo chgrp -R root $BASE_FOLDER/homes
-sudo chmod -R 0750 $BASE_FOLDER/homes
+sudo mkdir -p ${BASE_FOLDER}/homes
+sudo chgrp -R root ${BASE_FOLDER}/homes
+sudo chmod -R 0750 ${BASE_FOLDER}/homes
 ```
 
-#### 2.5.2.3. Create PVE Users
+## 3.4. Create PVE Users
 Create our list of PVE users. These are required by various PVE CT applications. Without them nothing will work.
 
 | Username  | UID | Home Folder | Group Member
@@ -296,65 +243,78 @@ Here is the Linux CLI for the task:
 BASE_FOLDER="insert full path (i.e /dir1/dir2)"
 
 # Create User media
-useradd -m -d $BASE_FOLDER/homes/media -u 1605 -g medialab -s /bin/bash media
+useradd -m -d ${BASE_FOLDER}/homes/media -u 1605 -g medialab -s /bin/bash media
 # Create User home
-useradd -m -d $BASE_FOLDER/homes/home -u 1606 -g homelab -G medialab -s /bin/bash home
+useradd -m -d ${BASE_FOLDER}/homes/home -u 1606 -g homelab -G medialab -s /bin/bash home
 # Create User private
-useradd -m -d $BASE_FOLDER/homes/private -u 1607 -g privatelab -G medialab,homelab -s /bin/bash private
+useradd -m -d ${BASE_FOLDER}/homes/private -u 1607 -g privatelab -G medialab,homelab -s /bin/bash private
+```
+# 4. NAS Folder Shares
+You need to create a set of folder shares in a 'storage volume' on your NAS. The new folder shares are mounted by your PVE hosts as NFS or SMB/CIFS mount points for creating your PVE host backend storage ( pve-01 ).
+
+We refer to the NAS 'storage volume' as your NAS "base folder".
+
+> For example, on a Synology the default volume is `/volume1`. So on a Synology our "base folder" would be: `/volume1`.
+
+Your NAS may already have some of the required folder structure. If so, then create the sub-directory where applicable.
+
+Create the following folders on your NAS.
+```
+# 65605=medialab
+# 65606=homelab
+# 65607=privatelab
+# 65608=chrootjail
+# FOLDERNAME GROUP PERMISSIONS ACL
+
+Your NAS (nas-01)
+│
+└──  base volume/
+    ├── audio - root 0750 65605:rwx 65607:rwx 65608:rx
+    ├── backup - root 1750 65605:rwx 65606:rwx 65607:rwx
+    ├── books - root 0755 65605:rwx 65607:rwx 65608:rx
+    ├── cloudstorage - root 1750 65606:rwx 65607:rwx
+    ├── docker - root 0750 65605:rwx 65606:rwx 65607:rwx
+    ├── downloads - root 0755 65605:rwx 65607:rwx
+    ├── git - root 0750 65607:rwx
+    ├── homes - root 0777
+    ├── music - root 0755 65605:rwx 65607:rwx 65608:rx
+    ├── openvpn - root 0750 65607:rwx
+    ├── photo - root 0750 65605:rwx 65607:rwx 65608:rx
+    ├── proxmox - root 0750 65607:rwx 65606:rwx
+    ├── public - root 1777 65605:rwx 65606:rwx 65607:rwx 65608:rwx
+    ├── sshkey - root 1750 65607:rwx
+    └── video - root 0750 65605:rwx 65607:rwx 65608:rx
 ```
 
-### 2.5.3. Set PVE Folder Permissions
+## 4.0.1. Folder Permissions
 
-Set your new PVE folder permissions as shown.
+Create sub-folders with permissions as shown [here.](https://raw.githubusercontent.com/ahuacate/pve-nas/master/scripts/source/pve_nas_basefolderlist)
 
-| Folder            | Owner    | Permissions | ACL                                                            |
-|-------------------|----------|-------------|----------------------------------------------------------------|
-| audio             | root     | 750         | g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx                |
-| audio/audiobooks  | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:rx  |
-| backup            | root     | 1750        | g:medialab:rwx,g:homelab:rwx,g:privatelab:rwx                  |
-| books             | root     | 755         | g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx                |
-| cloudstorage      | root     | 1750        | g:homelab:rwx,g:privatelab:rwx                                 |
-| docker            | root     | 750         | g:medialab:rwx,g:homelab:rwx,g:privatelab:rwx                  |
-| downloads         | root     | 755         | g:medialab:rwx,g:privatelab:rwx                                |
-| git               | root     | 750         | g:privatelab:rwx                                               |
-| homes             | root     | 755         |                                                                |
-| music             | root     | 755         | g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx                |
-| openvpn           | root     | 750         | g:privatelab:rwx                                               |
-| photo             | root     | 750         | g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rwx               |
-| proxmox           | root     | 750         | g:privatelab:rwx,g:homelab:rwx                                 |
-| public            | root     | 1777        | g:medialab:rwx,g:homelab:rwx,g:privatelab:rwx,g:chrootjail:rwx |
-| sshkey            | root     | 1750        | g:privatelab:rwx                                               |
-| video             | root     | 750         | g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx                |
-| video/cctv        | medialab | 750         | g:medialab:rx,g:privatelab:rwx,g:homelab:rwx,g:chrootjail:000  |
-| video/documentary | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:rx  |
-| video/homevideo   | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:rwx |
-| video/movies      | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:rx  |
-| video/musicvideo  | medialab | 750         | g:medialab:rwx,g:homelab:000,g:privatelab:rwx,g:chrootjail:rwx |
-| video/pron        | medialab | 750         | g:medialab:rwx,g:homelab:000,g:privatelab:rwx,g:chrootjail:rwx |
-| video/tv          | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:rx  |
-| video/transcode   | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:000 |
-
-
-
-Here is the Linux CLI example for the task audio:
+A CLI example for the task audio:
 ```
 # Set VAR
 BASE_FOLDER="insert full path (i.e /dir1/dir2)"
 
-sudo chgrp -R root $BASE_FOLDER/audio
-sudo chmod -R 750 $BASE_FOLDER/audio
-sudo setfacl -Rm g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx  $BASE_FOLDER/audio
+sudo chgrp -R root ${BASE_FOLDER}/audio
+sudo chmod -R 750 ${BASE_FOLDER}/audio
+sudo setfacl -Rm g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx  ${BASE_FOLDER}/audio
 ```
 
-## 2.6. Create PVE SMB (SAMBA) Shares
-Your `/etc/samba/smb.conf` file should include the following PVE shares. 
+## Sub Folder Permissions
+
+Create sub-folders with permissions as shown [here.](https://raw.githubusercontent.com/ahuacate/pve-nas/master/scripts/source/pve_nas_basefoldersubfolderlist)
+
+## 4.1. Create PVE SMB (SAMBA) Shares
+Your `/etc/samba/smb.conf` file should include the following PVE shares. This is a example from a Ubuntu NAS.
 
 Remember to replace `BASE_FOLDER` with your full path (i.e /dir1/dir2). Also you must restart your NFS service to invoke the changes.
+
+The sample file is from a Ubuntu 21.04 server.
 
 ```
 [global]
 workgroup = WORKGROUP
-server string = nas-01
+server string = nas-04
 server role = standalone server
 disable netbios = yes
 dns proxy = no
@@ -390,7 +350,7 @@ valid users = %S
 
 [public]
 comment = public anonymous access
-path = /BASE_FOLDER/public
+path = /srv/nas-04/public
 writable = yes
 browsable =yes
 public = yes
@@ -402,130 +362,142 @@ guest ok = yes
 hide dot files = yes
 
 [audio]
-comment = audio folder access
-path = /BASE_FOLDER/audio
-browsable =yes
-read only = no
-create mask = 0775
-directory mask = 0775
-valid users = %S, @root, @medialab, @privatelab
+  comment = audio folder access
+  path = /srv/nas-04/audio
+  browsable = yes
+  read only = no
+  create mask = 0775
+  directory mask = 0775
+  valid users = %S, @root, @65605, @65607
+
 
 [backup]
-comment = backup folder access
-path = /BASE_FOLDER/backup
-browsable =yes
-read only = no
-create mask = 0775
-directory mask = 0775
-valid users = %S, @root, @medialab, @homelab, @privatelab
+  comment = backup folder access
+  path = /srv/nas-04/backup
+  browsable = yes
+  read only = no
+  create mask = 0775
+  directory mask = 0775
+  valid users = %S, @root, @65605, @65606, @65607
+
 
 [books]
-comment = books folder access
-path = /BASE_FOLDER/books
-browsable =yes
-read only = no
-create mask = 0775
-directory mask = 0775
-valid users = %S, @root, @medialab, @privatelab
+  comment = books folder access
+  path = /srv/nas-04/books
+  browsable = yes
+  read only = no
+  create mask = 0775
+  directory mask = 0775
+  valid users = %S, @root, @65605, @65607
+
 
 [cloudstorage]
-comment = cloudstorage folder access
-path = /BASE_FOLDER/cloudstorage
-browsable =yes
-read only = no
-create mask = 0775
-directory mask = 0775
-valid users = %S, @root, @homelab, @privatelab
+  comment = cloudstorage folder access
+  path = /srv/nas-04/cloudstorage
+  browsable = yes
+  read only = no
+  create mask = 0775
+  directory mask = 0775
+  valid users = %S, @root, @65606, @65607
+
 
 [docker]
-comment = docker folder access
-path = /BASE_FOLDER/docker
-browsable =yes
-read only = no
-create mask = 0775
-directory mask = 0775
-valid users = %S, @root, @medialab, @homelab, @privatelab
+  comment = docker folder access
+  path = /srv/nas-04/docker
+  browsable = yes
+  read only = no
+  create mask = 0775
+  directory mask = 0775
+  valid users = %S, @root, @65605, @65606, @65607
+
 
 [downloads]
-comment = downloads folder access
-path = /BASE_FOLDER/downloads
-browsable =yes
-read only = no
-create mask = 0775
-directory mask = 0775
-valid users = %S, @root, @medialab, @privatelab
+  comment = downloads folder access
+  path = /srv/nas-04/downloads
+  browsable = yes
+  read only = no
+  create mask = 0775
+  directory mask = 0775
+  valid users = %S, @root, @65605, @65607
+
 
 [git]
-comment = git folder access
-path = /BASE_FOLDER/git
-browsable =yes
-read only = no
-create mask = 0775
-directory mask = 0775
-valid users = %S, @root, @privatelab
+  comment = git folder access
+  path = /srv/nas-04/git
+  browsable = yes
+  read only = no
+  create mask = 0775
+  directory mask = 0775
+  valid users = %S, @root, @65607
+
 
 [music]
-comment = music folder access
-path = /BASE_FOLDER/music
-browsable =yes
-read only = no
-create mask = 0775
-directory mask = 0775
-valid users = %S, @root, @medialab, @privatelab
+  comment = music folder access
+  path = /srv/nas-04/music
+  browsable = yes
+  read only = no
+  create mask = 0775
+  directory mask = 0775
+  valid users = %S, @root, @65605, @65607
+
 
 [openvpn]
-comment = openvpn folder access
-path = /BASE_FOLDER/openvpn
-browsable =yes
-read only = no
-create mask = 0775
-directory mask = 0775
-valid users = %S, @root, @privatelab
+  comment = openvpn folder access
+  path = /srv/nas-04/openvpn
+  browsable = yes
+  read only = no
+  create mask = 0775
+  directory mask = 0775
+  valid users = %S, @root, @65607
+
 
 [photo]
-comment = photo folder access
-path = /BASE_FOLDER/photo
-browsable =yes
-read only = no
-create mask = 0775
-directory mask = 0775
-valid users = %S, @root, @medialab, @privatelab
+  comment = photo folder access
+  path = /srv/nas-04/photo
+  browsable = yes
+  read only = no
+  create mask = 0775
+  directory mask = 0775
+  valid users = %S, @root, @65605, @65607
+
 
 [proxmox]
-comment = proxmox folder access
-path = /BASE_FOLDER/proxmox
-browsable =yes
-read only = no
-create mask = 0775
-directory mask = 0775
-valid users = %S, @root, @privatelab, @homelab
+  comment = proxmox folder access
+  path = /srv/nas-04/proxmox
+  browsable = yes
+  read only = no
+  create mask = 0775
+  directory mask = 0775
+  valid users = %S, @root, @65607, @65606
+
 
 [sshkey]
-comment = sshkey folder access
-path = /BASE_FOLDER/sshkey
-browsable =yes
-read only = no
-create mask = 0775
-directory mask = 0775
-valid users = %S, @root, @privatelab
+  comment = sshkey folder access
+  path = /srv/nas-04/sshkey
+  browsable = yes
+  read only = no
+  create mask = 0775
+  directory mask = 0775
+  valid users = %S, @root, @65607
+
 
 [video]
-comment = video folder access
-path = /BASE_FOLDER/video
-browsable =yes
-read only = no
-create mask = 0775
-directory mask = 0775
-valid users = %S, @root, @medialab, @privatelab
+  comment = video folder access
+  path = /srv/nas-04/video
+  browsable = yes
+  read only = no
+  create mask = 0775
+  directory mask = 0775
+  valid users = %S, @root, @65605, @65607
 
 ```
 
-## 2.7. Create PVE SMB (SAMBA) Shares
+## 4.2. Create PVE NFS Shares
 Modify your NFS exports file `/etc/exports` to include the following.
 
 Remember to replace `BASE_FOLDER` with your full path (i.e /dir1/dir2). Also note each NFS export defines a PVE host IPv4 addresses for primary and secondary (cluster nodes) machines. Modify if your PVE host are different.
 
-The sample file is from a Ubuntu 20.10 server.
+The sample file is from a Ubuntu 21.04 server.
 
 ```
 # /etc/exports: the access control list for filesystems which may be exported
@@ -540,46 +512,46 @@ The sample file is from a Ubuntu 20.10 server.
 #
 
 # backup export
-/BASE_FOLDER/backup 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
+/srv/nas-04/backup 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
 
 # cloudstorage export
-/BASE_FOLDER/cloudstorage 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
+/srv/nas-04/cloudstorage 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
 
 # docker export
-/BASE_FOLDER/docker 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
+/srv/nas-04/docker 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
 
 # downloads export
-/BASE_FOLDER/downloads 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
+/srv/nas-04/downloads 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
 
 # proxmox export
-/BASE_FOLDER/proxmox 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
+/srv/nas-04/proxmox 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
 
 # public export
-/BASE_FOLDER/public 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
+/srv/nas-04/public 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
 
 # audio export
-/BASE_FOLDER/audio 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.50.0/24(rw,async,no_wdelay,crossmnt,insecure,all_squash,insecure_locks,sec=sys,anonuid=1024,anongid=100)
+/srv/nas-04/audio 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.50.0/24(rw,async,no_wdelay,crossmnt,insecure,all_squash,insecure_locks,sec=sys,anonuid=1024,anongid=100)
 
 # books export
-/BASE_FOLDER/books 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.50.0/24(rw,async,no_wdelay,crossmnt,insecure,all_squash,insecure_locks,sec=sys,anonuid=1024,anongid=100)
+/srv/nas-04/books 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.50.0/24(rw,async,no_wdelay,crossmnt,insecure,all_squash,insecure_locks,sec=sys,anonuid=1024,anongid=100)
 
 # music export
-/BASE_FOLDER/music 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.50.0/24(rw,async,no_wdelay,crossmnt,insecure,all_squash,insecure_locks,sec=sys,anonuid=1024,anongid=100)
+/srv/nas-04/music 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.50.0/24(rw,async,no_wdelay,crossmnt,insecure,all_squash,insecure_locks,sec=sys,anonuid=1024,anongid=100)
 
 # photo export
-/BASE_FOLDER/photo 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.50.0/24(rw,async,no_wdelay,crossmnt,insecure,all_squash,insecure_locks,sec=sys,anonuid=1024,anongid=100)
+/srv/nas-04/photo 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.50.0/24(rw,async,no_wdelay,crossmnt,insecure,all_squash,insecure_locks,sec=sys,anonuid=1024,anongid=100)
 
 # video export
-/BASE_FOLDER/video 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.50.0/24(rw,async,no_wdelay,crossmnt,insecure,all_squash,insecure_locks,sec=sys,anonuid=1024,anongid=100)
+/srv/nas-04/video 192.168.1.101(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.102(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.103(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.1.104(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100) 192.168.50.0/24(rw,async,no_wdelay,crossmnt,insecure,all_squash,insecure_locks,sec=sys,anonuid=1024,anongid=100)
 ```
 
 
-# 3. Preparing a Synology NAS
+# 5. Preparing a Synology NAS
 
-## 3.1. Enable Synology Services
+## 5.1. Enable Synology Services
 You need to enable two network services on your Synology DiskStation.
 
-### 3.1.1. SMB Service
+### 5.1.1. SMB Service
 Open `Control Panel` > `File Services` > `SMB/AFP/NFS` and enable the following Services.
 
 * Enable SMB service ☑
@@ -595,7 +567,7 @@ Open `Control Panel` > `File Services` > `SMB/AFP/NFS` and enable the following 
     * Enable SMB2 lease ☐
   * (the rest leave off ☐)
 
-### 3.1.2. NFS Service
+### 5.1.2. NFS Service
 * Enable NFS ☑
   * Enable NFSv4.1 support ☑
     NFSv4 domain: `localdomain.com`
@@ -603,11 +575,11 @@ Open `Control Panel` > `File Services` > `SMB/AFP/NFS` and enable the following 
 * Apply default Unix permissions ☑
 * (the rest leave off ☐)
 
-## 3.2. Create the required Synology Shared Folders
+## 5.2. Create the required Synology Shared Folders
 The following are the minimum set of folder shares required for my configuration and needed for this build and for the scripts to work.
 
-### 3.2.1. Create Shared Folders
-We need the following shared folder tree, in addition to your standard default tree, on the Synology NAS:
+### 5.2.1. Create Shared Folders
+We need the following shared folder tree, in addition to your standard default tree, on the Synology NAS ( Note: Use the maintained list [here](https://raw.githubusercontent.com/ahuacate/pve-nas/master/scripts/source/pve_nas_basefolderlist) and [here](https://raw.githubusercontent.com/ahuacate/pve-nas/master/scripts/source/pve_nas_basefoldersubfolderlist) ):
 ```
 Synology NAS/
 │
@@ -634,12 +606,12 @@ Synology NAS/
           ├── movies
           ├── musicvideo
           ├── pron
-          ├── tv
+          ├── series
           └── transcode
 ```
 To create shared folders log in to the Synology Desktop. Open `Control Panel` > `Shared Folder` > `Create` and Shared Folder Creation Wizard will open.
 
-#### 3.2.1.1. Set up basic information:
+#### 5.2.1.1. Set up basic information:
 * Name: "i.e audio"
 * Description: "leave blank if you want"
 * Location: Volume 1 (or whatever volume you want to use)
@@ -667,39 +639,35 @@ To create shared folders log in to the Synology Desktop. Open `Control Panel` > 
      * video/homevideo ☑
      * video/movies ☐
      * video/pron ☐
-     * video/tv ☐
+     * video/series ☐
      * video/transcode ☐
 
-#### 3.2.1.2. Set up Encryption
+#### 5.2.1.2. Set up Encryption
 * Encrypt this shared folder ☐
-#### 3.2.1.3. Configure advanced settings
+#### 5.2.1.3. Configure advanced settings
 * Enable data checksum ☐ (enable if using BTRFS)
 * Enable file compression  ☐ 
 * Enable shared folder quota  ☐
 
-## 3.3. Create Synology User Groups
+## 5.3. Create Synology User Groups
 Create the following User groups.
 
 *  **medialab** - For media Apps (Sonarr, Radar, Jellyfin etc)
 *  **homelab** -  For everything to do with your Smart Home (CCTV, Home Assistant)
-<<<<<<< HEAD
-*  **privatelab** - Power, trusted, admin Users
-=======
 *  **privatelab** - Power, trusted, admin users
->>>>>>> 82374a1da423daaa1a6f49b9ab609ae5a4a0f2f5
 *  **chrootjail** - Chrootjail restricted users
 
 
-### 3.3.1. Create "medialab" User Group
+### 5.3.1. Create "medialab" User Group
 This user group is for home media content and applications only.
 
 Open `Control Panel` > `Group` > `Create` and Group Creation Wizard will open.
 
-#### 3.3.1.1. Group information
+#### 5.3.1.1. Group information
 * Name: `medialab`
 * Description: `Medialab group`
 
-#### 3.3.1.2. Assign shared folders permissions
+#### 5.3.1.2. Assign shared folders permissions
 
 | Name | No access | Read/Write | Read Only | Custom
 | :---  | :---: | :---: | :---: |:---: |
@@ -720,22 +688,22 @@ Open `Control Panel` > `Group` > `Create` and Group Creation Wizard will open.
 | ssh_key |  |  |  
 | video |  | ☑ |  
 
-#### 3.3.1.3. User quota setting
+#### 5.3.1.3. User quota setting
 Up to the you.
 
-#### 3.3.1.4. Assign application permissions
+#### 5.3.1.4. Assign application permissions
 None.
     
-### 3.3.2. Create "homelab" User Group
+### 5.3.2. Create "homelab" User Group
 This user group is for smart home applications and general non-critical private user data.
 
 Open `Control Panel` > `Group` > `Create` and Group Creation Wizard will open.
 
-#### 3.3.2.1. Group information
+#### 5.3.2.1. Group information
 * Name: `homelab`
 * Description: `Homelab group`
 
-#### 3.3.2.2. Assign shared folders permissions
+#### 5.3.2.2. Assign shared folders permissions
 
 | Name | No access | Read/Write | Read Only | Custom
 | :---  | :---: | :---: | :---: |:---: |
@@ -756,19 +724,19 @@ Open `Control Panel` > `Group` > `Create` and Group Creation Wizard will open.
 | ssh_key |  |  |  
 | video |  |  |  
 
-#### 3.3.2.3. User quota setting
+#### 5.3.2.3. User quota setting
 Up to the you.
 
 
-### 3.3.3. Create "privatelab" User Group
+### 5.3.3. Create "privatelab" User Group
 This user group is for your private, personal and strictly confidential data.
 Open `Control Panel` > `Group` > `Create` and Group Creation Wizard will open.
 
-#### 3.3.3.1. Group information
+#### 5.3.3.1. Group information
 * Name: `privatelab`
 * Description: `Private group`
 
-#### 3.3.3.2. Assign shared folders permissions
+#### 5.3.3.2. Assign shared folders permissions
 
 | Name | No access | Read/Write | Read Only | Custom
 | :---  | :---: | :---: | :---: |:---: |
@@ -789,20 +757,20 @@ Open `Control Panel` > `Group` > `Create` and Group Creation Wizard will open.
 | ssh_key |  | ☑ |  
 | video |  | ☑ |  
 
-#### 3.3.3.3. User quota setting
+#### 5.3.3.3. User quota setting
 Up to the you.
 
 
-### 3.3.4. Create "chrootjail" User Group
+### 5.3.4. Create "chrootjail" User Group
 This user group is for chrootjail users. Users are restricted or jailed within their own home folder. But they they have read only access to medialab folders.
 
 Open `Control Panel` > `Group` > `Create` and Group Creation Wizard will open.
 
-#### 3.3.4.1. Group information
+#### 5.3.4.1. Group information
 * Name: `chrootjail`
 * Description: `Chrootjail group`
 
-#### 3.3.4.2. Assign shared folders permissions
+#### 5.3.4.2. Assign shared folders permissions
 
 | Name | No access | Read/Write | Read Only | Custom
 | :---  | :---: | :---: | :---: |:---: |
@@ -823,19 +791,19 @@ Open `Control Panel` > `Group` > `Create` and Group Creation Wizard will open.
 | ssh_key |  |  |  |  
 | video |  |  | ☑ |  
 
-#### 3.3.4.3. User quota setting
+#### 5.3.4.3. User quota setting
 Up to the you.
 
-## 3.4. Create new Synology Users
+## 5.4. Create new Synology Users
 Here we create the following new Synology users:
 *  **media** - username `media` is the user for PVE CT's and VM's used to run media applications (i.e jellyfin, sonarr, radarr, lidarr etc);
 *  **home** - username `home` is the user for PVE CT's and VM's used to run homelab applications (i.e syncthing, unifi, nextcloud, home assistant/smart home etc);
 *  **private** - username `private` is the user for PVE CT's and VM's used to run privatelab applications (i.e mailserver, messaging etc);
 
-### 3.4.1. Create user "media"
+### 5.4.1. Create user "media"
 Open `Control Panel` > `Userp` > `Create` and User Creation Wizard will open.
 
-#### 3.4.1.1. User information
+#### 5.4.1.1. User information
 * Name: `media`
 * Description: `Medialab user`
 * Email: `Leave blank` (or insert your admin email)
@@ -846,28 +814,28 @@ Open `Control Panel` > `Userp` > `Create` and User Creation Wizard will open.
 * Disallow the user to change account password ☑
 * Password is allways valid ☑
 
-#### 3.4.1.2. Join groups
+#### 5.4.1.2. Join groups
 * medialab ☑
 * homelab 
 * privatelab
 * users ☑
 
-#### 3.4.1.3. Assign shared folders permissions
+#### 5.4.1.3. Assign shared folders permissions
 Leave as default because all permissions are automatically obtained from the medialab user 'group' permissions.
 
-#### 3.4.1.4. User quota setting
+#### 5.4.1.4. User quota setting
 Leave as default.
 
-#### 3.4.1.5. Assign application permissions
+#### 5.4.1.5. Assign application permissions
 Leave as default.
 
-#### 3.4.1.6. User Speed Limit Setting
+#### 5.4.1.6. User Speed Limit Setting
 Leave as default.
 
-### 3.4.2. Create user "home"
+### 5.4.2. Create user "home"
 Open `Control Panel` > `Userp` > `Create` and User Creation Wizard will open.
 
-#### 3.4.2.1. User information
+#### 5.4.2.1. User information
 * Name: `home`
 * Description: `Homelab user`
 * Email: `Leave blank` (or insert your admin email)
@@ -878,28 +846,28 @@ Open `Control Panel` > `Userp` > `Create` and User Creation Wizard will open.
 * Disallow the user to change account password ☑
 * Password is allways valid ☑
 
-#### 3.4.2.2. Join groups
+#### 5.4.2.2. Join groups
 * medialab ☑
 * homelab ☑
 * privatelab
 * users ☑
 
-#### 3.4.2.3. Assign shared folders permissions
+#### 5.4.2.3. Assign shared folders permissions
 Leave as default because all permissions are automatically obtained from the medialab user 'group' permissions.
 
-#### 3.4.2.4. User quota setting
+#### 5.4.2.4. User quota setting
 Leave as default.
 
-#### 3.4.2.5. Assign application permissions
+#### 5.4.2.5. Assign application permissions
 Leave as default.
 
-#### 3.4.2.6. User Speed Limit Setting
+#### 5.4.2.6. User Speed Limit Setting
 Leave as default.
 
-### 3.4.3. Create user "private"
+### 5.4.3. Create user "private"
 Open `Control Panel` > `User` > `Create` and User Creation Wizard will open.
 
-#### 3.4.3.1. User information
+#### 5.4.3.1. User information
 * Name: `private`
 * Description: `Private user`
 * Email: `Leave blank` (or insert your admin email)
@@ -910,26 +878,26 @@ Open `Control Panel` > `User` > `Create` and User Creation Wizard will open.
 * Disallow the user to change account password ☑
 * Password is always valid ☑
 
-#### 3.4.3.2. Join groups
+#### 5.4.3.2. Join groups
 * medialab ☑
 * homelab ☑
 * privatelab ☑
 * users ☑
 
-#### 3.4.3.3. Assign shared folders permissions
+#### 5.4.3.3. Assign shared folders permissions
 Leave as default because all permissions are automatically obtained from the medialab user 'group' permissions.
 
-#### 3.4.3.4. User quota setting
+#### 5.4.3.4. User quota setting
 Leave as default.
 
-#### 3.4.3.5. Assign application permissions
+#### 5.4.3.5. Assign application permissions
 Leave as default.
 
-#### 3.4.3.6. User Speed Limit Setting
+#### 5.4.3.6. User Speed Limit Setting
 Leave as default.
 
   
-## 3.5. Create NFS Permissions
+## 5.5. Create NFS Permissions
 Open `Control Panel` > `Shared Folder` > `Select a Folder` > `Edit` > `NFS Permissions` > `Create` and a Create NFS rule box will open.
 
 **Main Folders** - Set NFS rule options as follows for: audio, backup, books, cloudstorage, docker, downloads, git, homes, music, openvpn, photo, proxmox, public, sshkey, video
@@ -951,19 +919,19 @@ Open `Control Panel` > `Shared Folder` > `Select a Folder` > `Edit` > `NFS Permi
 * Allow connections from non-privileged ports ☑
 * Allow users to access mounted subfolders ☑
 
-## 3.6. Edit Synology NAS GUID and UID
+## 5.6. Edit Synology NAS GUID and UID
 Synology DSM WebGUI Control Panel interface does'nt allow assigning a GUID or UID number when creating any new Linux Groups and Users. Each new group is assigned a random UID upwards of 65536.
 
 We need to edit our newly created GUIDs and UIDs user GID's for Groups medialab, homelab and privatelab and the Users media, home and private.
 
-### 3.6.1. Prepare your Synology
+### 5.6.1. Prepare your Synology
 To edit Synology User GUIDs and UIDs you must SSH connect to your Synology (cannot be done via WebGUI).
 
 Prerequisites to complete these tasks are:
 *  You must have a nano editor installed on your Synology. To install a nano editor see instructions [here](#51-install-nano).
 *  Synology SSH is enabled: Open `Control Panel` > `Terminal & SNMP` > `Enable SSH service` state is on.
 
-### 3.6.2. Edit Synology NAS GUID (Groups)
+### 5.6.2. Edit Synology NAS GUID (Groups)
 We need to define each GUID to a known number.
 
 | Synology Group | Old GUID | | New GUID |
@@ -994,15 +962,11 @@ sed -i 's|homelab:x:*:.*|homelab:x:65606:home,private|g' /etc/group &&
 sed -i 's|privatelab:x:*:.*|privatelab:x:65607:private|g' /etc/group &&
 # Edit Chrootjail GID ID
 sed -i 's|chrootjail:x:*:.*|chrootjail:x:65608:|g' /etc/group &&
-<<<<<<< HEAD
-
-=======
->>>>>>> 82374a1da423daaa1a6f49b9ab609ae5a4a0f2f5
 # Rebuild the Users
 synouser --rebuild all
 ```
 
-### 3.6.3. Edit Synology NAS UID (Users)
+### 5.6.3. Edit Synology NAS UID (Users)
 Synology DSM WebGUI Control Panel interface does'nt allow assigning a UID number when creating any new User. Each new User is assigned a random UID upwards of 1027.
 
 We need to edit the user UID's for users media, home and private so they are known. This must be done after you have completed GUID modifications.
@@ -1048,11 +1012,11 @@ synouser --rebuild all
 Your Synology is now ready to be your PVE hosts shared storage.
 
 
-## 3.7 Set PVE Folder ACL Permissions
+## 5.7. Set PVE Folder ACL Permissions
 
 Synology DSM WebGUI Control Panel interface allows you to enable and set Folder ACL permissions. Each shared folder must have its ACL permissions set as shown in the table below.
 
-Set your new PVE folder ACL permissions as shown.
+Set your new PVE folder ACL permissions as shown ( Note: Use the maintained list [here](https://raw.githubusercontent.com/ahuacate/pve-nas/master/scripts/source/pve_nas_basefolderlist) and [here](https://raw.githubusercontent.com/ahuacate/pve-nas/master/scripts/source/pve_nas_basefoldersubfolderlist) ).
 
 | Folder            | Owner    | Permissions | ACL                                                            |
 |-------------------|----------|-------------|----------------------------------------------------------------|
@@ -1078,10 +1042,10 @@ Set your new PVE folder ACL permissions as shown.
 | video/movies      | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:rx  |
 | video/musicvideo  | medialab | 750         | g:medialab:rwx,g:homelab:000,g:privatelab:rwx,g:chrootjail:rwx |
 | video/pron        | medialab | 750         | g:medialab:rwx,g:homelab:000,g:privatelab:rwx,g:chrootjail:rwx |
-| video/tv          | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:rx  |
+| video/series      | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:rx  |
 | video/transcode   | medialab | 750         | g:medialab:rwx,g:privatelab:rwx,g:homelab:000,g:chrootjail:000 |
 
-### 3.7.1 Set Folder ACL using Synology DSM WebGUI
+### 5.7.1. Set Folder ACL using Synology DSM WebGUI
 To set your folder ACLs using Synology DSM WebGUI go to `Control Panel` > `Shared Folder` > `Select your folder to edit` > `Edit` > `Advanced Permissions` > and Enable advanced share permissions.
 
 Click on `Advanced Share Permissions` > `Local groups` and set each folder ACLs according to the above table.
@@ -1122,21 +1086,20 @@ Here is the Linux CLI example for the task audio:
 # Set VAR
 BASE_FOLDER="insert full path (i.e /dir1/dir2)"
 
-sudo chgrp -R root $BASE_FOLDER/audio
-sudo chmod -R 750 $BASE_FOLDER/audio
-sudo setfacl -Rm g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx  $BASE_FOLDER/audio
+sudo chgrp -R root ${BASE_FOLDER}/audio
+sudo chmod -R 750 ${BASE_FOLDER}/audio
+sudo setfacl -Rm g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx  ${BASE_FOLDER}/audio
 ```
 <hr>
 
-# 4. Synology Virtual Machine Manager
-If your Synology NAS model is capable you can install a PVE node on your Synology DiskStation using the native Synology Virtual Machine Manager application.
+# 6. Synology Virtual Machine Manager
+If your Synology NAS model is capable ( Intel x86 )you can install a PVE node on your Synology DiskStation using the native Synology Virtual Machine Manager application.
 
-I recommend your Synology Diskstation has a Intel CPU type of a Atom, Pentium, Celeron or Xeon of at least 2 Cores (really a Quad Core is recommended) and 16Gb of Ram (minimum 8Gb).
 
-## 4.1. Download the Proxmox installer ISO
+## 6.1. Download the Proxmox installer ISO
 Download the latest Proxmox ISO installer to your PC from  www.proxmox.com or [HERE](https://www.proxmox.com/en/downloads/category/iso-images-pve).
 
-## 4.2. Install Synology Virtual Machine Manager on your NAS
+## 6.2. Install Synology Virtual Machine Manager on your NAS
 A prerequisite to running any VMs on your Synology NAS is you require a BTRFS file system. If they are not then you CANNOT install VM's.
 
 In my experience the best way to create a BTRFS is to back up your data to a external disk (USB) or another internal volume (be careful and know what you are doing). Then delete and recreate `/volume1` via DSM and restore your backup data. I recommend using Synology Hyper Backup to backup your data and settings.
@@ -1145,13 +1108,13 @@ Its a lengthy topic and the procedures can be found by seaching on the internet.
 
 To install Synology Virtual Machine Manager login to the Synology WebGUI interface and open `Synology Package Centre` and install `Virtual Machine Manager`
 
-## 4.3. Configure Synology Virtual Machine Manager
+## 6.3. Configure Synology Virtual Machine Manager
 Using the Synology WebGUI interface `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Storage` > `Add` and follow the prompts and configure as follows:
 
-| Tab Title | Value |
-| :---  | :---: |
-| Create a Storage Resource | `NEXT` |
-| Create Storage | Select/Highlight `nas-01/Volume 1` and Click `NEXT` |
+| Tab Title                 |                        Value                        |
+|:--------------------------|:---------------------------------------------------:|
+| Create a Storage Resource |                       `NEXT`                        |
+| Create Storage            | Select/Highlight `nas-01/Volume 1` and Click `NEXT` |
 | **Configure General Specifications** 
 | Name | `nas-01 - VM Storage 1` |
 | Full | Leave Default |
@@ -1160,13 +1123,13 @@ Using the Synology WebGUI interface `Main Menu` (top left box icon) > `Virtual M
 
 And hit `Apply`.
 
-## 4.4. Create a Proxmox VM
+## 6.4. Create a Proxmox VM
 Just like a hardmetal installation Proxmox VM requires a harddisk. Except in this case its a virtual disk.
 
-### 4.4.1. Add the Proxmox VE ISO image to your Synology
+### 6.4.1. Add the Proxmox VE ISO image to your Synology
 Using the Synology WebGUI interface click on Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Image` > `ISO File` > `Add` > `From Computer` and browse to your downloaded Proxmox ISO (i.e proxmox-ve_6.3.iso ) > `Select Storage` > `Choose your host (i.e nas-01)`
 
-### 4.4.2. Create the Proxmox VM machine
+### 6.4.2. Create the Proxmox VM machine
 Using the Synology WebGUI interface Open Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Virtual Machine` > `Create` > `Choose OS` > `Linux` > `Select Storage` > `nas-01` > and assign the following values:
 
 | (1) Tab General | Value |--|Options or Notes|
@@ -1211,15 +1174,15 @@ Using the Synology WebGUI interface Open Synology `Main Menu` (top left box icon
 
 And hit `Apply`.
 
-### 4.4.3. Install Proxmox OS
+### 6.4.3. Install Proxmox OS
 Now your are going to install Proxmox OS using the installation ISO media. 
 
-#### 4.4.3.1. Power-on PVE-0X VM
+#### 6.4.3.1. Power-on PVE-0X VM
 Using the Synology WebGUI interface Open Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Virtual Machine` > `Power On` and wait for the `status` to show `running`.
 
 This is like hitting the power-on button on any hardmetal machine --- but a virtual boot.
 
-#### 4.4.3.2. Run the Proxmox ISO Installation
+#### 6.4.3.2. Run the Proxmox ISO Installation
 Using the Synology WebGUI interface Open Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Virtual Machine` > `Connect` and a new browser tab should open showing the Proxmox installation script. The installation is much the same as a hardmetal installation you would've performed for pve-01 or pve-02.
 
 To start the install, on the new browser tab, use your keyboard arrow keys with `Install Proxmox VE` selected hit your `ENTER` key to begin the installation script.
@@ -1247,10 +1210,10 @@ Now configure the installation fields for the node as follows:
 
 Finally click `Reboot` and your VM Proxmox node will reboot.
 
-## 4.5. Configure the Proxmox VM
+## 6.5. Configure the Proxmox VM
 Configuration is now done via the Proxmox web interface. Just point your browser to the IP address given during installation (https://192.168.1.10X:8006) and ignore the security warning by clicking `Advanced` then `Accept the Risk and Continue` -- this is the warning I get in Firefox. Default login is "root" (realm PAM) and the root password you defined during the installation process.
 
-### 4.5.1. Update Proxmox OS VM and enable turnkeylinux templates
+### 6.5.1. Update Proxmox OS VM and enable turnkeylinux templates
 Using the web interface `updates` > `refresh` search for all the latest required updates. You will get a few errors which ignore.
 Next install the updates using the web interface `updates` > `_upgrade` - a pop up terminal will show the installation steps of all your required updates and it will prompt you to type `Y` so do so.
 
@@ -1261,9 +1224,9 @@ Finished. Your Synology DiskStation Proxmox VM node is ready.
 
 <hr>
 
-# 5. Patches and Fixes
+# 7. Patches and Fixes
 
-## 5.1. Install Nano
+## 7.1. Install Nano
 Install Nano as a SynoCommunity package.
 
 Log in to the Synology Desktop and go to `Package Center` > `Settings` > `Package Sources` > `Add` and complete the fields as follows:
