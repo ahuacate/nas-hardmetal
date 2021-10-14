@@ -28,113 +28,95 @@ Synology DiskStation Prerequisites are:
 >  **Note: A prerequisite to running any VMs on a Synology DiskStation NAS is your volumes must use the BTRFS file system - without BTRFS you CANNOT install VM's. In my experience the best way forward is based upon backing up your existing data to a external disk (USB) or another internal volume (be careful and know what you are doing), deleting and recreating /volume1 via DSM and restoring your backup data. I recommend using Synology Hyper Backup for backing up your data and settings.**
 >  **Its a lengthy topic and the procedures can be found by searching on the internet. The following tutorials assumes your Volume 1 is in the BTRFS file system format.**
 
-<h4>Easy Script</h4>
-
-Our single Easy Script can ONLY be used on Ubuntu systems. It may work on other Linux OS - best check the Bash script first. Your user input is required. The script will create, edit and/or change system files on your machine. When an optional default setting is provided you can accept our default (recommended) by pressing ENTER on your keyboard. Or overwrite our default value by typing in your own value and then pressing ENTER to accept and to continue to the next step.
-
-Easy Scripts are based on bash scripting. Simply `Cut & Paste` our Easy Script command into your terminal window, press `Enter` and follow the prompts and terminal instructions. 
-
-**Installation**
-After executing the Easy Script the installer is prompted to configure their Ubuntu machine. Script tasks include:
-
-- Create a default set of PVE folders
-- Create PVE Linux Users and Groups (UID & GUID)
-- Setup PVE folder permissions
-- Setup SMB shares
-- Setup NFS shares
-
-```bash
-bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/nas-oem-setup/master/scripts/nas_oem_setup_nas_linux_setup.sh)
-```
+<hr>
 <h4>Table of Contents</h4>
 <!-- TOC -->
 
 - [1. Introduction](#1-introduction)
-- [2. Preparing a OEM NAS or Linux Server](#2-preparing-a-oem-nas-or-linux-server)
-    - [2.1. NFS Prerequisites](#21-nfs-prerequisites)
-    - [2.2. CIFS/SMB Prerequisites](#22-cifssmb-prerequisites)
-    - [2.3. ACL Prerequisites](#23-acl-prerequisites)
-    - [2.4. PVE Folder Structure](#24-pve-folder-structure)
-    - [2.5. Create our PVE Users and Groups](#25-create-our-pve-users-and-groups)
-        - [2.5.1. PVE Linux Groups](#251-pve-linux-groups)
-            - [2.5.1.1. Create PVE Groups](#2511-create-pve-groups)
-        - [2.5.2. PVE Linux Users](#252-pve-linux-users)
-            - [2.5.2.1. Change the NAS Home folder permissions (optional)](#2521-change-the-nas-home-folder-permissions-optional)
-            - [2.5.2.2. Modify PVE Users Home Folder](#2522-modify-pve-users-home-folder)
-            - [2.5.2.3. Create PVE Users](#2523-create-pve-users)
-        - [2.5.3. Set PVE Folder Permissions](#253-set-pve-folder-permissions)
-    - [2.6. Create PVE SMB (SAMBA) Shares](#26-create-pve-smb-samba-shares)
-    - [2.7. Create PVE SMB (SAMBA) Shares](#27-create-pve-smb-samba-shares)
-- [3. Preparing a Synology NAS](#3-preparing-a-synology-nas)
-    - [3.1. Enable Synology Services](#31-enable-synology-services)
-        - [3.1.1. SMB Service](#311-smb-service)
-        - [3.1.2. NFS Service](#312-nfs-service)
-    - [3.2. Create the required Synology Shared Folders](#32-create-the-required-synology-shared-folders)
-        - [3.2.1. Create Shared Folders](#321-create-shared-folders)
-            - [3.2.1.1. Set up basic information:](#3211-set-up-basic-information)
-            - [3.2.1.2. Set up Encryption](#3212-set-up-encryption)
-            - [3.2.1.3. Configure advanced settings](#3213-configure-advanced-settings)
-    - [3.3. Create Synology User Groups](#33-create-synology-user-groups)
-        - [3.3.1. Create "medialab" User Group](#331-create-medialab-user-group)
-            - [3.3.1.1. Group information](#3311-group-information)
-            - [3.3.1.2. Assign shared folders permissions](#3312-assign-shared-folders-permissions)
-            - [3.3.1.3. User quota setting](#3313-user-quota-setting)
-            - [3.3.1.4. Assign application permissions](#3314-assign-application-permissions)
-        - [3.3.2. Create "homelab" User Group](#332-create-homelab-user-group)
-            - [3.3.2.1. Group information](#3321-group-information)
-            - [3.3.2.2. Assign shared folders permissions](#3322-assign-shared-folders-permissions)
-            - [3.3.2.3. User quota setting](#3323-user-quota-setting)
-        - [3.3.3. Create "privatelab" User Group](#333-create-privatelab-user-group)
-            - [3.3.3.1. Group information](#3331-group-information)
-            - [3.3.3.2. Assign shared folders permissions](#3332-assign-shared-folders-permissions)
-            - [3.3.3.3. User quota setting](#3333-user-quota-setting)
-        - [3.3.4. Create "chrootjail" User Group](#334-create-chrootjail-user-group)
-            - [3.3.4.1. Group information](#3341-group-information)
-            - [3.3.4.2. Assign shared folders permissions](#3342-assign-shared-folders-permissions)
-            - [3.3.4.3. User quota setting](#3343-user-quota-setting)
-    - [3.4. Create new Synology Users](#34-create-new-synology-users)
-        - [3.4.1. Create user "media"](#341-create-user-media)
-            - [3.4.1.1. User information](#3411-user-information)
-            - [3.4.1.2. Join groups](#3412-join-groups)
-            - [3.4.1.3. Assign shared folders permissions](#3413-assign-shared-folders-permissions)
-            - [3.4.1.4. User quota setting](#3414-user-quota-setting)
-            - [3.4.1.5. Assign application permissions](#3415-assign-application-permissions)
-            - [3.4.1.6. User Speed Limit Setting](#3416-user-speed-limit-setting)
-        - [3.4.2. Create user "home"](#342-create-user-home)
-            - [3.4.2.1. User information](#3421-user-information)
-            - [3.4.2.2. Join groups](#3422-join-groups)
-            - [3.4.2.3. Assign shared folders permissions](#3423-assign-shared-folders-permissions)
-            - [3.4.2.4. User quota setting](#3424-user-quota-setting)
-            - [3.4.2.5. Assign application permissions](#3425-assign-application-permissions)
-            - [3.4.2.6. User Speed Limit Setting](#3426-user-speed-limit-setting)
-        - [3.4.3. Create user "private"](#343-create-user-private)
-            - [3.4.3.1. User information](#3431-user-information)
-            - [3.4.3.2. Join groups](#3432-join-groups)
-            - [3.4.3.3. Assign shared folders permissions](#3433-assign-shared-folders-permissions)
-            - [3.4.3.4. User quota setting](#3434-user-quota-setting)
-            - [3.4.3.5. Assign application permissions](#3435-assign-application-permissions)
-            - [3.4.3.6. User Speed Limit Setting](#3436-user-speed-limit-setting)
-    - [3.5. Create NFS Permissions](#35-create-nfs-permissions)
-    - [3.6. Edit Synology NAS GUID and UID](#36-edit-synology-nas-guid-and-uid)
-        - [3.6.1. Prepare your Synology](#361-prepare-your-synology)
-        - [3.6.2. Edit Synology NAS GUID (Groups)](#362-edit-synology-nas-guid-groups)
-        - [3.6.3. Edit Synology NAS UID (Users)](#363-edit-synology-nas-uid-users)
-    - [3.7 Set PVE Folder ACL Permissions](#37-set-pve-folder-acl-permissions)
-        - [3.7.1 Set Folder ACL using Synology DSM WebGUI](#371-set-folder-acl-using-synology-dsm-webgui)
-- [4. Synology Virtual Machine Manager](#4-synology-virtual-machine-manager)
-    - [4.1. Download the Proxmox installer ISO](#41-download-the-proxmox-installer-iso)
-    - [4.2. Install Synology Virtual Machine Manager on your NAS](#42-install-synology-virtual-machine-manager-on-your-nas)
-    - [4.3. Configure Synology Virtual Machine Manager](#43-configure-synology-virtual-machine-manager)
-    - [4.4. Create a Proxmox VM](#44-create-a-proxmox-vm)
-        - [4.4.1. Add the Proxmox VE ISO image to your Synology](#441-add-the-proxmox-ve-iso-image-to-your-synology)
-        - [4.4.2. Create the Proxmox VM machine](#442-create-the-proxmox-vm-machine)
-        - [4.4.3. Install Proxmox OS](#443-install-proxmox-os)
-            - [4.4.3.1. Power-on PVE-0X VM](#4431-power-on-pve-0x-vm)
-            - [4.4.3.2. Run the Proxmox ISO Installation](#4432-run-the-proxmox-iso-installation)
-    - [4.5. Configure the Proxmox VM](#45-configure-the-proxmox-vm)
-        - [4.5.1. Update Proxmox OS VM and enable turnkeylinux templates](#451-update-proxmox-os-vm-and-enable-turnkeylinux-templates)
-- [5. Patches and Fixes](#5-patches-and-fixes)
-    - [5.1. Install Nano](#51-install-nano)
+- [2. Prerequisites](#2-prerequisites)
+    - [2.1. NFS Support](#21-nfs-support)
+    - [2.2. SMB/CIFS Support](#22-smbcifs-support)
+    - [2.3. ACL Support](#23-acl-support)
+- [3. Create PVE Users and Groups](#3-create-pve-users-and-groups)
+    - [3.1. Create PVE Groups](#31-create-pve-groups)
+    - [3.2. Change the NAS Home folder permissions (optional)](#32-change-the-nas-home-folder-permissions-optional)
+    - [3.3. Modify PVE Users Home Folder](#33-modify-pve-users-home-folder)
+    - [3.4. Create PVE Users](#34-create-pve-users)
+- [4. NAS Folder Shares](#4-nas-folder-shares)
+    - [4.1. Folder Permissions](#41-folder-permissions)
+    - [4.2. Sub Folder Permissions](#42-sub-folder-permissions)
+    - [4.3. Create PVE SMB (SAMBA) Shares](#43-create-pve-smb-samba-shares)
+    - [4.4. Create PVE NFS Shares](#44-create-pve-nfs-shares)
+- [5. Preparing a Synology NAS](#5-preparing-a-synology-nas)
+    - [5.1. Enable Synology Services](#51-enable-synology-services)
+        - [5.1.1. SMB Service](#511-smb-service)
+        - [5.1.2. NFS Service](#512-nfs-service)
+    - [5.2. Create the required Synology Shared Folders](#52-create-the-required-synology-shared-folders)
+        - [5.2.1. Create Shared Folders](#521-create-shared-folders)
+            - [5.2.1.1. Set up basic information:](#5211-set-up-basic-information)
+            - [5.2.1.2. Set up Encryption](#5212-set-up-encryption)
+            - [5.2.1.3. Configure advanced settings](#5213-configure-advanced-settings)
+    - [5.3. Create Synology User Groups](#53-create-synology-user-groups)
+        - [5.3.1. Create "medialab" User Group](#531-create-medialab-user-group)
+            - [5.3.1.1. Group information](#5311-group-information)
+            - [5.3.1.2. Assign shared folders permissions](#5312-assign-shared-folders-permissions)
+            - [5.3.1.3. User quota setting](#5313-user-quota-setting)
+            - [5.3.1.4. Assign application permissions](#5314-assign-application-permissions)
+        - [5.3.2. Create "homelab" User Group](#532-create-homelab-user-group)
+            - [5.3.2.1. Group information](#5321-group-information)
+            - [5.3.2.2. Assign shared folders permissions](#5322-assign-shared-folders-permissions)
+            - [5.3.2.3. User quota setting](#5323-user-quota-setting)
+        - [5.3.3. Create "privatelab" User Group](#533-create-privatelab-user-group)
+            - [5.3.3.1. Group information](#5331-group-information)
+            - [5.3.3.2. Assign shared folders permissions](#5332-assign-shared-folders-permissions)
+            - [5.3.3.3. User quota setting](#5333-user-quota-setting)
+        - [5.3.4. Create "chrootjail" User Group](#534-create-chrootjail-user-group)
+            - [5.3.4.1. Group information](#5341-group-information)
+            - [5.3.4.2. Assign shared folders permissions](#5342-assign-shared-folders-permissions)
+            - [5.3.4.3. User quota setting](#5343-user-quota-setting)
+    - [5.4. Create new Synology Users](#54-create-new-synology-users)
+        - [5.4.1. Create user "media"](#541-create-user-media)
+            - [5.4.1.1. User information](#5411-user-information)
+            - [5.4.1.2. Join groups](#5412-join-groups)
+            - [5.4.1.3. Assign shared folders permissions](#5413-assign-shared-folders-permissions)
+            - [5.4.1.4. User quota setting](#5414-user-quota-setting)
+            - [5.4.1.5. Assign application permissions](#5415-assign-application-permissions)
+            - [5.4.1.6. User Speed Limit Setting](#5416-user-speed-limit-setting)
+        - [5.4.2. Create user "home"](#542-create-user-home)
+            - [5.4.2.1. User information](#5421-user-information)
+            - [5.4.2.2. Join groups](#5422-join-groups)
+            - [5.4.2.3. Assign shared folders permissions](#5423-assign-shared-folders-permissions)
+            - [5.4.2.4. User quota setting](#5424-user-quota-setting)
+            - [5.4.2.5. Assign application permissions](#5425-assign-application-permissions)
+            - [5.4.2.6. User Speed Limit Setting](#5426-user-speed-limit-setting)
+        - [5.4.3. Create user "private"](#543-create-user-private)
+            - [5.4.3.1. User information](#5431-user-information)
+            - [5.4.3.2. Join groups](#5432-join-groups)
+            - [5.4.3.3. Assign shared folders permissions](#5433-assign-shared-folders-permissions)
+            - [5.4.3.4. User quota setting](#5434-user-quota-setting)
+            - [5.4.3.5. Assign application permissions](#5435-assign-application-permissions)
+            - [5.4.3.6. User Speed Limit Setting](#5436-user-speed-limit-setting)
+    - [5.5. Create NFS Permissions](#55-create-nfs-permissions)
+    - [5.6. Edit Synology NAS GUID and UID](#56-edit-synology-nas-guid-and-uid)
+        - [5.6.1. Prepare your Synology](#561-prepare-your-synology)
+        - [5.6.2. Edit Synology NAS GUID (Groups)](#562-edit-synology-nas-guid-groups)
+        - [5.6.3. Edit Synology NAS UID (Users)](#563-edit-synology-nas-uid-users)
+    - [5.7. Set PVE Folder ACL Permissions](#57-set-pve-folder-acl-permissions)
+        - [5.7.1. Set Folder ACL using Synology DSM WebGUI](#571-set-folder-acl-using-synology-dsm-webgui)
+- [6. Synology Virtual Machine Manager](#6-synology-virtual-machine-manager)
+    - [6.1. Download the Proxmox installer ISO](#61-download-the-proxmox-installer-iso)
+    - [6.2. Install Synology Virtual Machine Manager on your NAS](#62-install-synology-virtual-machine-manager-on-your-nas)
+    - [6.3. Configure Synology Virtual Machine Manager](#63-configure-synology-virtual-machine-manager)
+    - [6.4. Create a Proxmox VM](#64-create-a-proxmox-vm)
+        - [6.4.1. Add the Proxmox VE ISO image to your Synology](#641-add-the-proxmox-ve-iso-image-to-your-synology)
+        - [6.4.2. Create the Proxmox VM machine](#642-create-the-proxmox-vm-machine)
+        - [6.4.3. Install Proxmox OS](#643-install-proxmox-os)
+            - [6.4.3.1. Power-on PVE-0X VM](#6431-power-on-pve-0x-vm)
+            - [6.4.3.2. Run the Proxmox ISO Installation](#6432-run-the-proxmox-iso-installation)
+    - [6.5. Configure the Proxmox VM](#65-configure-the-proxmox-vm)
+        - [6.5.1. Update Proxmox OS VM and enable turnkeylinux templates](#651-update-proxmox-os-vm-and-enable-turnkeylinux-templates)
+- [7. Patches and Fixes](#7-patches-and-fixes)
+    - [7.1. Install Nano](#71-install-nano)
 
 <!-- /TOC -->
 
@@ -286,7 +268,7 @@ Your NAS (nas-01)
     └── video - root 0750 65605:rwx 65607:rwx 65608:rx
 ```
 
-## 4.0.1. Folder Permissions
+## 4.1. Folder Permissions
 
 Create sub-folders with permissions as shown [here.](https://raw.githubusercontent.com/ahuacate/pve-nas/master/scripts/source/pve_nas_basefolderlist)
 
@@ -300,11 +282,11 @@ sudo chmod -R 750 ${BASE_FOLDER}/audio
 sudo setfacl -Rm g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx  ${BASE_FOLDER}/audio
 ```
 
-## Sub Folder Permissions
+## 4.2. Sub Folder Permissions
 
 Create sub-folders with permissions as shown [here.](https://raw.githubusercontent.com/ahuacate/pve-nas/master/scripts/source/pve_nas_basefoldersubfolderlist)
 
-## 4.1. Create PVE SMB (SAMBA) Shares
+## 4.3. Create PVE SMB (SAMBA) Shares
 Your `/etc/samba/smb.conf` file should include the following PVE shares. This is a example from a Ubuntu NAS.
 
 Remember to replace `BASE_FOLDER` with your full path (i.e /dir1/dir2). Also you must restart your NFS service to invoke the changes.
@@ -492,7 +474,7 @@ hide dot files = yes
 
 ```
 
-## 4.2. Create PVE NFS Shares
+## 4.4. Create PVE NFS Shares
 Modify your NFS exports file `/etc/exports` to include the following.
 
 Remember to replace `BASE_FOLDER` with your full path (i.e /dir1/dir2). Also note each NFS export defines a PVE host IPv4 addresses for primary and secondary (cluster nodes) machines. Modify if your PVE host are different.
