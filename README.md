@@ -1,12 +1,12 @@
 <h2> OEM NAS Brands - Linux based NAS Servers</h2>
 
-This guide is for setting up any OEM Linux based NAS ( Synology, Qnap or whatever Linux flavour etc ) to support our PVE host nodes, PVE CT/VM applications and all our installation Easy Scripts.
+This guide is for setting up any OEM Linux-based NAS ( Synology, Qnap, or whatever Linux flavor, etc ) to support our PVE host nodes, PVE CT/VM applications, and all our installation Easy Scripts.
 
-This is not for Users who have installed our PVE based NAS solution. Or if you require a NAS server try our [PVE NAS](https://github.com/ahuacate/pve-nas) which is fully turnkey and operational ready. 
+This is not for users who have installed our PVE based NAS solution. If you require a NAS server try our [PVE NAS](https://github.com/ahuacate/pve-nas) which is fully turnkey and operationally ready. 
 
-> For owners of third party NAS servers its important you strictly follow this guide. Our PVE CT and VMs all have specific UIDs and GUIDs, Linux file permissions including ACLs and NAS needs.
+> For owners of third-party NAS servers its important you strictly follow this guide. Our PVE CT and VMs all have specific UIDs and GUIDs, Linux file permissions including ACLs and NAS needs.
 
-A section of this guide is dedicated to Synology DiskStations. This is because Synology DiskStation web management interface is restricted and does not permit assignment of UIDs and GUIDs. So I have written a section about how to modify and set Synology DiskStations UIDs and GUIDs ( must be done ), ACLs using SSH CLI.
+A section of this guide is dedicated to Synology DiskStations. Synology DiskStation web management interface is restricted and does not permit the assignment of UIDs and GUIDs.
 
 Network Prerequisites are:
 - [x] Layer 2/3 Network Switches
@@ -25,8 +25,8 @@ Synology DiskStation Prerequisites are:
 - [ ] x86 CPU Intel CPU (only required if running VMs)
 - [x] Volume is formatted to BTRFS (not ext4, which doesn't support Synology Virtual Machines)
 
->  **Note: A prerequisite to running any VMs on a Synology DiskStation NAS is your volumes must use the BTRFS file system - without BTRFS you CANNOT install VM's. In my experience the best way forward is based upon backing up your existing data to a external disk (USB) or another internal volume (be careful and know what you are doing), deleting and recreating /volume1 via DSM and restoring your backup data. I recommend using Synology Hyper Backup for backing up your data and settings.**
->  **Its a lengthy topic and the procedures can be found by searching on the internet. The following tutorials assumes your Volume 1 is in the BTRFS file system format.**
+>  **Note: A prerequisite to running VMs on a Synology DiskStation NAS is your volumes must use the BTRFS file system - without BTRFS you CANNOT install VM's. In my experience, the best way forward is based upon backing up your existing data to an external disk (USB) or another internal volume (be careful and know what you are doing), deleting and recreating /volume1 via DSM, and restoring your backup data. I recommend using Synology Hyper Backup for backing up your data and settings.**
+>  **It's a lengthy topic and the procedures can be found by searching on the internet. The following tutorials assume your Volume 1 is in the BTRFS file system format.**
 
 <hr>
 <h4>Table of Contents</h4>
@@ -114,7 +114,7 @@ Synology DiskStation Prerequisites are:
             - [6.4.3.1. Power-on PVE-0X VM](#6431-power-on-pve-0x-vm)
             - [6.4.3.2. Run the Proxmox ISO Installation](#6432-run-the-proxmox-iso-installation)
     - [6.5. Configure the Proxmox VM](#65-configure-the-proxmox-vm)
-        - [6.5.1. Update Proxmox OS VM and enable turnkeylinux templates](#651-update-proxmox-os-vm-and-enable-turnkeylinux-templates)
+        - [6.5.1. Update Proxmox OS VM and enable turnkey Linux templates](#651-update-proxmox-os-vm-and-enable-turnkey-linux-templates)
 - [7. Patches and Fixes](#7-patches-and-fixes)
     - [7.1. Install Nano](#71-install-nano)
 
@@ -124,13 +124,13 @@ Synology DiskStation Prerequisites are:
 
 # 1. Introduction
 
-All our PVE CT & VM applications require backend storage pools. A backend storage pools is a NFS or CIFS mount point to your NAS appliance folder shares (nas-01). Backend storage pools are only setup on your primary PVE node ( pve-01 ).
+All our PVE CT & VM applications require backend storage pools. A backend storage pool is an NFS or CIFS mount point to your NAS appliance folder shares (nas-01). Backend storage pools are only set up on your primary PVE node ( pve-01 ).
 
-This is a shared storage pool system because all backend storage pools get automatically mounted and distributed to all PVE cluster nodes. Because all PVE nodes share the same storage configuration the backend storage mount points are available on all PVE nodes. Every backend storage pool can be physically different, either a NFS or CIFS mount, or a combination of both NFS and CIFS, and are individually labelled accessing different content.
+This is a shared storage pool system because all backend storage pools get automatically mounted and distributed to all PVE cluster nodes. Because all PVE nodes share the same storage configuration the backend storage mount points are available on all PVE nodes. Every backend storage pool can be physically different, either an NFS or CIFS mount, or a combination of both NFS and CIFS, and are individually labeled accessing different content.
 
-Once your PVE backend storage is setup a PVE CT application local disk storage is actually disk storage space on your network NAS appliance.
+Once your PVE backend storage is set up a PVE CT application local disk storage is actually disk storage space on your network NAS appliance.
 
-There are basically four task levels in setting up your NAS.
+There are four task levels in setting up your NAS.
 1. Install NFS and CIFS/SMB on your NAS.
 2. Create our default set of Users and Groups each with our UIDs and GUIDs.
 2. Create our default set of shared folders.
@@ -138,7 +138,7 @@ There are basically four task levels in setting up your NAS.
 
 
 # 2. Prerequisites
-Its assumed the installer has some Linux skills. There are lots of online guides about how to configure OEM NAS brands and Linux networking.
+It's assumed the installer has some Linux skills. There are lots of online guides about how to configure OEM NAS brands and Linux networking.
 
 Most OEM NAS have a Web Management interface for all configuration tasks.
 
@@ -149,7 +149,7 @@ Your NAS NFS server must support NFSv3/v4.
 Your NAS SMB/CIFS server must support SMB3 protocol (PVE default). SMB1 is NOT supported.
 
 ## 2.3. ACL Support
-Access control list (ACL) provides an additional, more flexible permission mechanism for your PVE storage pools. It is designed to assist with UNIX file permissions. ACL allows you to give permissions for any user or group to any disc resource. Best install and enable ACL.
+Access control list (ACL) provides an additional, more flexible permission mechanism for your PVE storage pools. Enable ACL.
 
 # 3. Create PVE Users and Groups
 All our PVE CT applications require a specific set of UID and GUID to work properly. So make sure your UIDs and GUIDs exactly match our guide.
@@ -164,7 +164,7 @@ All our PVE CT applications require a specific set of UID and GUID to work prope
 | **Default Users**       |                         |                                                                                                                      |
 |                         | media - UID 1605        | Member of group medialab                                                                                             |
 |                         | home - UID 1606         | Member of group homelab. Supplementary member of group medialab                                                      |
-|                         | private - UID 1607      | Member of group private lab. Supplementary member of group medialab, homelab                                         |
+|                         | private - UID 1607      | Member of group privatelab. Supplementary member of group medialab, homelab                                         |
 
 
 ## 3.1. Create PVE Groups
@@ -190,7 +190,7 @@ Depending on your NAS you may be able to change this setting
 sed -i "s/DIR_MODE=.*/DIR_MODE=0750/g" /etc/adduser.conf
 ```
 
-Running the above command will change only all new Users HOME folder permissions to `0750` globally on your NAS.
+Running the above command will change all-new User HOME folder permissions to `0750` globally on your NAS.
 
 ## 3.3. Modify PVE Users Home Folder
 Set `/base_folder/homes` permissions for Users media. home and private.
@@ -211,7 +211,7 @@ sudo chmod -R 0750 ${BASE_FOLDER}/homes
 ```
 
 ## 3.4. Create PVE Users
-Create our list of PVE users. These are required by various PVE CT applications. Without them nothing will work.
+Create our list of PVE users. These are required by various PVE CT applications. Without them, nothing will work.
 
 | Username  | UID | Home Folder | Group Member
 |---|---|---|---|---|
@@ -234,7 +234,7 @@ useradd -m -d ${BASE_FOLDER}/homes/private -u 1607 -g privatelab -G medialab,hom
 # 4. NAS Folder Shares
 You need to create a set of folder shares in a 'storage volume' on your NAS. The new folder shares are mounted by your PVE hosts as NFS or SMB/CIFS mount points for creating your PVE host backend storage ( pve-01 ).
 
-We refer to the NAS 'storage volume' as your NAS "base folder".
+We refer to the NAS 'storage volume' as your NAS 'base folder'.
 
 > For example, on a Synology the default volume is `/volume1`. So on a Synology our "base folder" would be: `/volume1`.
 
@@ -287,9 +287,9 @@ sudo setfacl -Rm g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx  ${BASE_FOLDER}
 Create sub-folders with permissions as shown [here.](https://raw.githubusercontent.com/ahuacate/pve-nas/master/scripts/source/pve_nas_basefoldersubfolderlist)
 
 ## 4.3. Create PVE SMB (SAMBA) Shares
-Your `/etc/samba/smb.conf` file should include the following PVE shares. This is a example from a Ubuntu NAS.
+Your `/etc/samba/smb.conf` file should include the following PVE shares. This is an example from a Ubuntu NAS.
 
-Remember to replace `BASE_FOLDER` with your full path (i.e /dir1/dir2). Also you must restart your NFS service to invoke the changes.
+Remember to replace `BASE_FOLDER` with your full path (i.e /dir1/dir2). Also, you must restart your NFS service to invoke the changes.
 
 The sample file is from a Ubuntu 21.04 server.
 
@@ -477,7 +477,7 @@ hide dot files = yes
 ## 4.4. Create PVE NFS Shares
 Modify your NFS exports file `/etc/exports` to include the following.
 
-Remember to replace `BASE_FOLDER` with your full path (i.e /dir1/dir2). Also note each NFS export defines a PVE host IPv4 addresses for primary and secondary (cluster nodes) machines. Modify if your PVE host are different.
+Remember to replace `BASE_FOLDER` with your full path (i.e /dir1/dir2). Also, note each NFS export defines a PVE host IPv4 address for primary and secondary (cluster nodes) machines. Modify if your PVE host is different.
 
 The sample file is from a Ubuntu 21.04 server.
 
@@ -545,7 +545,7 @@ Open `Control Panel` > `File Services` > `SMB/AFP/NFS` and enable the following 
   * Maximum SMB protocol `SMB3`
   * Minimum SMB protocol ` SMB2`
   * Transport encryption mode `auto`
-  * Enable Oppurtunistic Locking ☑
+  * Enable Opportunistic Locking ☑
     * Enable SMB2 lease ☐
   * (the rest leave off ☐)
 
@@ -554,7 +554,7 @@ Open `Control Panel` > `File Services` > `SMB/AFP/NFS` and enable the following 
   * Enable NFSv4.1 support ☑
     NFSv4 domain: `localdomain.com`
 * Advanced Settings
-* Apply default Unix permissions ☑
+* Apply to default Unix permissions ☑
 * (the rest leave off ☐)
 
 ## 5.2. Create the required Synology Shared Folders
@@ -744,7 +744,7 @@ Up to the you.
 
 
 ### 5.3.4. Create "chrootjail" User Group
-This user group is for chrootjail users. Users are restricted or jailed within their own home folder. But they they have read only access to medialab folders.
+This user group is for chrootjail users. Users are restricted or jailed within their home folders. But they have read-only access to medialab folders.
 
 Open `Control Panel` > `Group` > `Create` and Group Creation Wizard will open.
 
@@ -902,7 +902,7 @@ Open `Control Panel` > `Shared Folder` > `Select a Folder` > `Edit` > `NFS Permi
 * Allow users to access mounted subfolders ☑
 
 ## 5.6. Edit Synology NAS GUID and UID
-Synology DSM WebGUI Control Panel interface does'nt allow assigning a GUID or UID number when creating any new Linux Groups and Users. Each new group is assigned a random UID upwards of 65536.
+Synology DSM WebGUI Control Panel interface doesn't allow assigning a GUID or UID number when creating any new Linux Groups and Users. Each new group is assigned a random UID upwards of 65536.
 
 We need to edit our newly created GUIDs and UIDs user GID's for Groups medialab, homelab and privatelab and the Users media, home and private.
 
@@ -923,18 +923,18 @@ We need to define each GUID to a known number.
 | **privatelab** | 10XX | ==>> | 65607
 | **chrootjail** | 10XX | ==>> | 65608
 
-Using a CLI terminal connect to your Synology:
+Using a CLI terminal to your Synology:
 ```
 # Replace IP with yours
 ssh admin@192.168.1.10
 ```
 Login as 'admin' and enter your Synology admin password at the prompt. The CLI terminal will show `admin@nas-01:~$` (replacing `nas-01` with your hostname) if successful.
 
-Synology DSM is Linux so we need switch user `root`. In the CLI terminal type the following to switch to `root@nas-01:~#` :
+You need to switch the user to `root`. In the terminal type:
 ```
 sudo -i
 ```
-And next type the following to change all the GUID's:
+Next type the following to change all the GUID's:
 ```
 # Edit Medialab GID ID
 sed -i 's|medialab:x:*:.*|medialab:x:65605:media,home,private|g' /etc/group &&
@@ -949,9 +949,9 @@ synouser --rebuild all
 ```
 
 ### 5.6.3. Edit Synology NAS UID (Users)
-Synology DSM WebGUI Control Panel interface does'nt allow assigning a UID number when creating any new User. Each new User is assigned a random UID upwards of 1027.
+Synology DSM WebGUI Control Panel interface doesn't allow assigning a UID number when creating a new User. Each new User is assigned a random UID upwards of 1027.
 
-We need to edit the user UID's for users media, home and private so they are known. This must be done after you have completed GUID modifications.
+You must edit the User UIDs for 'media', 'home' and 'private'. This must be performed after the GUID modifications.
 
 | Synology Username | Old UID | | New UID |
 | :---  | ---: | :---: | :--- |
@@ -959,14 +959,14 @@ We need to edit the user UID's for users media, home and private so they are kno
 | **home** | 10XX | ==>> | 1606
 | **private** | 10XX | ==>> | 1607
 
-Using a CLI terminal connect to your Synology:
+Again using a CLI terminal connected to your Synology:
 ```
 # Replace IP with yours
 ssh admin@192.168.1.10
 ```
 Login as 'admin' and enter your Synology admin password at the prompt. The CLI terminal will show `admin@nas-01:~$` (replacing `nas-01` with your hostname) if successful.
 
-Synology DSM is Linux so we need switch user `root`. In the CLI terminal type the following to switch to `root@nas-01:~#` :
+You need to switch the user to `root`. In the terminal type:
 ```
 sudo -i
 ```
@@ -1075,18 +1075,18 @@ sudo setfacl -Rm g:medialab:rwx,g:privatelab:rwx,g:chrootjail:rx  ${BASE_FOLDER}
 <hr>
 
 # 6. Synology Virtual Machine Manager
-If your Synology NAS model is capable ( Intel x86 )you can install a PVE node on your Synology DiskStation using the native Synology Virtual Machine Manager application.
+If your Synology NAS model is capable ( Intel x86 ) you can install a PVE node on your Synology DiskStation using the native Synology Virtual Machine Manager application.
 
 
 ## 6.1. Download the Proxmox installer ISO
 Download the latest Proxmox ISO installer to your PC from  www.proxmox.com or [HERE](https://www.proxmox.com/en/downloads/category/iso-images-pve).
 
 ## 6.2. Install Synology Virtual Machine Manager on your NAS
-A prerequisite to running any VMs on your Synology NAS is you require a BTRFS file system. If they are not then you CANNOT install VM's.
+A prerequisite to running any VMs on your Synology NAS is you require a BTRFS file system.
 
-In my experience the best way to create a BTRFS is to back up your data to a external disk (USB) or another internal volume (be careful and know what you are doing). Then delete and recreate `/volume1` via DSM and restore your backup data. I recommend using Synology Hyper Backup to backup your data and settings.
+In my experience, the best way to create a BTRFS is to back up your data to an external disk (USB) or another internal volume (be careful and know what you are doing). Then delete and recreate `/volume1` via DSM and restore your backup data. I recommend using Synology Hyper Backup to backup your data and settings.
 
-Its a lengthy topic and the procedures can be found by seaching on the internet.
+It's a lengthy topic and the procedures can be found by searching on the internet.
 
 To install Synology Virtual Machine Manager login to the Synology WebGUI interface and open `Synology Package Centre` and install `Virtual Machine Manager`
 
@@ -1106,7 +1106,7 @@ Using the Synology WebGUI interface `Main Menu` (top left box icon) > `Virtual M
 And hit `Apply`.
 
 ## 6.4. Create a Proxmox VM
-Just like a hardmetal installation Proxmox VM requires a harddisk. Except in this case its a virtual disk.
+Just like a hard metal installation, Proxmox VM requires a hard disk. Except in this case it's a virtual disk.
 
 ### 6.4.1. Add the Proxmox VE ISO image to your Synology
 Using the Synology WebGUI interface click on Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Image` > `ISO File` > `Add` > `From Computer` and browse to your downloaded Proxmox ISO (i.e proxmox-ve_6.3.iso ) > `Select Storage` > `Choose your host (i.e nas-01)`
@@ -1162,14 +1162,14 @@ Now your are going to install Proxmox OS using the installation ISO media.
 #### 6.4.3.1. Power-on PVE-0X VM
 Using the Synology WebGUI interface Open Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Virtual Machine` > `Power On` and wait for the `status` to show `running`.
 
-This is like hitting the power-on button on any hardmetal machine --- but a virtual boot.
+This is like hitting the power-on button on any hard metal machine --- but a virtual boot.
 
 #### 6.4.3.2. Run the Proxmox ISO Installation
-Using the Synology WebGUI interface Open Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Virtual Machine` > `Connect` and a new browser tab should open showing the Proxmox installation script. The installation is much the same as a hardmetal installation you would've performed for pve-01 or pve-02.
+Using the Synology WebGUI interface Open Synology `Main Menu` (top left box icon) > `Virtual Machine Manager` > `Virtual Machine` > `Connect` and a new browser tab should open showing the Proxmox installation script. The installation is much the same as a hard metal installation you would've performed for pve-01 or pve-02.
 
-To start the install, on the new browser tab, use your keyboard arrow keys with `Install Proxmox VE` selected hit your `ENTER` key to begin the installation script.
+To start the install, on the new browser tab, use your keyboard arrow keys with `Install Proxmox VE` selected then hit your `ENTER` key to begin the installation script.
 
-Your first user prompt will probably be a window saying "No support for KVM virtualisation detected. Check BIOS settings for Intel VT/AMD-V/SVM" so click `OK` then to the End User Agreement click `I Agree`.
+Your first user prompt will probably be a window saying "No support for KVM virtualization detected. Check BIOS settings for Intel VT/AMD-V/SVM" so click `OK` then to the End User Agreement click `I Agree`.
 
 Now configure the installation fields for the node as follows:
    
@@ -1190,19 +1190,19 @@ Now configure the installation fields for the node as follows:
 | Gateway |`192.168.1.5`|
 | DNS Server |`192.168.1.5`|
 
-Finally click `Reboot` and your VM Proxmox node will reboot.
+Finally, click `Reboot` and your VM Proxmox node will reboot.
 
 ## 6.5. Configure the Proxmox VM
-Configuration is now done via the Proxmox web interface. Just point your browser to the IP address given during installation (https://192.168.1.10X:8006) and ignore the security warning by clicking `Advanced` then `Accept the Risk and Continue` -- this is the warning I get in Firefox. Default login is "root" (realm PAM) and the root password you defined during the installation process.
+Configuration is now done via the Proxmox web interface. Just point your browser to the IP address given during installation (https://192.168.1.10X:8006) and ignore the security warning by clicking `Advanced` then `Accept the Risk and Continue` -- this is the warning I get in Firefox. The default login is "root" (realm PAM) and the root password you defined during the installation process.
 
-### 6.5.1. Update Proxmox OS VM and enable turnkeylinux templates
+### 6.5.1. Update Proxmox OS VM and enable turnkey Linux templates
 Using the web interface `updates` > `refresh` search for all the latest required updates. You will get a few errors which ignore.
-Next install the updates using the web interface `updates` > `_upgrade` - a pop up terminal will show the installation steps of all your required updates and it will prompt you to type `Y` so do so.
+Next, install the updates using the web interface `updates` > `_upgrade` - a pop-up terminal will show the installation steps of all your required updates and it will prompt you to type `Y` so do so.
 
-Next install turnkeylinux container templates by using the web interface CLI `shell` and type
+Next, install turnkey Linux container templates by using the web interface CLI `shell` and type
 `pveam update`
 
-Finished. Your Synology DiskStation Proxmox VM node is ready.
+Your Synology DiskStation Proxmox VM node is ready.
 
 <hr>
 
@@ -1218,4 +1218,4 @@ Log in to the Synology Desktop and go to `Package Center` > `Settings` > `Packag
 | Name     | `SynoCommunity`                      |
 | Location | `http://packages.synocommunity.com/` |
 
-And click `OK`. Then type in the serach bar 'nano' and install Nano.
+And click `OK`. Then type in the search bar 'nano' and install Nano.
