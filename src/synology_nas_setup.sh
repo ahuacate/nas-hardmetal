@@ -515,17 +515,17 @@ section "Create Ahuacate default Users and Groups"
 
 msg "Creating default users..."
 # Media user
-if [ ! $(synouser --get media > /dev/null; echo $?) == 0 ]; then
+if [ ! $(synouser --get media &> /dev/null; echo $?) == 0 ]; then
   synouser --add media "" "Medialab user" 0 "" 0
   info "Default user created: ${YELLOW}media${NC} of group medialab"
 fi
 # Home user
-if [ ! $(synouser --get home > /dev/null; echo $?) == 0 ]; then
+if [ ! $(synouser --get home &> /dev/null; echo $?) == 0 ]; then
   synouser --add home "" "Homelab user" 0 "" 0
   info "Default user created: ${YELLOW}home${NC} of groups medialab, homelab"
 fi
 # Private user
-if [ ! $(synouser --get private > /dev/null; echo $?) == 0 ]; then
+if [ ! $(synouser --get private &> /dev/null; echo $?) == 0 ]; then
   synouser --add private "" "Privatelab user" 0 "" 0
   info "Default user created: ${YELLOW}private${NC} of groups medialab, homelab and privatelab"
 fi
@@ -533,28 +533,28 @@ echo
 
 msg "Creating default user groups..."
 # Medialab group
-if [ ! $(synogroup --get medialab > /dev/null; echo $?) == 0 ]; then
+if [ ! $(synogroup --get medialab &> /dev/null; echo $?) == 0 ]; then
   synogroup --add medialab
   synogroup --descset medialab "Medialab user group"
   synogroup --member medialab media home private
   info "Default user group created: ${YELLOW}medialab${NC}"
 fi
 # Homelab group
-if [ ! $(synogroup --get homelab > /dev/null; echo $?) == 0 ]; then
+if [ ! $(synogroup --get homelab &> /dev/null; echo $?) == 0 ]; then
   synogroup --add homelab
   synogroup --descset homelab "Homelab user group"
   synogroup --member homelab home private
   info "Default user group created: ${YELLOW}homelab${NC}"
 fi
 # Medialab group
-if [ ! $(synogroup --get privatelab > /dev/null; echo $?) == 0 ]; then
+if [ ! $(synogroup --get privatelab &> /dev/null; echo $?) == 0 ]; then
   sudo synogroup --add privatelab
   synogroup --descset privatelab "Privatelab user group"
   synogroup --member privatelab private
   info "Default user group created: ${YELLOW}privatelab${NC}"
 fi
 # Chrootjail group
-if [ ! $(synogroup --get chrootjail > /dev/null; echo $?) == 0 ]; then
+if [ ! $(synogroup --get chrootjail &> /dev/null; echo $?) == 0 ]; then
   sudo synogroup --add chrootjail
   synogroup --descset chrootjail "Chrootjail user group"
   info "Default user group created: ${YELLOW}chrootjail${NC}"
