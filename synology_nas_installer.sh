@@ -21,9 +21,23 @@
 # Check user is root
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root.\nSSH into Synology. Login as 'admin'.\nThen type cmd 'sudo -i' to run as root. Use same pwd as admin.\nTry again. Bye..."
-   sleep 3
-   exit 1
+   echo
+   return 1 2>/dev/null
 fi
+
+
+# Check for Git
+if [ $(synopkg status Git > /dev/null; echo $?) != 0 ]; then
+  msg "${RED}[WARNING]${NC}\nThere are issues with this Synology:
+    
+  1. Git status: missing
+  2. Install Git Server package using the Synology Package Manager WebGUI.
+  
+  Exiting script. Fix the issue and try again..."
+  echo
+  return 1 2>/dev/null
+fi
+
 
 # Check for Internet connectivity
 if ping -c 2 -q google.com &> /dev/null; then
