@@ -201,7 +201,7 @@ if [ ! $(uname -a | grep -i --color=never '.*synology.*' &> /dev/null; echo $?) 
     --  Wrong Hardware. This setup script is for a Synology DiskStations.
   
   Bye..."
-  return 0
+  exit 0
 elif [ $(uname -a | grep -i --color=never '.*synology.*' &> /dev/null; echo $?) == 0 ] && [ ! ${majorversion} -ge ${DSM_MIN} ] || [ ! $(id -u) == 0 ]; then
   warn "There are problems with this installation:
 
@@ -209,7 +209,7 @@ elif [ $(uname -a | grep -i --color=never '.*synology.*' &> /dev/null; echo $?) 
   $(if [ ! $(id -u) == 0 ]; then echo "  --  This script must be run under User 'root'."; fi)
 
   Fix the issues and try again. Bye..."
-  return 0
+  exit 0
 fi
 
 # Check for User & Group conflict
@@ -226,7 +226,7 @@ while read USER GROUP UUID GUID; do
     
     Exiting script. Fix the issue and try again..."
     echo
-    return
+    exit 0
   fi
   # Check for User conflict
   if [ ! $(synouser --get $USER &> /dev/null; echo $?) == 0 ] && [ $(synouser --getuid $UUID &> /dev/null; echo $?) == 0 ]; then
@@ -238,7 +238,7 @@ while read USER GROUP UUID GUID; do
     
     Exiting script. Fix the issue and try again..."
     echo
-    return
+    exit 0
   fi
 done  < <( printf '%s\n' "${USER_ARRAY[@]}" )
 
@@ -251,7 +251,7 @@ if [ $(chattr --help &> /dev/null; echo $?) != 1 ]; then
   
   Exiting script. Fix the issue and try again..."
   echo
-  return
+  exit 0
 fi
 
 
@@ -287,7 +287,7 @@ while true; do
     [Nn]*)
       msg "You have chosen not to proceed. Exiting script..."
       echo
-      return 0
+      exit 0
       ;;
     *)
       warn "Error! Entry must be 'y' or 'n'. Try again..."
@@ -332,7 +332,7 @@ else
       [Nn]*)
         msg "You have chosen not to proceed. Change your Synology DNS Search Domain using the Synology DNS Server application. Then re-run this script again. Exiting script..."
         echo
-        return 0
+        exit 0
         ;;
       *)
         warn "Error! Entry must be 'y' or 'n'. Try again..."
@@ -437,7 +437,7 @@ while true; do
         [Nn]*)
           msg "No problem. Change your PVE host primary hostname and try again. Bye..."
           echo
-          return
+          exit 0
           ;;
         *)
           warn "Error! Entry must be 'y' or 'n'. Try again..."
