@@ -664,24 +664,24 @@ while IFS=',' read -r dir desc group permission acl_01 acl_02 acl_03 acl_04 acl_
     while read -r acl_entry; do 
       synoacltool -del ${DIR_SCHEMA}/${dir} ${acl_entry} > /dev/null
     done < <( synoacltool -get "${DIR_SCHEMA}/${dir}" | grep -i --color=never ".*medialab.*\|.*homelab.*\|.*privatelab.*\|.*chrootjail.*" | grep --color=never -Po "(?<=\[).*?(?=\])" | sort -r )
-    # Set ACLs
-    if [ ! -z ${acl_01} ]; then
+    #Set ACLs
+    if [ -n "${acl_01}" ]; then
       acl_var=${acl_01}
       synoaclset "${DIR_SCHEMA}/${dir}"
     fi
-    if [ ! -z ${acl_02} ]; then
+    if [ -n "${acl_02}" ]; then
       acl_var=${acl_02}
       synoaclset "${DIR_SCHEMA}/${dir}"
     fi
-    if [ ! -z ${acl_03} ]; then
+    if [ -n "${acl_03}" ]; then
       acl_var=${acl_03}
       synoaclset "${DIR_SCHEMA}/${dir}"
     fi
-    if [ ! -z ${acl_04} ]; then
+    if [ -n "${acl_04}" ]; then
       acl_var=${acl_04}
       synoaclset "${DIR_SCHEMA}/${dir}"
     fi
-    if [ ! -z ${acl_05} ]; then
+    if [ -n "${acl_05}" ]; then
       acl_var=${acl_05}
       synoaclset "${DIR_SCHEMA}/${dir}"
     fi
@@ -690,29 +690,29 @@ while IFS=',' read -r dir desc group permission acl_01 acl_02 acl_03 acl_04 acl_
     info "New base folder created:\n  ${WHITE}"${DIR_SCHEMA}/${dir}"${NC}"
     synoshare --add "${dir}" "${desc}" "${DIR_SCHEMA}/${dir}" "" "@administrators" "" 1 0
     # Set ACLs
-    if [ ! -z ${acl_01} ]; then
+    if [ -n "${acl_01}" ]; then
       acl_var=${acl_01}
       synoaclset "${DIR_SCHEMA}/${dir}"
     fi
-    if [ ! -z ${acl_02} ]; then
+    if [ -n "${acl_02}" ]; then
       acl_var=${acl_02}
       synoaclset "${DIR_SCHEMA}/${dir}"
     fi
-    if [ ! -z ${acl_03} ]; then
+    if [ -n "${acl_03}" ]; then
       acl_var=${acl_03}
       synoaclset "${DIR_SCHEMA}/${dir}"
     fi
-    if [ ! -z ${acl_04} ]; then
+    if [ -n "${acl_04}" ]; then
       acl_var=${acl_04}
       synoaclset "${DIR_SCHEMA}/${dir}"
     fi
-    if [ ! -z ${acl_05} ]; then
+    if [ -n "${acl_05}" ]; then
       acl_var=${acl_05}
       synoaclset "${DIR_SCHEMA}/${dir}"
     fi
     echo
   fi
-done <<< $(printf '%s\n' "${nas_basefolder_LIST[@]}")
+done < <( printf '%s\n' "${nas_basefolder_LIST[@]}" )
 
 # Create Default SubFolders
 msg "Creating ${SECTION_HEAD^} subfolder shares..."
@@ -724,23 +724,23 @@ while IFS=',' read -r dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; d
     find ${dir} -name .foo_protect -exec chattr -i {} \;
     chgrp -R "${group}" "${dir}" >/dev/null
     chmod -R "${permission}" "${dir}" >/dev/null
-    if [ ! -z ${acl_01} ]; then
+    if [ -n  "${acl_01}" ]; then
       acl_var=${acl_01}
       synoaclset "${dir}"
     fi
-    if [ ! -z ${acl_02} ]; then
+    if [ -n "${acl_02}" ]; then
       acl_var=${acl_02}
       synoaclset "${dir}"
     fi
-    if [ ! -z ${acl_03} ]; then
+    if [ -n "${acl_03}" ]; then
       acl_var=${acl_03}
       synoaclset "${dir}"
     fi
-    if [ ! -z ${acl_04} ]; then
+    if [ -n "${acl_04}" ]; then
       acl_var=${acl_04}
       synoaclset "${dir}"
     fi
-    if [ ! -z ${acl_05} ]; then
+    if [ -n "${acl_05}" ]; then
       acl_var=${acl_05}
       synoaclset "${dir}"
     fi
@@ -750,35 +750,35 @@ while IFS=',' read -r dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; d
     mkdir -p "${dir}" >/dev/null
     chgrp -R "${group}" "${dir}" >/dev/null
     chmod -R "${permission}" "${dir}" >/dev/null
-    if [ ! -z ${acl_01} ]; then
+    if [ -n "${acl_01}" ]; then
       acl_var=${acl_01}
       synoaclset "${dir}"
     fi
-    if [ ! -z ${acl_02} ]; then
+    if [ -n "${acl_02}" ]; then
       acl_var=${acl_02}
       synoaclset "${dir}"
     fi
-    if [ ! -z ${acl_03} ]; then
+    if [ -n "${acl_03}" ]; then
       acl_var=${acl_03}
       synoaclset "${dir}"
     fi
-    if [ ! -z ${acl_04} ]; then
+    if [ -n "${acl_04}" ]; then
       acl_var=${acl_04}
       synoaclset "${dir}"
     fi
-    if [ ! -z ${acl_05} ]; then
+    if [ -n "${acl_05}" ]; then
       acl_var=${acl_05}
       synoaclset "${dir}"
     fi
     echo
   fi
-done <<< $(printf '%s\n' "${nas_basefoldersubfolder_LIST[@]}")
+done < <( printf '%s\n' "${nas_basefoldersubfolder_LIST[@]}" )
 
 # Chattr set share points attributes to +a
 while IFS=',' read -r dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
   touch ${dir}/.foo_protect
   chattr +i ${dir}/.foo_protect
-done <<< $(printf '%s\n' "${nas_basefoldersubfolder_LIST[@]}")
+done < <( printf '%s\n' "${nas_basefoldersubfolder_LIST[@]}" )
 
 
 #---- Create NFS exports
@@ -787,60 +787,74 @@ if [[ $(synoservice --is-enabled nfsd) ]]; then
   synoservice --disable nfsd &> /dev/null
 fi
 
-while IFS=',' read -r dir desc group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
-  if [[ $(grep -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS}) ]]; then
-    # Edit existing nfs export share
-    i=$(( $(echo ${PVE_01_IP} | cut -d . -f 4)))
-    counter=0
-    until [ $counter -eq ${PVE_HOST_NODE_CNT} ]
-    do
-      PVE_0X_IP="$(echo ${PVE_01_IP} | cut -d"." -f1-3).${i}"
-      match=$(grep --color=never -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS})
-      if [[ $(echo "${match}" | grep -ws "${PVE_0X_IP}") ]]; then
-        substitute=$(echo "${match}" | sed "s/${PVE_0X_IP}[^\t]*/${PVE_0X_IP}${NFS_STRING}/")
-        sed -i "s|${match}|${substitute}|" ${NFS_EXPORTS}
-      else
+# Update NFS exports file
+msg "Creating new NFS exports..."
+while IFS=',' read -r dir desc group permission user_groups; do
+  [[ ${dir} =~ 'none' ]] && continue
+  # Check for dir
+  if [ -d "${DIR_SCHEMA}/$dir" ]; then
+    if [[ $(grep -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS}) ]]; then
+      # Edit existing nfs export share
+      while IFS=, read hostid ipaddr desc; do
+        nfs_var=$(if [[ ${NFS_EXPORT_TYPE} == '0' ]]; then echo ${hostid}; else echo ${ipaddr}; fi)
+        match=$(grep --color=never -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS})
+        if [[ $(echo "${match}" | grep -ws "${nfs_var}") ]]; then
+          substitute=$(echo "${match}" | sed -e "s/${nfs_var}[^\t]*/${nfs_var}${NFS_STRING}/")
+          sed -i "s|${match}|${substitute}|" ${NFS_EXPORTS}
+        else
+          # Add to existing nfs export share
+          substitute=$(echo "${match}" | sed -e "s/$/\t${nfs_var}${NFS_STRING}/")
+          sed -i "s|${match}|${substitute}|g" ${NFS_EXPORTS}
+        fi
+      done < <( printf '%s\n' "${pve_node_LIST[@]}" )
+      info "Updating NFS share: ${YELLOW}${DIR_SCHEMA}/${dir}${NC}"
+    else
+      # Create new nfs export share
+      printf "\n"${DIR_SCHEMA}/${dir}"" >> ${NFS_EXPORTS}
+      while IFS=, read hostid ipaddr desc; do
+        nfs_var=$(if [[ ${NFS_EXPORT_TYPE} == '0' ]]; then echo ${hostid}; else echo ${ipaddr}; fi)
+        match=$(grep --color=never -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS})
         # Add to existing nfs export share
-        substitute=$(echo "${match}" | sed "s/$/\t${PVE_0X_IP}${NFS_STRING}/")
+        substitute=$(echo "${match}" | sed -e "s/$/\t${nfs_var}${NFS_STRING}/")
         sed -i "s|${match}|${substitute}|g" ${NFS_EXPORTS}
-      fi
-      ((i=i+1))
-      ((counter++))
-    done
+      done < <( printf '%s\n' "${pve_node_LIST[@]}" )
+      info "New NFS share: ${YELLOW}${DIR_SCHEMA}/${dir}${NC}"
+    fi
   else
-    # Create new nfs export share
-    printf "\n"${DIR_SCHEMA}/${dir}"" >> ${NFS_EXPORTS}
-    i=$(( $(echo ${PVE_01_IP} | cut -d . -f 4)))
-    counter=0
-    until [ $counter -eq ${PVE_HOST_NODE_CNT} ]
-    do
-      PVE_0X_IP="$(echo ${PVE_01_IP} | cut -d"." -f1-3).${i}"
-      match=$(grep --color=never -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS})
-      # Add to existing nfs export share
-      substitute=$(echo "${match}" | sed "s/$/\t${PVE_0X_IP}${NFS_STRING}/")
-      sed -i "s|${match}|${substitute}|g" ${NFS_EXPORTS}
-      ((i=i+1))
-      ((counter++))
-    done
+    info "${DIR_SCHEMA}/${dir} does not exist. Skipping..."
   fi
-done <<< $(printf '%s\n' "${nas_basefolder_LIST[@]}")
+done < <( printf '%s\n' "${nas_basefolder_LIST[@]}" )
+echo
+
+# Update '/etc/hosts' file
+if [[ ${NFS_EXPORT_TYPE} == '0' ]]; then 
+echo "# --- BEGIN PVE HOST IP ADDRESS FOR NFS ---" >> /etc/hosts
+while IFS=, read hostid ipaddr desc; do
+  echo "${ipaddr} ${hostid}.$(hostname -d) ${hostid}" >> /etc/hosts
+done < <( printf '%s\n' "${pve_node_LIST[@]}" )
+echo "# --- END PVE HOST IP ADDRESS FOR NFS ---" >> /etc/hosts
+fi
 
 # Set NFS settings
 sed -i "s#^\(nfsv4_enable.*\s*=\s*\).*\$#\1yes#" /etc/nfs/syno_nfs_conf # Enable nfs4.1
 sed -i "s#^\(nfs_unix_pri_enable.*\s*=\s*\).*\$#\11#" /etc/nfs/syno_nfs_conf # Enable Unix permissions
 
 # Restart NFS
-if ! [ $(synoservice --status nfsd > /dev/null; echo $?) == 0 ]; then
+if ! [ $(synoservice --status nfsd > /dev/null; echo $?) == '0' ]; then
   synoservice --reload nfsd
   synoservice --enable nfsd
 fi
 
 #---- Enable SMB
 /usr/syno/etc/rc.sysv/S80samba.sh stop &> /dev/null
-sed -i "s#\(min protocol.*\s*=\s*\).*\$#\1SMB2#" ${SMB_CONF_FILE}
-sed -i "s#\(max protocol.*\s*=\s*\).*\$#\1SMB3#" ${SMB_CONF_FILE}
+sed -i "s#\(min protocol.*\s*=\s*\).*\$#\1SMB2#" ${SMB_CONF}
+sed -i "s#\(max protocol.*\s*=\s*\).*\$#\1SMB3#" ${SMB_CONF}
 /usr/syno/etc/rc.sysv/S80samba.sh reload &> /dev/null
 /usr/syno/etc/rc.sysv/S80samba.sh restart &> /dev/null
+
+#---- Enable WS-Discovery
+sudo synoservicectl --restart synowsdiscoveryd
+sudo synoservicectl --status synowsdiscoveryd
 
 #---- Set Synology Hostname
 if [ ${SYNO_HOSTNAME_MOD} == 0 ]; then
@@ -851,11 +865,15 @@ fi
 
 section "Completion Status."
 
-msg "Success. ${HOSTNAME_VAR^} build has completed and is ready to provide NFS/CIFS file storage to your Proxmox nodes.
-
+msg "Success. ${HOSTNAME_VAR^} NAS is fully configured and is ready to provide NFS and/or SMB/CIFS backend storage mounts for your PVE hosts.
 $(if [ ${SYNO_HOSTNAME_MOD} == 0 ]; then echo "  --  Synology NAS hostname has changed to: ${WHITE}${HOSTNAME_VAR}${NC}\n"; fi)
-More information about configuring a Synology NAS is available here:
+More information about configuring a Synology NAS and PVE hosts is available here:
 
-  --  ${WHITE}https://github.com/ahuacate/pve-nas${NC}
-  
-We recommend the User now reboots this Synology NAS."
+  --  ${WHITE}https://github.com/ahuacate/nas-hardmetal${NC}
+  --  ${WHITE}https://github.com/ahuacate/pve-host-setup${NC}
+
+We recommend the User now:
+  --  Enables WS-Discovery using the Synology WebGUI
+      ( Control Panel > File Services > Advanced > WS-Discovery )
+  --  Reboot the Synology NAS."
+echo
