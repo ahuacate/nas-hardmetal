@@ -125,6 +125,7 @@ SMB_CONF='/etc/samba/smb.conf'
 # DHCP status
 if [[ $(synonet --show | grep "^DHCP.*") ]]; then
   NAS_DHCP='1'
+  NAS_IP=$(ip route get 8.8.8.8 | sed -n '/src/{s/.*src *\([^ ]*\).*/\1/p;q}')
 elif [[ $(synonet --show | grep "^Manual\sIP.*") ]]; then
   NAS_DHCP='0'
   NAS_IP=$(synonet --show | grep -i --color=never "^IP:" | awk -F':' '{ print $2 }' | sed -r 's/\s+//g')
@@ -793,9 +794,9 @@ fi
 if [ ! $(nslookup $(synonet --get_hostname) >/dev/null 2>&1; echo $?) == '0' ]; then
   # Set NFS export method (because nslookup failed to resolve PVE primary hostname)
   display_msg1="DNS Server 1:$(ip route show default | awk '/default/ {print $3}' | awk -F'.' 'BEGIN {OFS=FS} { print $1, $2, $3, "254" }'):This is your PiHole server IP address\nDNS Server 2:$(ip route show default | awk '/default/ {print $3}'):This is your network router DNS IP"
-  display_msg2="/volume1/audio:${PVE_HOST_IP}(rw,sync):IP based example\n/volume1/audio:${PVE_HOSTNAME}(rw,sync):Hostname based example (Recommended)"
+  display_msg2="/volume1/audio:${PVE_HOST_IP}(rw,sync):IP based\n/volume1/audio:${PVE_HOSTNAME}(rw,sync):Hostname based (Recommended)"
 
-  msg "#### PLEASE READ CAREFULLY - NFS SHARED FOLDERS ####\n\nYour Proxmox primary host probably requires shared storage mountpoints to this NAS. You can choose between 'hostname' or 'IP' based NAS NFS exports.\n\nUnfortunately some network DNS servers may not map arbitrary hostnames to their static IP addresses (UniFi for example). An alternative is to configure NFS exports with 'IP' based exports when configuring NFS '/etc/exports'. Or we recommend you install a PVE CT PiHole DNS server to resolve arbitrary hostnames to their static IP addresses by adding each PVE host IP address to the PiHole local DNS record and set 'Use Conditional Forwarding' with the following parameters:\n\n$(printf '%s\n' "${pve_node_LIST[@]}" | awk -F',' -v searchdomain="$(echo ${SEARCHDOMAIN})" 'BEGIN {OFS="\t"} { print $1"."searchdomain, $2 }' | indent2)\n\nThen edit each PVE host DNS setting ( in identical order, PiHole first ) as follows:\n\n$(echo -e "${display_msg1}" | awk -F':' 'BEGIN{OFS="\t"} {$1=$1;print}' | indent2)\n\nRemember in the event the User changes their PVE hosts IP addresses you must update the PiHole local DNS records.\n\nExamples of NFS exports is as follows:\n\n$(echo -e "${display_msg2}" | awk -F':' '{ printf "%-15s %-25s %-20s\n", $1, $2, $3 }' | indent2)"
+  msg "#### PLEASE READ CAREFULLY - NFS SHARED FOLDERS ####\n\nYour Proxmox primary host probably requires shared storage mountpoints to this NAS. You can choose between 'hostname' or 'IP' based NAS NFS exports.\n\nUnfortunately some network DNS servers may not map arbitrary hostnames to their static IP addresses (UniFi for example). An alternative is to configure NFS exports with 'IP' based exports when configuring NFS '/etc/exports'. Or we recommend you install a PVE CT PiHole DNS server to resolve arbitrary hostnames to their static IP addresses by adding each PVE host IP and NAS IP to the PiHole local DNS record. Also enable 'Use Conditional Forwarding' and fields and enable 'Use DNSSEC'. Your PiHole Local DNS Records will be:\n\n$(printf '%s\n' "${pve_node_LIST[@]}" | sed "a${HOSTNAME_VAR}\,${NAS_IP}" | awk -F',' -v searchdomain="$(echo ${SEARCHDOMAIN})" 'BEGIN {OFS="\t"} { print $1"."searchdomain, $2 }' | indent2)\n\nThen edit each PVE host DNS setting ( in identical order, PiHole first ) as follows:\n\n$(echo -e "${display_msg1}" | awk -F':' 'BEGIN{OFS="\t"} {$1=$1;print}' | indent2)\n\nRemember in the event the User changes their PVE hosts IP addresses you must update the PiHole local DNS records.\n\nExamples of NFS exports is as follows:\n\n$(echo -e "${display_msg2}" | awk -F':' '{ printf "%-15s %-25s %-20s\n", $1, $2, $3 }' | indent2)"
   echo
   echo
 
@@ -894,7 +895,7 @@ if ! [ $(synoservice --status nfsd > /dev/null; echo $?) == '0' ]; then
 fi
 
 # Read /etc/exports
-exportfs -ra
+sudo exportfs -ra
 
 #---- Enable SMB
 /usr/syno/etc/rc.sysv/S80samba.sh stop &> /dev/null
@@ -928,5 +929,7 @@ We recommend the User now:
       ( Control Panel > File Services > Advanced > WS-Discovery )
   --  Reboot the Synology NAS.
 
-If you have issues with NFS hostnames simply re-run this script and select IP based exports."
+If you have issues with NFS using hostnames simply re-run this script and select IP based NFS exports.
+
+WARNING: Synology WebGUI will not show the new NFS exports. But they are working. To edit /etc/exports use nano or vi (as root). After editing type 'sudo exportfs -ra' to propogate the NFS server with any changes."
 echo
