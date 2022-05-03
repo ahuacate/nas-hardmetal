@@ -116,8 +116,6 @@ perm_08=':allow:--x----------:fd--'
 PVE_HOST_NODE_CNT='5'
 
 # NFS string and settings
-pve-04(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
-/volume1/audio  nas-01(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
 NFS_STRING='(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)'
 NFS_EXPORTS='/etc/exports'
 
