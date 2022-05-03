@@ -795,7 +795,7 @@ if [ ! $(nslookup $(synonet --get_hostname) >/dev/null 2>&1; echo $?) == '0' ]; 
   display_msg1="DNS Server 1:$(ip route show default | awk '/default/ {print $3}' | awk -F'.' 'BEGIN {OFS=FS} { print $1, $2, $3, "254" }'):This is your PiHole server IP address\nDNS Server 2:$(ip route show default | awk '/default/ {print $3}'):This is your network router DNS IP"
   display_msg2="/volume1/audio:${PVE_HOST_IP}(rw,sync):IP based example\n/volume1/audio:${PVE_HOSTNAME}(rw,sync):Hostname based example (Recommended)"
 
-  msg "#### PLEASE READ CAREFULLY - NFS SHARED FOLDERS ####\n\nYour Proxmox primary requires shared storage mountpoints to this NAS. You can choose between 'hostname' or 'IP' based NAS NFS exports.\n\nUnfortunately some network DNS servers may not map arbitrary hostnames to their static IP addresses (UniFi for example). An alternative is to configure NFS exports with 'IP' based exports when configuring NFS '/etc/exports'. Or we recommend you install a PVE CT PiHole DNS server to resolve arbitrary hostnames to their static IP addresses by adding each PVE host IP address to the PiHole local DNS record and set 'Use Conditional Forwarding' with the following parameters:\n\n$(printf '%s\n' "${pve_node_LIST[@]}" | awk -F',' -v searchdomain="$(echo ${SEARCHDOMAIN})" 'BEGIN {OFS="\t"} { print $1"."searchdomain, $2 }' | indent2)\n\nThen edit each PVE host DNS setting ( in identical order, PiHole first ) as follows:\n\n$(echo -e "${display_msg1}" | awk -F':' 'BEGIN{OFS="\t"} {$1=$1;print}' | indent2)\n\nRemember in the event the User changes their PVE hosts IP addresses you must update the PiHole local DNS records.\n\nExamples of NFS exports is as follows:\n\n$(echo -e "${display_msg2}" | awk -F':' '{ printf "%-15s %-25s %-20s\n", $1, $2, $3 }' | indent2)"
+  msg "#### PLEASE READ CAREFULLY - NFS SHARED FOLDERS ####\n\nYour Proxmox primary host probably requires shared storage mountpoints to this NAS. You can choose between 'hostname' or 'IP' based NAS NFS exports.\n\nUnfortunately some network DNS servers may not map arbitrary hostnames to their static IP addresses (UniFi for example). An alternative is to configure NFS exports with 'IP' based exports when configuring NFS '/etc/exports'. Or we recommend you install a PVE CT PiHole DNS server to resolve arbitrary hostnames to their static IP addresses by adding each PVE host IP address to the PiHole local DNS record and set 'Use Conditional Forwarding' with the following parameters:\n\n$(printf '%s\n' "${pve_node_LIST[@]}" | awk -F',' -v searchdomain="$(echo ${SEARCHDOMAIN})" 'BEGIN {OFS="\t"} { print $1"."searchdomain, $2 }' | indent2)\n\nThen edit each PVE host DNS setting ( in identical order, PiHole first ) as follows:\n\n$(echo -e "${display_msg1}" | awk -F':' 'BEGIN{OFS="\t"} {$1=$1;print}' | indent2)\n\nRemember in the event the User changes their PVE hosts IP addresses you must update the PiHole local DNS records.\n\nExamples of NFS exports is as follows:\n\n$(echo -e "${display_msg2}" | awk -F':' '{ printf "%-15s %-25s %-20s\n", $1, $2, $3 }' | indent2)"
   echo
   echo
 
@@ -893,6 +893,9 @@ if ! [ $(synoservice --status nfsd > /dev/null; echo $?) == '0' ]; then
   synoservice --enable nfsd
 fi
 
+# Read /etc/exports
+exportfs -ra
+
 #---- Enable SMB
 /usr/syno/etc/rc.sysv/S80samba.sh stop &> /dev/null
 sed -i "s#\(min protocol.*\s*=\s*\).*\$#\1SMB2#" ${SMB_CONF}
@@ -923,5 +926,7 @@ More information about configuring a Synology NAS and PVE hosts is available her
 We recommend the User now:
   --  Enables WS-Discovery using the Synology WebGUI
       ( Control Panel > File Services > Advanced > WS-Discovery )
-  --  Reboot the Synology NAS."
+  --  Reboot the Synology NAS.
+
+If you have issues with NFS hostnames simply re-run this script and select IP based exports."
 echo
