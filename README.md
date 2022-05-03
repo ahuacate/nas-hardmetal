@@ -50,9 +50,10 @@ Our Easy Scripts have preset configurations. The installer may accept or decline
 
 
 <h4><b>1) Synology NAS Builder Easy Script</b></h4>
-You must first SSH login to your Synology NAS using your Administrator credentials: `ssh admin@IP_address`. If you have changed your Synology default SSH port use `ssh admin@IP_address:port`. After SSH login the User must type the following commands to switch to User root:
+You must first SSH login to your Synology NAS using your Administrator credentials: `ssh admin@IP_address`. If you have changed your Synology default SSH port use `ssh admin@IP_address:port`. After SSH login the User must type `sudo -i` to switch to root user. Root password which is the same as User password for 'admin'
+
 ```bash
-sudo -i # You will prompted for a root password which is the same as User password for 'admin'
+sudo -i
 bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/nas-hardmetal/master/synology_nas_installer.sh)"
 ```
 
