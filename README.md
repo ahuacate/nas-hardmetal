@@ -10,18 +10,21 @@ Easy Scripts are available for:
 
 <h2>Features</h2>
 
-Easy Script installer will create, modify and change system settings including:
+Our Easy Script installer will create, modify and change system settings including:
 
-* Create new Power User & Group Accounts
+Our Easy Script installer will fully configure and ready your NAS to support Ahuacate CTs or VMs. Each NAS installer will create, modify and change system settings including:
+
+* Power User & Group Accounts
     * Groups: medialab:65605, homelab:65606, privatelab:65607, chrootjail:65608
     * Users: media:1605, home:1606, private:1607
     * Users media, home and private are for running CT applications
-* Chrootjail Group for general User accounts
-* Create a full set of compatible base and sub-folders ready for Ahuacate PVE CT applications
-* Set new folder shares with access permissions rights including ACLs
-* Create NFS exports for PVE hosts backend storage mounts
-* Create SMB shares with access permissions ( by User Group accounts )
-* Check Search Domain (localdomain) name is valid ( i.e .local, .localdomain, .home.arpa, .lan )
+* Chrootjail Group for general User accounts.
+* Ready for all Medialab applications such as Sonarr, Radarr, JellyFin, NZBGet and more.
+* Full set of base and sub-folders ready for all CT applications
+* Folder and user permissions are set including ACLs
+* NFS 4.1 exports ready for PVE hosts backend storage mounts
+* SMB 3.0 shares with access permissions set ( by User Group accounts )
+* Set Local Domain option to set ( i.e .local, .localdomain, .home.arpa, .lan )
 
 <h2>Prerequisites</h2>
 
@@ -35,45 +38,30 @@ Easy Script installer will create, modify and change system settings including:
 - [x] Network DNS Search Domain resolves all LAN device hostnames (*static and dhcp IP's*)
 - [x] Local Domain name is set on all network devices (*see note below*)
 - [x] PVE host hostnames are suffixed with a numeric (*i.e pve-01 or pve01 or pve1*)
-- [x] PVE host has internet access
+- [x] NAS and PVE host have internet access
 
-Note: The network Local Domain or Search domain must be set. We recommend only top-level domain (spTLD) names for residential and small networks names because they cannot be resolved across the internet. Routers and DNS servers know, in theory, not to forward ARPA requests they do not understand onto the public internet. It is best to choose one of our listed names: local, home.arpa, localdomain or lan only. Do NOT use made-up names.
+>Note: The network Local Domain or Search domain must be set. We recommend only top-level domain (spTLD) names for residential and small networks names because they cannot be resolved across the internet. Routers and DNS servers know, in theory, not to forward ARPA requests they do not understand onto the public internet. It is best to choose one of our listed names: local, home.arpa, localdomain or lan only. Do NOT use made-up names.
 
-<h2>Installation Options</h2>
-
-If you want a Proxmox hosted NAS look at this GitHub [repository](https://github.com/ahuacate/pve-nas).
-
-For hard-metal NAS setup select your OS type.
-<ol>
-<li><h4><b>Ubuntu NAS - PVE SATA/NVMe</b></h4></li>
-
-PVE ZFS pool backend, Ubuntu frontend.
-
-Proxmox manages the ZFS storage pool backend while Ubuntu does the frontend. ZFS Raid levels depend on the number of disks installed. You also have the option of configuring ZFS cache using SSD drives. ZFS cache will provide High-Speed disk I/O.
-
-<li><h4><b>Ubuntu NAS - USB disks</b></h4></li>
-
-PVE USB disk backend, Ubuntu frontend.
-
-Here the NAS stores all data on an external USB disk. This is for SFF computing hardware such as Intel NUCs. Your NAS ZFS storage pool backend is fully managed by the Proxmox host.
-</ol>
-
-The other build option is a NAS OS solution VM.
-
-<ol>
-<li><h4><b>OMV NAS - SATA/SAS HBA Card</b><h/4></li>
-
-PCIe SATA/NVMe HBA card pass-thru based on Open Media Vault (Under Development).
-
-Here a dedicated PCIe SATA/NVMe HBA Adapter Card (i.e LSI 9207-8i) supports all NAS disks. All OMV storage disks, including any ZFS Cache SSDs, must be connected to the HBA Adapter Card. You cannot co-mingle OMV disks with the PVE hosts mainboard onboard SATA/NVMe devices. OMV manages both backend and frontend.
-</ol>
-
-<h4><b>Easy Scripts</b></h4>
+<h2><b>Easy Scripts</b></h2>
 
 Easy Scripts automate the installation and/or configuration processes. Easy Scripts are hardware type-dependent so choose carefully. Easy Scripts are based on bash scripting. `Cut & Paste` our Easy Script command into a terminal window, press `Enter`, and follow the prompts and terminal instructions. 
 
 Our Easy Scripts have preset configurations. The installer may accept or decline the ES values. If you decline the User will be prompted to input all required configuration settings. PLEASE read our guide if you are unsure.
 
+
+<h4><b>1) Synology NAS Builder Easy Script</b></h4>
+You must first SSH login to your Synology NAS using your Administrator credentials: `ssh admin@IP_address`. If you have changed your Synology default SSH port use `ssh admin@IP_address:port`. After SSH login the User must type the following commands to switch to User root:
+```bash
+sudo -i # You will prompted for a root password which is the same as User password for 'admin'
+bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/nas-hardmetal/master/synology_nas_installer.sh)"
+```
+And simply follow the scripts prompts.
+
+### 3.2.1. Linux NAS Installer/Builder ( hard metal )
+You must first SSH login to your NAS `ssh root@IP_address` or if you have changed your default SSH port use `ssh root@IP_address:port`. Then you must run the following commands:
+```bash
+bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/pve-nas/master/linux_nas_installer.sh)"
+```
 
 > Use this script to start the PVE NAS Installer. The User will be prompted to select a installation type. Run in a PVE host SSH terminal.
 
@@ -133,6 +121,7 @@ Synology DiskStation Prerequisites are:
 <h4>Table of Contents</h4>
 <!-- TOC -->
 
+        - [3.2.1. Linux NAS Installer/Builder ( hard metal )](#321-linux-nas-installerbuilder--hard-metal-)
 - [1. Introduction](#1-introduction)
 - [2. Prerequisites](#2-prerequisites)
     - [2.1. NFS Support](#21-nfs-support)
@@ -222,7 +211,7 @@ Synology DiskStation Prerequisites are:
 - [3. Hard Metal NAS](#3-hard-metal-nas)
     - [3.1. Hard Metal NAS Prerequisites](#31-hard-metal-nas-prerequisites)
     - [3.2. Easy Script setup](#32-easy-script-setup)
-        - [3.2.1. Linux NAS Installer/Builder ( hard metal )](#321-linux-nas-installerbuilder--hard-metal-)
+        - [3.2.1. Linux NAS Installer/Builder ( hard metal )](#321-linux-nas-installerbuilder--hard-metal--1)
         - [3.2.2. Synology NAS Installer/Builder ( hard metal )](#322-synology-nas-installerbuilder--hard-metal-)
 - [4. Other Linux NAS Types & Basic NAS Building](#4-other-linux-nas-types--basic-nas-building)
     - [4.1. Prerequisites](#41-prerequisites)

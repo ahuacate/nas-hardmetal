@@ -116,6 +116,8 @@ perm_08=':allow:--x----------:fd--'
 PVE_HOST_NODE_CNT='5'
 
 # NFS string and settings
+pve-04(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
+/volume1/audio  nas-01(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)
 NFS_STRING='(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)'
 NFS_EXPORTS='/etc/exports'
 
@@ -400,7 +402,7 @@ fi
 
 #---- Set PVE primary host hostname and IP address
 section "Input Proxmox primary hostname and IP address"
-msg "#### PLEASE READ CAREFULLY ####\n\nThe User must confirm your PVE primary hostname and IP address. Only input the PVE primary host details and NOT the secondary host. These inputs are critical for system and networking configuration."
+msg "#### PLEASE READ CAREFULLY ####\n\nThe User must confirm your PVE primary hostname and IP address. Only input your PVE primary host details and NOT a secondary host. These inputs are critical for system and networking configuration."
 echo
 HOSTNAME_FAIL_MSG="The PVE hostname is not valid. A valid PVE hostname is when all of the following constraints are satisfied:\n
   --  it does exists on the network.
@@ -782,9 +784,57 @@ done < <( printf '%s\n' "${nas_basefoldersubfolder_LIST[@]}" )
 
 
 #---- Create NFS exports
+section "Setup NFS exports"
+
 # Stop NFS service
 if [[ $(synoservice --is-enabled nfsd) ]]; then
   synoservice --disable nfsd &> /dev/null
+fi
+
+# Check if Static hostnames are mapped
+if [ ! $(nslookup $(synonet --get_hostname) >/dev/null 2>&1; echo $?) == '0' ]; then
+  # Set NFS export method (because nslookup failed to resolve PVE primary hostname)
+  display_msg1="DNS Server 1:$(ip route show default | awk '/default/ {print $3}' | awk -F'.' 'BEGIN {OFS=FS} { print $1, $2, $3, "254" }'):This is your PiHole server IP address\nDNS Server 2:$(ip route show default | awk '/default/ {print $3}'):This is your network router DNS IP"
+  display_msg2="/volume1/audio:${PVE_HOST_IP}(rw,sync):IP based example\n/volume1/audio:${PVE_HOSTNAME}(rw,sync):Hostname based example (Recommended)"
+
+  msg "#### PLEASE READ CAREFULLY - NFS SHARED FOLDERS ####\n\nYour Proxmox primary requires shared storage mountpoints to this NAS. You can choose between 'hostname' or 'IP' based NAS NFS exports.\n\nUnfortunately some network DNS servers may not map arbitrary hostnames to their static IP addresses (UniFi for example). An alternative is to configure NFS exports with 'IP' based exports when configuring NFS '/etc/exports'. Or we recommend you install a PVE CT PiHole DNS server to resolve arbitrary hostnames to their static IP addresses by adding each PVE host IP address to the PiHole local DNS record and set 'Use Conditional Forwarding' with the following parameters:\n\n$(printf '%s\n' "${pve_node_LIST[@]}" | awk -F',' -v searchdomain="$(echo ${SEARCHDOMAIN})" 'BEGIN {OFS="\t"} { print $1"."searchdomain, $2 }' | indent2)\n\nThen edit each PVE host DNS setting ( in identical order, PiHole first ) as follows:\n\n$(echo -e "${display_msg1}" | awk -F':' 'BEGIN{OFS="\t"} {$1=$1;print}' | indent2)\n\nRemember in the event the User changes their PVE hosts IP addresses you must update the PiHole local DNS records.\n\nExamples of NFS exports is as follows:\n\n$(echo -e "${display_msg2}" | awk -F':' '{ printf "%-15s %-25s %-20s\n", $1, $2, $3 }' | indent2)"
+  echo
+  echo
+
+  unset options
+  options=( "Hostname Based (Recommended)" "IP Based" )
+  PS3="Select a NFS export type (entering numeric) : "
+  select NFS_TYPE_VAR in "${options[@]}"; do
+    msg "You have assigned and set: ${YELLOW}$NFS_TYPE${NC}"
+    while true; do
+      read -p "Confirm your selection is correct [y/n]?: " -n 1 -r YN
+      echo
+      case $YN in
+        [Yy]*)
+          echo
+          break 2
+          ;;
+        [Nn]*)
+          msg "No problem. Try again..."
+          echo
+          break
+          ;;
+        *)
+          warn "Error! Entry must be 'y' or 'n'. Try again..."
+          echo
+          ;;
+      esac
+    done
+  done
+  # Set NFS Type var
+  if [[ ${NFS_TYPE_VAR} =~ ^Hostname ]]; then
+    NFS_EXPORT_TYPE='0'
+  elif [[ ${NFS_TYPE_VAR} =~ ^IP ]]; then
+    NFS_EXPORT_TYPE='1'
+  fi
+else
+  # NFS exports set to use hostnames
+  NFS_EXPORT_TYPE='0'
 fi
 
 # Update NFS exports file
