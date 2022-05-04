@@ -1,6 +1,6 @@
 <h1>NAS - Hard-metal Builds</h1>
 
-If you have hard-metal NAS of compatible Linux OS then our Easy Scripts will help you prepare your NAS for Proxmox hosts and our suite of PVE applications.
+If your NAS is a Synology or a supported hard-metal Linux OS then our Easy Scripts can set-up your NAS for Proxmox and our suite of PVE applications.
 
 Easy Scripts are available for:
 
@@ -9,8 +9,6 @@ Easy Scripts are available for:
 * Debian Linux
 
 <h2>Features</h2>
-
-Our Easy Script installer will create, modify and change system settings including:
 
 Our Easy Script installer will fully configure and ready your NAS to support Ahuacate CTs or VMs. Each NAS installer will create, modify and change system settings including:
 
