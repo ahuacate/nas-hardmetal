@@ -600,7 +600,7 @@ fi
 msg "#### PLEASE READ CAREFULLY - SHARED FOLDERS ####\n
 Shared folders are the basic directories where you can store files and folders on your Synology NAS. Below is a list of the Ahuacate default Synology shared folders.
 
-$(while IFS=',' read -r var1 var2; do echo "  --  $DIR_SCHEMA_TMP/'${var1}'"; done < <( cat nas_basefolderlist | sed 's/^#.*//' | sed '/^$/d' ))
+$(while IFS=',' read -r var1 var2; do echo "  --  ${DIR_SCHEMA_TMP}/'${var1}'"; done < <( cat ${COMMON_DIR}/nas/src/nas_basefolderlist | sed 's/^#.*//' | sed '/^$/d' ))
 
 Some of these shared folders may already exist. This script will modify the permissions and ACLs of matching existing shared folders and create new shared folders if required. You should always perform a Synology backup before running this script. This script will NOT delete any existing data but may change shared folder permissions.
 
