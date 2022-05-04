@@ -40,6 +40,38 @@ Our Easy Script installer will fully configure and ready your NAS to support Ahu
 - [x] PVE host hostnames are suffixed with a numeric (*i.e pve-01 or pve01 or pve1*)
 - [x] NAS and PVE host have internet access
 
+**Local DNS Records**
+Its important the User checks if hostnames are being mapped for clients with static IP addresses. Use Linux command `nslookup hostname` on your PVE host to check if static IP client hostnames are being being mapped.
+
+Unfortunately some network DNS servers may not map arbitrary hostnames to their static IP addresses (UniFi for example). The fix is to install PVE CT PiHole DNS server to resolve arbitrary hostnames to their static IP addresses by adding each PVE host IP and NAS IP to the PiHole local DNS record. In PiHole DNS settings complete as follows (change to match your network):
+
+:white_check_mark: Use DNSSEC
+:white_check_mark: Use Conditional Forwarding
+
+|Local network in CIDR|IP address of your DHCP server (router)|Local domain name
+|----|----|----
+|192.168.0.0/24|192.168.1.5|local
+
+Then in PiHole Local DNS add any client which uses static IP addresses like the following records (change to match your network).
+
+|Domain|IP address
+|----|----
+|nas-01.local|192.168.1.10
+|nas-02.local|192.168.1.11
+|pve-01.local|192.168.1.101
+|pve-02.local|192.168.1.102
+|pve-03.local|192.168.1.103
+|pve-04.local|192.168.1.104
+|pve-05.local|192.168.1.105
+
+Then edit your Proxmox hosts DNS setting ( in identical order, PiHole DNS first )
+as follows:
+|Type|Value|Description
+|----|----|----
+|Search Domain|local
+|DNS Server 1|192.168.1.254|This is your PiHole server IP address
+|DNS Server 2|192.168.1.5|This is your network router DNS IP
+
 >Note: The network Local Domain or Search domain must be set. We recommend only top-level domain (spTLD) names for residential and small networks names because they cannot be resolved across the internet. Routers and DNS servers know, in theory, not to forward ARPA requests they do not understand onto the public internet. It is best to choose one of our listed names: local, home.arpa, localdomain or lan only. Do NOT use made-up names.
 
 <h2><b>Easy Scripts</b></h2>
@@ -50,7 +82,7 @@ Our Easy Scripts have preset configurations. The installer may accept or decline
 
 
 <h4><b>1) Synology NAS Builder Easy Script</b></h4>
-You must first SSH login to your Synology NAS using your Administrator credentials: `ssh admin@IP_address`. If you have changed your Synology default SSH port use `ssh admin@IP_address:port`. After SSH login the User must type `sudo -i` to switch to root user. Root password which is the same as User password for 'admin'
+SSH login to your Synology NAS using your Administrator credentials: `ssh admin@IP_address`. If you have changed your Synology default SSH port use `ssh admin@IP_address:port`. After SSH login you must type `sudo -i` to switch to root user. The Root password is the password used for 'admin'. Then you must run the following commands.
 
 ```bash
 sudo -i
@@ -59,14 +91,14 @@ bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/nas-hardmetal/
 
 <h4><b>2) Linux NAS Builder Easy Script</b></h4>
 
-Built for debian based NAS servers. You must first SSH login to your NAS `ssh root@IP_address`. Then you must run the following commands:
+Built for debian based NAS servers. You must first SSH login to your NAS `ssh root@IP_address`. Then you must run the following commands.
 ```bash
 Coming soon. Sorry
 ```
 
 <h4><b>2) Open Media Vault Builder Easy Script</b></h4>
 
-Built for OMV NAS only. You must first SSH login to your NAS `ssh root@IP_address`. Then you must run the following commands:
+Built for OMV NAS only. You must first SSH login to your NAS `ssh root@IP_address`. Then you must run the following commands.
 ```bash
 Coming soon. Sorry
 ```
