@@ -11,7 +11,7 @@
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 COMMON_DIR="${DIR}/../common"
-COMMON_PVE_SRC="${DIR}/../common/pve/src"
+COMMON_PVE_SRC_DIR="${DIR}/../common/pve/src"
 SHARED_DIR="${DIR}/../shared"
 
 #---- Dependencies -----------------------------------------------------------------
@@ -401,7 +401,7 @@ fi
 
 #---- Set PVE primary host hostname and IP address
 section "Input Proxmox primary hostname and IP address"
-msg "#### PLEASE READ CAREFULLY ####\n\nThe User must confirm your PVE primary hostname and IP address. Only input your PVE primary host details and NOT a secondary host. These inputs are critical for system and networking configuration."
+msg "#### PLEASE READ CAREFULLY ####\n\nThe User must confirm their PVE primary hostname (i.e pve-01) and IP address. Only input your PVE primary host details and NOT a secondary hostname. These inputs are critical for system and networking configuration."
 echo
 HOSTNAME_FAIL_MSG="The PVE hostname is not valid. A valid PVE hostname is when all of the following constraints are satisfied:\n
   --  it does exists on the network.
@@ -917,7 +917,7 @@ fi
 
 section "Completion Status."
 
-msg "Success. ${HOSTNAME_VAR^} NAS is fully configured and is ready to provide NFS and/or SMB/CIFS backend storage mounts for your PVE hosts.
+msg "Success. ${HOSTNAME_VAR^} NAS is fully configured and is ready to provide NFS and/or SMB/CIFS backend storage mounts to your PVE hosts.
 $(if [ ${SYNO_HOSTNAME_MOD} == 0 ]; then echo "  --  Synology NAS hostname has changed to: ${WHITE}${HOSTNAME_VAR}${NC}\n"; fi)
 More information about configuring a Synology NAS and PVE hosts is available here:
 
