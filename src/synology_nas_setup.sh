@@ -804,7 +804,7 @@ if [ ! $(nslookup $(synonet --get_hostname) >/dev/null 2>&1; echo $?) == '0' ]; 
   options=( "Hostname Based (Recommended)" "IP Based" )
   PS3="Select a NFS export type (entering numeric) : "
   select NFS_TYPE_VAR in "${options[@]}"; do
-    msg "You have assigned and set: ${YELLOW}$NFS_TYPE${NC}"
+    msg "You have assigned and set: ${YELLOW}$NFS_TYPE_VAR${NC}"
     while true; do
       read -p "Confirm your selection is correct [y/n]?: " -n 1 -r YN
       echo
@@ -842,10 +842,10 @@ while IFS=',' read -r dir desc group permission user_groups; do
   [[ ${dir} =~ 'none' ]] && continue
   # Check for dir
   if [ -d "${DIR_SCHEMA}/$dir" ]; then
-    if [[ $(grep -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS}) ]]; then
+    if [[ $(grep -xs "^${DIR_SCHEMA}/${dir}.*" nano ) ]]; then
       # Edit existing nfs export share
       while IFS=, read hostid ipaddr desc; do
-        nfs_var=$(if [[ ${NFS_EXPORT_TYPE} == '0' ]]; then echo ${hostid}; else echo ${ipaddr}; fi)
+        nfs_var=$(if [[ ${NFS_EXPORT_TYPE} == '0' ]]; then echo "${hostid}.${SEARCHDOMAIN}"; else echo ${ipaddr}; fi)
         match=$(grep --color=never -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS})
         if [[ $(echo "${match}" | grep -ws "${nfs_var}") ]]; then
           substitute=$(echo "${match}" | sed -e "s/${nfs_var}[^\t]*/${nfs_var}${NFS_STRING}/")
@@ -861,7 +861,7 @@ while IFS=',' read -r dir desc group permission user_groups; do
       # Create new nfs export share
       printf "\n"${DIR_SCHEMA}/${dir}"" >> ${NFS_EXPORTS}
       while IFS=, read hostid ipaddr desc; do
-        nfs_var=$(if [[ ${NFS_EXPORT_TYPE} == '0' ]]; then echo ${hostid}; else echo ${ipaddr}; fi)
+        nfs_var=$(if [[ ${NFS_EXPORT_TYPE} == '0' ]]; then echo "${hostid}.${SEARCHDOMAIN}"; else echo ${ipaddr}; fi)
         match=$(grep --color=never -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS})
         # Add to existing nfs export share
         substitute=$(echo "${match}" | sed -e "s/$/\t${nfs_var}${NFS_STRING}/")
@@ -879,7 +879,7 @@ echo
 if [[ ${NFS_EXPORT_TYPE} == '0' ]]; then 
 echo "# --- BEGIN PVE HOST IP ADDRESS FOR NFS ---" >> /etc/hosts
 while IFS=, read hostid ipaddr desc; do
-  echo "${ipaddr} ${hostid}.$(hostname -d) ${hostid}" >> /etc/hosts
+  echo "${ipaddr} ${hostid}.${SEARCHDOMAIN} ${hostid}" >> /etc/hosts
 done < <( printf '%s\n' "${pve_node_LIST[@]}" )
 echo "# --- END PVE HOST IP ADDRESS FOR NFS ---" >> /etc/hosts
 fi

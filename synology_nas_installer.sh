@@ -27,11 +27,11 @@ fi
 
 
 # Check for Git
-if [ $(synopkg status Git > /dev/null; echo $?) != 0 ]; then
-  msg "${RED}[WARNING]${NC}\nThere are issues with this Synology:
+if [ $(synopkg status Git > /dev/null; echo $?) != 0 ] && [ $(synopkg status git > /dev/null; echo $?) != 0 ]; then
+  echo "${RED}[WARNING]${NC}\nThere are issues with this Synology:
     
   1. Git status: missing
-  2. Install Git Server package using the Synology Package Manager WebGUI.
+  2. Install git (synocommunity) or Git Server package using the Synology Package Manager WebGUI.
   
   Exiting script. Fix the issue and try again..."
   echo
@@ -94,31 +94,30 @@ cd ${REPO_TEMP}
 #---- Other Variables --------------------------------------------------------------
 #---- Other Files ------------------------------------------------------------------
 
-# #---- Package loader
-# if [ -f /volume1/git/${GIT_USER}/developer_settings.git ] && [ -f /volume1/git/${GIT_USER}/${GIT_REPO}/synology_nas_installer.sh ]; then
-#   # Copy files from Synology Git
-#   cp /volume1/git/${GIT_USER}/${GIT_REPO}/src/synology/synology_nas_setup.sh ${TEMP_DIR}/synology_nas_setup.sh
-#   cp /volume1/git/${GIT_USER}/${GIT_REPO}/common/nas/src/nas_basefolderlist ${TEMP_DIR}/nas_basefolderlist
-#   cp /volume1/git/${GIT_USER}/${GIT_REPO}/common/nas/src/nas_basefoldersubfolderlist ${TEMP_DIR}/nas_basefoldersubfolderlist
-#   chmod +x ${TEMP_DIR}/synology_nas_setup.sh
-# else
-#   # Download from Github
-#   wget -qL - https://raw.githubusercontent.com/${GIT_USER}/${GIT_REPO}/master/src/synology/synology_nas_setup.sh -O ${TEMP_DIR}/synology_nas_setup.sh
-#   wget -qL - https://raw.githubusercontent.com/${GIT_USER}/${GIT_REPO}/master/common/nas/src/nas_basefolderlist -O ${TEMP_DIR}/nas_basefolderlist
-#   wget -qL - https://raw.githubusercontent.com/${GIT_USER}/${GIT_REPO}/master/common/nas/src/nas_basefoldersubfolderlist -O ${TEMP_DIR}/nas_basefoldersubfolderlist
-#   chmod +x ${TEMP_DIR}/synology_nas_setup.sh
-# fi
-
 #---- Package loader
-if [ -f /mnt/pve/nas-*[0-9]-git/${GIT_USER}/developer_settings.git ] && [ -f /mnt/pve/nas-*[0-9]-git/${GIT_USER}/${GIT_REPO}/common/bash/src/pve_repo_loader.sh ]; then
-  # Developer Options loader
-  source /mnt/pve/nas-*[0-9]-git/${GIT_USER}/${GIT_REPO}/common/bash/src/pve_repo_loader.sh
+if [ -f /volume1/git/${GIT_USER}/developer_settings.git ] && [ -f /volume1/git/${GIT_USER}/${GIT_REPO}/synology_nas_installer.sh ]; then
+  # Copy files from Synology Git
+  cp -R /volume1/git/${GIT_USER}/${GIT_REPO} ${REPO_TEMP}
+  # chmod +x ${REPO_TEMP}/${GIT_REPO}/synology_nas_setup.sh
 else
-  # Download Github loader
-  wget -qL - https://raw.githubusercontent.com/${GIT_USER}/common/master/bash/src/pve_repo_loader.sh -O ${REPO_TEMP}/pve_repo_loader.sh
-  chmod +x ${REPO_TEMP}/pve_repo_loader.sh
-  source ${REPO_TEMP}/pve_repo_loader.sh
+  # Download from Github
+  git clone --recurse-submodules https://github.com/${GIT_USER}/${GIT_REPO}.git
+  # wget -qL - https://raw.githubusercontent.com/${GIT_USER}/${GIT_REPO}/master/src/synology/synology_nas_setup.sh -O ${TEMP_DIR}/synology_nas_setup.sh
+  # wget -qL - https://raw.githubusercontent.com/${GIT_USER}/${GIT_REPO}/master/common/nas/src/nas_basefolderlist -O ${TEMP_DIR}/nas_basefolderlist
+  # wget -qL - https://raw.githubusercontent.com/${GIT_USER}/${GIT_REPO}/master/common/nas/src/nas_basefoldersubfolderlist -O ${TEMP_DIR}/nas_basefoldersubfolderlist
+  # chmod +x ${TEMP_DIR}/synology_nas_setup.sh
 fi
+
+# #---- Package loader
+# if [ -f /mnt/pve/nas-*[0-9]-git/${GIT_USER}/developer_settings.git ] && [ -f /mnt/pve/nas-*[0-9]-git/${GIT_USER}/${GIT_REPO}/common/bash/src/pve_repo_loader.sh ]; then
+#   # Developer Options loader
+#   source /mnt/pve/nas-*[0-9]-git/${GIT_USER}/${GIT_REPO}/common/bash/src/pve_repo_loader.sh
+# else
+#   # Download Github loader
+#   wget -qL - https://raw.githubusercontent.com/${GIT_USER}/common/master/bash/src/pve_repo_loader.sh -O ${REPO_TEMP}/pve_repo_loader.sh
+#   chmod +x ${REPO_TEMP}/pve_repo_loader.sh
+#   source ${REPO_TEMP}/pve_repo_loader.sh
+# fi
 
 #---- Body -------------------------------------------------------------------------
 
