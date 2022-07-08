@@ -195,7 +195,7 @@ function synoaclset() {
 #---- Prerequisites
 # Check for a Synology OS
 eval $(grep "^majorversion=" /etc.defaults/VERSION)
-DSM_MIN='6'
+DSM_MIN='7'
 if [ ! $(uname -a | grep -i --color=never '.*synology.*' &> /dev/null; echo $?) == 0 ]; then
   warn "There are problems with this installation:
 
@@ -786,9 +786,15 @@ done < <( printf '%s\n' "${nas_basefoldersubfolder_LIST[@]}" )
 section "Setup NFS exports"
 
 # Stop NFS service
-if [[ $(synoservice --is-enabled nfsd) ]]; then
-  synoservice --disable nfsd &> /dev/null
+# if [[ $(synoservice --is-enabled nfsd) ]]; then
+#   synoservice --disable nfsd &> /dev/null
+# fi
+if [[ $(systemctl is-active nfs-mountd.service) ]]; then
+  # synoservice --disable nfsd &> /dev/null
+  systemctl stop nfs-idmapd.service
+  systemctl stop nfs-mountd.service
 fi
+
 
 # Check if Static hostnames are mapped
 if [ ! $(nslookup $(synonet --get_hostname) >/dev/null 2>&1; echo $?) == '0' ]; then
@@ -842,7 +848,7 @@ while IFS=',' read -r dir desc group permission user_groups; do
   [[ ${dir} =~ 'none' ]] && continue
   # Check for dir
   if [ -d "${DIR_SCHEMA}/$dir" ]; then
-    if [[ $(grep -xs "^${DIR_SCHEMA}/${dir}.*" nano ) ]]; then
+    if [[ $(grep -xs "^${DIR_SCHEMA}/${dir}.*" ${NFS_EXPORTS}) ]]; then
       # Edit existing nfs export share
       while IFS=, read hostid ipaddr desc; do
         nfs_var=$(if [[ ${NFS_EXPORT_TYPE} == '0' ]]; then echo "${hostid}.${SEARCHDOMAIN}"; else echo ${ipaddr}; fi)
@@ -872,7 +878,7 @@ while IFS=',' read -r dir desc group permission user_groups; do
   else
     info "${DIR_SCHEMA}/${dir} does not exist. Skipping..."
   fi
-done < <( printf '%s\n' "${nas_basefolder_LIST[@]}" )
+done < <( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed '/^backup/d' | sed '/^sshkey/d' )
 echo
 
 # Update '/etc/hosts' file
@@ -889,24 +895,32 @@ sed -i "s#^\(nfsv4_enable.*\s*=\s*\).*\$#\1yes#" /etc/nfs/syno_nfs_conf # Enable
 sed -i "s#^\(nfs_unix_pri_enable.*\s*=\s*\).*\$#\11#" /etc/nfs/syno_nfs_conf # Enable Unix permissions
 
 # Restart NFS
-if ! [ $(synoservice --status nfsd > /dev/null; echo $?) == '0' ]; then
-  synoservice --reload nfsd
-  synoservice --enable nfsd
+if ! [ $(systemctl status nfs-mountd.service > /dev/null; echo $?) == '0' ]; then
+  systemctl restart nfs-mountd.service
+  systemctl restart nfs-idmapd.service
 fi
 
 # Read /etc/exports
 sudo exportfs -ra
 
 #---- Enable SMB
-/usr/syno/etc/rc.sysv/S80samba.sh stop &> /dev/null
+if [ $(systemctl status pkg-synosamba-smbd.service > /dev/null; echo $?) == '0' ]; then
+  systemctl stop pkg-synosamba-smbd.service
+  systemctl stop pkg-synosamba-nmbd.service
+fi
+
 sed -i "s#\(min protocol.*\s*=\s*\).*\$#\1SMB2#" ${SMB_CONF}
 sed -i "s#\(max protocol.*\s*=\s*\).*\$#\1SMB3#" ${SMB_CONF}
-/usr/syno/etc/rc.sysv/S80samba.sh reload &> /dev/null
-/usr/syno/etc/rc.sysv/S80samba.sh restart &> /dev/null
+
+if ! [ $(systemctl status pkg-synosamba-smbd.service > /dev/null; echo $?) == '0' ]; then
+  systemctl restart pkg-synosamba-smbd.service
+  systemctl restart pkg-synosamba-nmbd.service
+fi
 
 #---- Enable WS-Discovery
-sudo synoservicectl --restart synowsdiscoveryd
-sudo synoservicectl --status synowsdiscoveryd
+systemctl restart pkg-synosamba-wsdiscoveryd.service
+systemctl restart pkg-synosamba-wstransferd.service
+
 
 #---- Set Synology Hostname
 if [ ${SYNO_HOSTNAME_MOD} == 0 ]; then
