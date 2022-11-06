@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ----------------------------------------------------------------------------------
-# Filename:     synology_nas_setup.sh
+# Filename:     nas-hardmetal_synology_installer.sh
 # Description:  Setup script to build a Synology DiskStation NAS
 #
 # Usage:        SSH into Synology. Login as 'admin'.
@@ -8,12 +8,6 @@
 # ----------------------------------------------------------------------------------
 
 #---- Source -----------------------------------------------------------------------
-
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-COMMON_DIR="${DIR}/../common"
-COMMON_PVE_SRC_DIR="${DIR}/../common/pve/src"
-SHARED_DIR="${DIR}/../shared"
-
 #---- Dependencies -----------------------------------------------------------------
 
 # Requires file: 'nas_basefolderlist' & 'nas_basefoldersubfolderlist'
@@ -22,63 +16,8 @@ SHARED_DIR="${DIR}/../shared"
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root.\nSSH into Synology. Login as 'admin'.\nThen type cmd 'sudo -i' to run as root. Use same pwd as admin.\nTry again. Bye..."
    sleep 3
-   exit 1
+   return
 fi
-
-#---- Cleanup
-function pushd () {
-  command pushd "$@" &> /dev/null
-}
-function popd () {
-  command popd "$@" &> /dev/null
-}
-function cleanup() {
-  popd
-  rm -rf $TEMP_DIR &> /dev/null
-  unset TEMP_DIR
-}
-
-#---- Bash Messaging Functions
-function msg() {
-  local TEXT="$1"
-  echo -e "$TEXT" | fmt -s -w 80 
-}
-function msg_nofmt() {
-  local TEXT="$1"
-  echo -e "$TEXT"
-}
-function warn() {
-  local REASON="${WHITE}$1${NC}"
-  local FLAG="${RED}[WARNING]${NC}"
-  msg "$FLAG"
-  msg "$REASON"
-}
-function info() {
-  local REASON="$1"
-  local FLAG="\e[36m[INFO]\e[39m"
-  msg_nofmt "$FLAG $REASON"
-}
-function section() {
-  local REASON="\e[97m$1\e[37m"
-  printf -- '-%.0s' {1..84}; echo ""
-  msg "  $SECTION_HEAD - $REASON"
-  printf -- '-%.0s' {1..84}; echo ""
-  echo
-}
-function indent() {
-    eval "$@" |& sed "s/^/\t/"
-    return "$PIPESTATUS"
-}
-function indent2() { sed 's/^/  /'; } # Use with pipe echo 'sample' | indent2
-
-#---- Terminal settings
-RED=$'\033[0;31m'
-YELLOW=$'\033[1;33m'
-GREEN=$'\033[0;32m'
-WHITE=$'\033[1;37m'
-NC=$'\033[0m'
-UNDERLINE=$'\033[4m'
-printf '\033[8;40;120t'
 
 #---- Static Variables -------------------------------------------------------------
 
@@ -123,12 +62,12 @@ NFS_EXPORTS='/etc/exports'
 SMB_CONF='/etc/samba/smb.conf'
 
 # DHCP status
-if [[ $(synonet --show | grep "^DHCP.*") ]]; then
+if [[ $(synonet --show 2> /dev/null | grep "^DHCP.*") ]]; then
   NAS_DHCP='1'
   NAS_IP=$(ip route get 8.8.8.8 | sed -n '/src/{s/.*src *\([^ ]*\).*/\1/p;q}')
-elif [[ $(synonet --show | grep "^Manual\sIP.*") ]]; then
+elif [[ $(synonet --show 2> /dev/null | grep "^Manual\sIP.*") ]]; then
   NAS_DHCP='0'
-  NAS_IP=$(synonet --show | grep -i --color=never "^IP:" | awk -F':' '{ print $2 }' | sed -r 's/\s+//g')
+  NAS_IP=$(synonet --show 2> /dev/null | grep -i --color=never "^IP:" | awk -F':' '{ print $2 }' | sed -r 's/\s+//g')
 fi
 
 # Search domain (local domain)
@@ -202,7 +141,7 @@ if [ ! $(uname -a | grep -i --color=never '.*synology.*' &> /dev/null; echo $?) 
     --  Wrong Hardware. This setup script is for a Synology DiskStations.
   
   Bye..."
-  exit 0
+  return
 elif [ $(uname -a | grep -i --color=never '.*synology.*' &> /dev/null; echo $?) == 0 ] && [ ! ${majorversion} -ge ${DSM_MIN} ] || [ ! $(id -u) == 0 ]; then
   warn "There are problems with this installation:
 
@@ -210,7 +149,7 @@ elif [ $(uname -a | grep -i --color=never '.*synology.*' &> /dev/null; echo $?) 
   $(if [ ! $(id -u) == 0 ]; then echo "  --  This script must be run under User 'root'."; fi)
 
   Fix the issues and try again. Bye..."
-  exit 0
+  return
 fi
 
 # Check for User & Group conflict
@@ -227,7 +166,7 @@ while read USER GROUP UUID GUID; do
     
     Exiting script. Fix the issue and try again..."
     echo
-    exit 0
+    return
   fi
   # Check for User conflict
   if [ ! $(synouser --get $USER &> /dev/null; echo $?) == 0 ] && [ $(synouser --getuid $UUID &> /dev/null; echo $?) == 0 ]; then
@@ -239,7 +178,7 @@ while read USER GROUP UUID GUID; do
     
     Exiting script. Fix the issue and try again..."
     echo
-    exit 0
+    return
   fi
 done  < <( printf '%s\n' "${USER_ARRAY[@]}" )
 
@@ -252,9 +191,8 @@ if [ $(chattr --help &> /dev/null; echo $?) != 1 ]; then
   
   Exiting script. Fix the issue and try again..."
   echo
-  exit 0
+  return
 fi
-
 
 
 #---- Introduction
@@ -288,7 +226,7 @@ while true; do
     [Nn]*)
       msg "You have chosen not to proceed. Exiting script..."
       echo
-      exit 0
+      return
       ;;
     *)
       warn "Error! Entry must be 'y' or 'n'. Try again..."
@@ -333,7 +271,7 @@ else
       [Nn]*)
         msg "You have chosen not to proceed. Change your Synology DNS Search Domain using the Synology DNS Server application. Then re-run this script again. Exiting script..."
         echo
-        exit 0
+        return
         ;;
       *)
         warn "Error! Entry must be 'y' or 'n'. Try again..."
@@ -438,7 +376,7 @@ while true; do
         [Nn]*)
           msg "No problem. Change your PVE host primary hostname and try again. Bye..."
           echo
-          exit 0
+          return
           ;;
         *)
           warn "Error! Entry must be 'y' or 'n'. Try again..."
@@ -570,7 +508,7 @@ sed -i 's|^chrootjail:x:*:.*|chrootjail:x:65608:|g' /etc/group
 synogroup --rebuild all
 
 # Edit UID ( Set UIDs )
-msg "Finding and modifying old User UUID ( media, home, private ) to new UUID ( be patient, may take a while... )"
+msg "Finding and modifying old User UUID ( media, home, private ) to new UUID ( be patient, may take a long, long, long while... )"
 unset userid
 userid=$(id -u media)
 sed -i 's|^media:x:.*|media:x:1605:100:Medialab user:/var/services/homes/media:/sbin/nologin|g' /etc/passwd
@@ -650,14 +588,15 @@ unset nas_basefoldersubfolder_LIST
 nas_basefoldersubfolder_LIST=()
 while IFS= read -r line; do
   [[ "$line" =~ (${rm_match}) ]] && continue
-  nas_basefoldersubfolder_LIST+=( "$(eval echo -e "$line")" )
+  nas_basefoldersubfolder_LIST+=( "${DIR_SCHEMA}/${line}" )
 done < ${COMMON_DIR}/nas/src/nas_basefoldersubfolderlist
+
 
 # Create storage share folders
 msg "Creating ${SECTION_HEAD^} base ${DIR_SCHEMA} storage shares..."
 echo
 # cat nas_basefolderlist | sed '/^#/d' | sed '/^$/d' >/dev/null > nas_basefolderlist_input
-while IFS=',' read -r dir desc group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
+while IFS=',' read -r dir desc user group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
   if [ -d "${DIR_SCHEMA}/${dir}" ]; then
     info "Pre-existing folder: ${UNDERLINE}"${DIR_SCHEMA}/${dir}"${NC}\n  Setting ${group^} group permissions for existing folder."
     find "${DIR_SCHEMA}/${dir}" -name .foo_protect -exec chattr -i {} \;
@@ -719,11 +658,11 @@ done < <( printf '%s\n' "${nas_basefolder_LIST[@]}" )
 msg "Creating ${SECTION_HEAD^} subfolder shares..."
 echo
 # echo -e "$(eval "echo -e \"`<nas_basefoldersubfolderlist`\"")" | sed '/^#/d' | sed '/^$/d' >/dev/null > nas_basefoldersubfolderlist_input
-while IFS=',' read -r dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
+while IFS=',' read -r dir user group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
   if [ -d "${dir}" ]; then
     info "${dir} exists.\n  Setting ${group^} group permissions for this folder."
     find ${dir} -name .foo_protect -exec chattr -i {} \;
-    chgrp -R "${group}" "${dir}" >/dev/null
+    chgrp -R "root" "${dir}" >/dev/null
     chmod -R "${permission}" "${dir}" >/dev/null
     if [ -n  "${acl_01}" ]; then
       acl_var=${acl_01}
@@ -749,7 +688,7 @@ while IFS=',' read -r dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; d
   else
     info "New subfolder created:\n  ${WHITE}"${dir}"${NC}"
     mkdir -p "${dir}" >/dev/null
-    chgrp -R "${group}" "${dir}" >/dev/null
+    chgrp -R "root" "${dir}" >/dev/null
     chmod -R "${permission}" "${dir}" >/dev/null
     if [ -n "${acl_01}" ]; then
       acl_var=${acl_01}
@@ -776,7 +715,7 @@ while IFS=',' read -r dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; d
 done < <( printf '%s\n' "${nas_basefoldersubfolder_LIST[@]}" )
 
 # Chattr set share points attributes to +a
-while IFS=',' read -r dir group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
+while IFS=',' read -r dir user group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
   touch ${dir}/.foo_protect
   chattr +i ${dir}/.foo_protect
 done < <( printf '%s\n' "${nas_basefoldersubfolder_LIST[@]}" )
@@ -844,7 +783,7 @@ fi
 
 # Update NFS exports file
 msg "Creating new NFS exports..."
-while IFS=',' read -r dir desc group permission user_groups; do
+while IFS=',' read -r dir desc user group permission user_groups; do
   [[ ${dir} =~ 'none' ]] && continue
   # Check for dir
   if [ -d "${DIR_SCHEMA}/$dir" ]; then
@@ -947,3 +886,4 @@ If you have issues with NFS using hostnames simply re-run this script and select
 
 WARNING: Synology WebGUI will not show the new NFS exports. But they are working. To edit /etc/exports use nano or vi (as root). After editing type 'sudo exportfs -ra' to propogate the NFS server with any changes."
 echo
+#-----------------------------------------------------------------------------------
