@@ -2,12 +2,14 @@
 # ----------------------------------------------------------------------------------
 # Filename:     nas-hardmetal_installer.sh
 # Description:  Installer script for NAS Hardmetal setups
+# Notes:        Do NOT upgrade to installer scripts.
+#               This installer uses simple BASH language (for multi OS)
 # ----------------------------------------------------------------------------------
 
 #---- Bash command to run script ---------------------------------------------------
 
 #---- Source Github
-# bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/nas-hardmetal/master/nas-hardmetal_installer.sh)"
+# bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/nas-hardmetal/main/nas-hardmetal_installer.sh)"
 
 #---- Source local Git
 # /volume1/git/ahuacate/nas-hardmetal/nas-hardmetal_installer.sh
@@ -22,7 +24,7 @@ GIT_USER='ahuacate'
 # Git repository
 GIT_REPO='nas-hardmetal'
 # Git branch
-GIT_BRANCH='master'
+GIT_BRANCH='main'
 # Git common
 GIT_COMMON='0'
 
@@ -85,7 +87,7 @@ if [ -f ${REPO_PATH}/common/bash/src/pve_repo_loader.sh ] && [[ $(sed -n 's/^dev
   source ${REPO_PATH}/common/bash/src/pve_repo_loader.sh
 else
   # Download Github loader
-  wget -qL - https://raw.githubusercontent.com/${GIT_USER}/common/master/bash/src/pve_repo_loader.sh -O ${REPO_TEMP}/pve_repo_loader.sh
+  wget -qL - https://raw.githubusercontent.com/${GIT_USER}/common/main/bash/src/pve_repo_loader.sh -O ${REPO_TEMP}/pve_repo_loader.sh
   chmod +x ${REPO_TEMP}/pve_repo_loader.sh
   source ${REPO_TEMP}/pve_repo_loader.sh
 fi

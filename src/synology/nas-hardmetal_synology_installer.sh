@@ -875,7 +875,7 @@ $(if [ ${SYNO_HOSTNAME_MOD} == 0 ]; then echo "  --  Synology NAS hostname has c
 More information about configuring a Synology NAS and PVE hosts is available here:
 
   --  ${WHITE}https://github.com/ahuacate/nas-hardmetal${NC}
-  --  ${WHITE}https://github.com/ahuacate/pve-host-setup${NC}
+  --  ${WHITE}https://github.com/ahuacate/pve-host${NC}
 
 We recommend the User now:
   --  Enables WS-Discovery using the Synology WebGUI

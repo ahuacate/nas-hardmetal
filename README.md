@@ -1,29 +1,29 @@
-<h1>NAS - Hardmetal Builds</h1>
+<h1>NAS - Hard metal Builds</h1>
 
-This guide is for dedicated hard metal NAS appliances. The exception is OpenMediaVault (OMV) where our OMV configuration steps also apply to PVE OMV VM installations.
+This guide is for dedicated hard metal NAS appliances. The exception is OpenMediaVault (OMV) where our OMV configuration guide also applies to PVE OMV VM installations.
 
 Easy Scripts are available for:
 
 * Synology DiskStations
 * Open Media Vault (OMV)
 
-Our Easy Scripts will modify your NAS setting. If you intend to run our Easy Scripts on an existing working NAS which contains any personal or valuable data we highly recommend you first backup the NAS including stored data and NAS settings.
+Our Easy Scripts will modify your NAS setting. If you intend to run our Easy Scripts on an existing working NAS which contains any personal or valuable data we highly recommend you first backup the NAS including stored data and configuration settings.
 
 <h2>Features</h2>
 
-Our Easy Script installer will fully configure and ready your NAS to support Ahuacate CTs and VMs. Each NAS installer will create, modify and change system settings including:
+Easy Script will fully configure and ready your NAS to support Ahuacate CTs and VMs. The script will create, modify and change system settings including:
 
 * Power User & Group Accounts
     * Groups: medialab:65605, homelab:65606, privatelab:65607, chrootjail:65608
     * Users: media:1605, home:1606, private:1607
-    * Users media, home and private are for running CT applications
+    * Users media, home and private required by Ahuacate VM/CT applications
 * Chrootjail Group for general User accounts.
-* Ready for all Medialab applications such as Sonarr, Radarr, JellyFin, NZBGet and more.
 * Full set of base and sub-folders ready for all VM/CT applications
 * Folder and user permissions including ACLs
 * NFS 4.0 exports ready for PVE host backend storage mounts
 * SMB 3.0 shares with access permissions set ( by User Group accounts )
 * Set Local Domain option to set ( i.e .local, .localdomain, .home.arpa, .lan )
+
 
 <h2>Prerequisites</h2>
 
@@ -45,7 +45,7 @@ Our Easy Script installer will fully configure and ready your NAS to support Ahu
 
 <h2>Local DNS Records</h2>
 
-We recommend <span style="color:red">you read</span> about network Local DNS and why a PiHole server is a necessity. Click <a href="https://github.com/ahuacate/common/tree/master/pve/src/local_dns_records.md" target="_blank">here</a> to learn more before proceeding any further.
+We recommend <span style="color:red">you read</span> about network Local DNS and why a PiHole server is a necessity. Click <a href="https://github.com/ahuacate/common/tree/main/pve/src/local_dns_records.md" target="_blank">here</a> to learn more before proceeding any further.
 
 Your network Local Domain or Search domain must be also set. We recommend only top-level domain (spTLD) names for residential and small networks names because they cannot be resolved across the internet. Routers and DNS servers know, in theory, not to forward ARPA requests they do not understand onto the public internet. It is best to choose one of our listed names: local, home.arpa, localdomain or lan only. Do NOT use made-up names.
 
@@ -59,18 +59,20 @@ Our Easy Scripts have preset configurations. The installer may accept or decline
 
 
 <h4><b>1) Synology NAS Easy Script</b></h4>
-SSH login to your Synology NAS using your Administrator credentials: `ssh admin@IP_address`. If you have changed your Synology default SSH port use `ssh admin@IP_address:port`. After SSH login you must type `sudo -i` to switch to root user. The Root password is the password used for 'admin'. Then you must run the following commands..
+SSH login to your Synology NAS using your Administrator credentials: `ssh admin@IP_address`. If you have changed your Synology default SSH port use `ssh admin@IP_address:port`. After SSH login you must type `sudo -i` to switch to root user. The Root password is the password used for 'admin'. Then you must run the following commands.
 
 ```bash
-sudo -i
-bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/nas-hardmetal/master/nas-hardmetal_installer.sh)"
+sudo -i # to change to root user
+bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/nas-hardmetal/main/nas-hardmetal_installer.sh)"
 ```
 
 <h4><b>2) Open Media Vault (OMV) Easy Script</b></h4>
 
-Built for OMV NAS only. Your OMV NAS must have a storage filesystem ready and available. This guide includes step-by-step instructions for preparing any OMV NAS. You must first SSH login to your NAS `ssh root@IP_address` or `ssh root@nas-01.local`. Then you must run the following commands.
+Your OMV NAS must have a storage filesystem ready and available. Read this guide following step-by-step instructions before running this script.
+
+You must first SSH login to your NAS `ssh root@IP_address` or `ssh root@nas-01.local`. Then you run the following command.
 ```bash
-bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/nas-hardmetal/master/nas-hardmetal_installer.sh)"
+bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/nas-hardmetal/main/nas-hardmetal_installer.sh)"
 ```
 
 ![alt text](./images/OpenMediaVault_es_00.png)
@@ -95,7 +97,8 @@ If you followed our OMV guide then you created a 'MergerFS & SnapRAID' pool. Whe
         - [1.5.5. Configure MergerFS](#155-configure-mergerfs)
         - [1.5.6. Configure SnapRaid](#156-configure-snapraid)
         - [1.5.7. SnapRAID Scheduled Diff and Cron Jobs](#157-snapraid-scheduled-diff-and-cron-jobs)
-- [2. Easy Script Configuration](#2-easy-script-configuration)
+    - [1.6. Easy Script Configuration](#16-easy-script-configuration)
+- [2. Synology configuration](#2-synology-configuration)
 - [3. Manual NAS build](#3-manual-nas-build)
     - [3.1. Create Groups](#31-create-groups)
         - [3.1.1. Create Groups](#311-create-groups)
@@ -159,7 +162,7 @@ The domain name is requested in the next screen, so the hostname here is the fir
 
 Enter the domain name of the server. We recommend 'local' because it's your LAN. If you have decided on your local LAN domain name then read on.
 
-We recommend <span style="color:red">you read</span> about network Local DNS and why a PiHole server is a necessity. Click <a href="https://github.com/ahuacate/common/tree/master/pve/src/local_dns_records.md" target="_blank">here</a> to learn more before proceeding any further.
+We recommend <span style="color:red">you read</span> about network Local DNS and why a PiHole server is a necessity. Click <a href="https://github.com/ahuacate/common/tree/main/pve/src/local_dns_records.md" target="_blank">here</a> to learn more before proceeding any further.
 
 Your network Local Domain or Search domain must be also set. We recommend only top-level domain (spTLD) names for residential and small networks names because they cannot be resolved across the internet. Routers and DNS servers know, in theory, not to forward ARPA requests they do not understand onto the public internet. It is best to choose one of our listed names: local, home.arpa, localdomain or lan only. Do NOT use made-up names.
 
@@ -251,18 +254,19 @@ You need to establish two connections to your OMV host:
 
 Perform the following tasks to bring your OMV host up-to-date and ready for configuration. Remember to immediately apply all changes at each stage for the changes to take effect.
 
-1. Navigate to `System` > `Update Management`:
--- Settings: `Community-maintained updates`
--- Updates: `Install updates`
-2. Cut & Paste the CLI command (all lines) into your OMV SSH shell. This command will install OMV-Extras, mergerFS, snapRAID, luksencryption and remote mount.
+1. Cut & Paste the CLI command (all lines) into your OMV SSH shell. This command will install OMV-Extras.
 
 ```
-wget -O - https://github.com/OpenMediaVault-Plugin-Developers/packages/raw/master/install | bash && \
+wget -O - https://github.com/OpenMediaVault-Plugin-Developers/packages/raw/main/install | bash
+```
+2. Navigate to `System` > `Update Management`:
+-- Settings: `Community-maintained updates`
+-- Updates: `Install updates`
+3. Cut & Paste the CLI command (all lines) into your OMV SSH shell. This command will install MergerFS and SnapRAID.
+
+```
 apt-get install openmediavault-mergerfs -y && \
-apt-get install openmediavault-snapraid -y && \
-apt-get install openmediavault-luksencryption -y && \
-apt-get install openmediavault-remotemount -y && \
-apt-get install openmediavault-filebrowser -y 
+apt-get install openmediavault-snapraid -y
 ```
 
 ## 1.5. Select a NAS File System
@@ -286,7 +290,7 @@ At this stage, you must choose a file system. Ext4 is more mature, whereas BTRFS
 1. Navigate to `Storage` > `File systems` > `+ Add` > `+ Create` (for all, but OS SSD):
 -- `Device` Select a disk
 -- `Type` BTRFS
-You will be prompted to mount the disk. Comment or label data drives as data1, data2 etc., and parity drives as parity1, parity2 etc.
+You will be prompted to mount the disk. Comment or label the drives as data1, data2 etc., and parity drives as parity1, parity2 etc.
 -- File System `/dev/sdx [BTRFS, 55.89 GiB]` (example)
 -- Usage Threshold `95%`
 -- Comment `data[1-9]` or `parity[1-9]`
@@ -315,8 +319,8 @@ Read more about MergerFS & SnapRAID [here](https://perfectmediaserver.com/tech-s
 ### 1.5.5. Configure MergerFS
 ![alt text](./images/mergerfs-blue.png)
 1. Create a pool of your new disks. Navigate to `Storage` > `mergerfs` > `+ Add` icon:
--- Name: `pool_nas_01` (pool_hostname. Underscores only.)
--- File Systems: `/dev/sdx [data1]` (select all data disks)
+-- Name: `pool1`
+-- File Systems: `/dev/sdx [data1]` (select data disks only)
 -- Policy: `Existing path - most free space`
 -- Minimum free space: 5% of smallest drive size (e.g. 4TB drive = 200G) (feel free to adjust)
 
@@ -355,12 +359,17 @@ SnapRAID plugin will generate a cron job in the `System` > `Scheduled Tasks` tab
 
 Your OMV NAS is now ready to configure with our custom Easy Script.
 
-<hr>
-
-# 2. Easy Script Configuration
+## 1.6. Easy Script Configuration
 We have Easy Scripts for configuring Synology and OpenMediaVault only.
 
->Warning: Our Easy Scripts are fully automated and configure your NAS ready for integration into our Proxmox environment. Ideally Easy Script should be run on a new fresh NAS installation. If not, fully backup all private data before running our Easy Script.
+>Warning: Our Easy Scripts are fully automated and configure your NAS ready for integration into our Proxmox environment. Ideally, Easy Script should be run on a new fresh NAS installation. If not, fully backup all private data before running our Easy Script.
+
+The links to our Easy Scripts are at the beginning of this guide.
+
+<hr>
+
+# 2. Synology configuration
+Fully update your Synology DiskStation before running our Easy Script. Synology runs a custom flavor of Debian with proprietary commands. The Easy Script was written for Synology v7. One peculiar issue is NFS. While the NFS mounts are created they will not appear in the Synology WebGUI for some odd reason.
 
 The links to our Easy Scripts are at the beginning of this guide.
 
@@ -503,7 +512,7 @@ Your NAS (nas-01)
 ```
 
 ### 3.5.1. Folder Permissions
-Create sub-folders with permissions as shown [here.](https://raw.githubusercontent.com/ahuacate/common/master/nas/src/nas_basefolderlist)
+Create sub-folders with permissions as shown [here.](https://raw.githubusercontent.com/ahuacate/common/main/nas/src/nas_basefolderlist)
 
 A CLI example for the task audio:
 ```
@@ -516,7 +525,7 @@ sudo setfacl -Rm g:medialab:rwx,g:privatelab:rwx,g:chrootjail:r-x  ${BASE_FOLDER
 ```
 
 ### 3.5.2. Sub Folder Permissions
-Create sub-folders with permissions as shown [here.](https://raw.githubusercontent.com/ahuacate/common/master/nas/src/nas_basefoldersubfolderlist)
+Create sub-folders with permissions as shown [here.](https://raw.githubusercontent.com/ahuacate/common/main/nas/src/nas_basefoldersubfolderlist)
 
 ```
 /srv/nas-01
