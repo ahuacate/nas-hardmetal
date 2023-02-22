@@ -28,24 +28,31 @@ GIT_BRANCH='main'
 # Git common
 GIT_COMMON='0'
 
-# Set Package Installer Temp Folder
-REPO_TEMP='/tmp'
-cd ${REPO_TEMP}
-
-# Script path variables
-DIR="${REPO_TEMP}/${GIT_REPO}"
-SRC_DIR="${DIR}/src"
-COMMON_DIR="${DIR}/common"
-COMMON_PVE_SRC_DIR="${DIR}/common/pve/src"
-SHARED_DIR="${DIR}/shared"
-TEMP_DIR="${DIR}/tmp"
-
 #---- Dependencies -----------------------------------------------------------------
 
-# Check for Internet connectivity
-if ping -c 2 -q google.com &> /dev/null; then
-  echo
-else
+#---- Check for Internet connectivity
+
+# List of well-known websites to test connectivity (in case one is blocked)
+websites=( "google.com 443" "github.com 443" "cloudflare.com 443" "apple.com 443" "amazon.com 443" )
+# Loop through each website in the list
+for website in "${websites[@]}"
+do
+  # Test internet connectivity
+  nc -zw1 $website > /dev/null 2>&1
+  # Check the exit status of the ping command
+  if [ $? = 0 ]
+  then
+    # Flag to track if internet connection is up
+    connection_up=0
+    break
+  else
+  # Flag to track if internet connection is down
+  connection_up=1
+  fi
+done
+# On connection fail
+if [ "$connection_up" = 1 ]
+then
   echo "Checking for internet connectivity..."
   echo -e "Internet connectivity status: \033[0;31mDown\033[0m\n\nCannot proceed without a internet connection.\nFix your PVE hosts internet connection and try again..."
   echo
@@ -54,7 +61,25 @@ fi
 
 #---- Static Variables -------------------------------------------------------------
 
+#---- Set Package Installer Temp Dir 
+
+# Set 'rep_temp' dir
+REPO_TEMP='/tmp'
+# Change to 'repo temp' dir
+cd $REPO_TEMP
+
+#---- Script path variables
+
+DIR="$REPO_TEMP/$GIT_REPO"
+SRC_DIR="$DIR/src"
+COMMON_DIR="$DIR/common"
+COMMON_PVE_SRC_DIR="$DIR/common/pve/src"
+SHARED_DIR="$DIR/shared"
+TEMP_DIR="$DIR/tmp"
+
+
 #---- Terminal settings
+
 RED=$'\033[0;31m'
 YELLOW=$'\033[1;33m'
 GREEN=$'\033[0;32m'
@@ -64,13 +89,14 @@ UNDERLINE=$'\033[4m'
 printf '\033[8;40;120t'
 
 #---- Local Repo path (check if local)
+
 # For local SRC a 'developer_settings.git' file must exist in repo dir
-REPO_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P | sed "s/${GIT_USER}.*/${GIT_USER}/" )"
+REPO_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P | sed "s/${GIT_USER}.*/$GIT_USER/" )"
 
 #---- Other Variables --------------------------------------------------------------
 
 # List of Hardmetal NAS OS. Edit this list to control the available NAS installer.
-# First field must match GIT_APP_SCRIPT filename 'nas_<name>_installer.sh'
+# First field must match git_app_script filename 'nas_<name>_installer.sh'
 # Second field is menu description only
 nas_LIST=( "synology:Synology DiskStation"
 "omv:Open Media Vault (OMV)"
@@ -82,14 +108,15 @@ SECTION_HEAD='PVE NAS Hardmetal'
 #---- Other Files ------------------------------------------------------------------
 
 #---- Package loader
-if [ -f ${REPO_PATH}/common/bash/src/pve_repo_loader.sh ] && [[ $(sed -n 's/^dev_git_mount=//p' ${REPO_PATH}/developer_settings.git 2> /dev/null) == '0' ]]; then
+if [ -f "$REPO_PATH/common/bash/src/pve_repo_loader.sh" ] && [ "$(sed -n 's/^dev_git_mount=//p' $REPO_PATH/developer_settings.git 2> /dev/null)" = 0 ]
+then
   # Download Local loader (developer)
-  source ${REPO_PATH}/common/bash/src/pve_repo_loader.sh
+  source $REPO_PATH/common/bash/src/pve_repo_loader.sh
 else
   # Download Github loader
-  wget -qL - https://raw.githubusercontent.com/${GIT_USER}/common/main/bash/src/pve_repo_loader.sh -O ${REPO_TEMP}/pve_repo_loader.sh
-  chmod +x ${REPO_TEMP}/pve_repo_loader.sh
-  source ${REPO_TEMP}/pve_repo_loader.sh
+  wget -qL - https://raw.githubusercontent.com/$GIT_USER/common/main/bash/src/pve_repo_loader.sh -O $REPO_TEMP/pve_repo_loader.sh
+  chmod +x $REPO_TEMP/pve_repo_loader.sh
+  source $REPO_TEMP/pve_repo_loader.sh
 fi
 
 #---- Functions --------------------------------------------------------------------
@@ -142,9 +169,10 @@ function indent2() { sed 's/^/  /'; } # Use with pipe echo 'sample' | indent2
 
 #---- Installer cleanup
 function installer_cleanup() {
-rm -R ${REPO_TEMP}/${GIT_REPO} &> /dev/null
-if [ -f ${REPO_TEMP}/${GIT_REPO}.tar.gz ]; then
-  rm ${REPO_TEMP}/${GIT_REPO}.tar.gz > /dev/null
+rm -R $REPO_TEMP/$GIT_REPO &> /dev/null
+if [ -f "$REPO_TEMP/${GIT_REPO}.tar.gz" ]
+then
+  rm $REPO_TEMP/${GIT_REPO}.tar.gz > /dev/null
 fi
 }
 
@@ -175,25 +203,30 @@ printf '    %s\n' ${YELLOW}"${i}"${NC}
 echo
 
 #---- Run the NAS installer
-if [ ${RESULTS} == 'TYPE00' ]; then
+if [ "$RESULTS" = 'TYPE00' ]
+then
   # Exit installation
   msg "You have chosen not to proceed. Aborting. Bye..."
   echo
   sleep 1
-elif [ ${RESULTS} == 'omv' ]; then
+elif [ "$RESULTS" = 'omv' ]
+then
   # Set Installer App script name
-  GIT_APP_SCRIPT="${GIT_REPO}_${RESULTS,,}_installer.sh"
-  chmod +x "${SRC_DIR}/${RESULTS,,}/${GIT_APP_SCRIPT}"
+  git_app_script="${GIT_REPO}_${RESULTS,,}_installer.sh"
+  chmod +x "$SRC_DIR/${RESULTS,,}/$git_app_script"
+
   #---- Run Bash Header
-  source ${COMMON_PVE_SRC_DIR}/pvesource_bash_defaults.sh
+  source $COMMON_PVE_SRC_DIR/pvesource_bash_defaults.sh
+
   #---- Run Installer
-  source ${SRC_DIR}/${RESULTS,,}/${GIT_APP_SCRIPT}
+  source $SRC_DIR/${RESULTS,,}/$git_app_script
 else
   # Set Installer App script name
-  GIT_APP_SCRIPT="${GIT_REPO}_${RESULTS,,}_installer.sh"
-  chmod +x "${SRC_DIR}/${RESULTS,,}/${GIT_APP_SCRIPT}"
+  git_app_script="${GIT_REPO}_${RESULTS,,}_installer.sh"
+  chmod +x "$SRC_DIR/${RESULTS,,}/$git_app_script"
+
   #---- Run Installer
-  source ${SRC_DIR}/${RESULTS,,}/${GIT_APP_SCRIPT}
+  source $SRC_DIR/${RESULTS,,}/$git_app_script
 fi
 
 #---- Finish Line ------------------------------------------------------------------

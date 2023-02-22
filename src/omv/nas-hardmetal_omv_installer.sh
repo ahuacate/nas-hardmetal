@@ -46,7 +46,8 @@ OMV configuration modification/changes includes:
 User input is required in the next steps to set NFS export settings. This script will not delete any existing NAS folders or files BUT may modify file access permissions on existing shared folders. It is recommended you make a full NAS file and settings backup before proceeding."
 echo
 echo
-while true; do
+while true
+do
   read -p "Proceed with your OMV NAS setup [y/n]?: " -n 1 -r YN
   echo
   case $YN in
@@ -67,5 +68,5 @@ while true; do
 done
 
 #---- Run setup
-source ${COMMON_DIR}/nas/src/nas_omv_setup.sh
+source $COMMON_DIR/nas/src/nas_omv_setup.sh
 #-----------------------------------------------------------------------------------

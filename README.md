@@ -1,17 +1,17 @@
 <h1>NAS - Hard metal Builds</h1>
 
-This guide is for dedicated hard metal NAS appliances. The exception is OpenMediaVault (OMV) where our OMV configuration guide also applies to PVE OMV VM installations.
+This guide is for hard metal and heavyweight NAS appliances including our Proxmox OMV VM installations.
 
 Easy Scripts are available for:
 
 * Synology DiskStations
 * Open Media Vault (OMV)
 
-Our Easy Scripts will modify your NAS setting. If you intend to run our Easy Scripts on an existing working NAS which contains any personal or valuable data we highly recommend you first backup the NAS including stored data and configuration settings.
+Our Easy Scripts will modify your NAS settings. If you intend to run our Easy Scripts on an existing working NAS which contains any personal or valuable data we recommend you first backup the NAS including stored data and configuration settings.
 
 <h2>Features</h2>
 
-Easy Script will fully configure and ready your NAS to support Ahuacate CTs and VMs. The script will create, modify and change system settings including:
+Our Easy Script will create, modify and change system settings including:
 
 * Power User & Group Accounts
     * Groups: medialab:65605, homelab:65606, privatelab:65607, chrootjail:65608
@@ -51,11 +51,11 @@ Your network Local Domain or Search domain must be also set. We recommend only t
 
 <h2>Easy Scripts</h2>
 
-To run an Easy Script you must first have an operational NAS machine.
+You must have an operational NAS machine.
 
-Our Easy Script automates the installation and/or configuration processes. The User when prompted must select the NAS hardware type.
+Our Easy Script automates the installation and/or configuration processes.
 
-Our Easy Scripts have preset configurations. The installer may accept or decline the ES values. If you decline the User will be prompted to input all required configuration settings. PLEASE read our guide if you are unsure.
+Our Easy Scripts have preset configurations. You may accept or decline our ES values. If you decline then you will be prompted to input all required configuration settings.
 
 
 <h4><b>1) Synology NAS Easy Script</b></h4>
@@ -68,7 +68,7 @@ bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/nas-hardmetal/
 
 <h4><b>2) Open Media Vault (OMV) Easy Script</b></h4>
 
-Your OMV NAS must have a storage filesystem ready and available. Read this guide following step-by-step instructions before running this script.
+Your OMV NAS must have a storage filesystem ready and available before proceeding with this Easy Script. Read the guide below following step-by-step instructions before running this script.
 
 You must first SSH login to your NAS `ssh root@IP_address` or `ssh root@nas-01.local`. Then you run the following command.
 ```bash
@@ -77,7 +77,7 @@ bash -c "$(wget -qLO - https://raw.githubusercontent.com/ahuacate/nas-hardmetal/
 
 ![alt text](./images/OpenMediaVault_es_00.png)
 
-If you followed our OMV guide then you created a 'MergerFS & SnapRAID' pool. When the ES prompts you for storage location select the MergerFS pool shown above. 
+If you followed our OMV guide then you created a 'MergerFS & SnapRAID' pool. When the Easy Script prompts you for a storage location select the MergerFS pool shown above in the terminal. 
 
 <hr>
 
