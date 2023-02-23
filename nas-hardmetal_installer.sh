@@ -109,15 +109,15 @@ SECTION_HEAD='PVE NAS Hardmetal'
 #---- Other Files ------------------------------------------------------------------
 
 #---- Package loader
-if [ -f "$REPO_PATH/common/bash/src/pve_repo_loader.sh" ] && [ "$(sed -n 's/^dev_git_mount=//p' $REPO_PATH/developer_settings.git 2> /dev/null)" = 0 ]
+if [ -f "$REPO_PATH/common/bash/src/linux_repo_loader.sh" ] && [ "$(sed -n 's/^dev_git_mount=//p' $REPO_PATH/developer_settings.git 2> /dev/null)" = 0 ]
 then
   # Download Local loader (developer)
-  source $REPO_PATH/common/bash/src/pve_repo_loader.sh
+  source $REPO_PATH/common/bash/src/linux_repo_loader.sh
 else
   # Download Github loader
-  wget -qL - https://raw.githubusercontent.com/$GIT_USER/common/main/bash/src/pve_repo_loader.sh -O $REPO_TEMP/pve_repo_loader.sh
-  chmod +x $REPO_TEMP/pve_repo_loader.sh
-  source $REPO_TEMP/pve_repo_loader.sh
+  wget -qL - https://raw.githubusercontent.com/$GIT_USER/common/main/bash/src/linux_repo_loader.sh -O $REPO_TEMP/linux_repo_loader.sh
+  chmod +x $REPO_TEMP/linux_repo_loader.sh
+  source $REPO_TEMP/linux_repo_loader.sh
 fi
 
 #---- Functions --------------------------------------------------------------------

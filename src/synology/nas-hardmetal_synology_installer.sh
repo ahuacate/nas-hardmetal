@@ -135,14 +135,16 @@ function synoaclset() {
 # Check for a Synology OS
 eval $(grep "^majorversion=" /etc.defaults/VERSION)
 DSM_MIN='7'
-if [ ! $(uname -a | grep -i --color=never '.*synology.*' &> /dev/null; echo $?) == 0 ]; then
+if [[ ! $(uname -a | grep -i --color=never '.*synology.*') ]]
+then
   warn "There are problems with this installation:
 
     --  Wrong Hardware. This setup script is for a Synology DiskStations.
   
   Bye..."
   return
-elif [ $(uname -a | grep -i --color=never '.*synology.*' &> /dev/null; echo $?) == 0 ] && [ ! ${majorversion} -ge ${DSM_MIN} ] || [ ! $(id -u) == 0 ]; then
+elif [[ $(uname -a | grep -i --color=never '.*synology.*') ]] && [ ! ${majorversion} -ge ${DSM_MIN} ] || [[ ! $(id -u) ]]
+then
   warn "There are problems with this installation:
 
   $(if [ ! ${majorversion} -ge ${DSM_MIN} ]; then echo "  --  Wrong Synology DSM OS version. This setup script is for a Synology DSM Version ${DSM_MIN} or later. Try upgrading your Synology DSM OS."; fi)
