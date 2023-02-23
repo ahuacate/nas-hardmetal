@@ -33,12 +33,13 @@ GIT_COMMON='0'
 #---- Check for Internet connectivity
 
 # List of well-known websites to test connectivity (in case one is blocked)
-websites=( "google.com 443" "github.com 443" "cloudflare.com 443" "apple.com 443" "amazon.com 443" )
+# Do NOT change to use 'nc'. Synology and OMV only use ping.
+websites=( "google.com" "github.com" "cloudflare.com" "apple.com" "amazon.com" )
 # Loop through each website in the list
 for website in "${websites[@]}"
 do
   # Test internet connectivity
-  nc -zw1 $website > /dev/null 2>&1
+  ping -c1 $website > /dev/null 2>&1
   # Check the exit status of the ping command
   if [ $? = 0 ]
   then
