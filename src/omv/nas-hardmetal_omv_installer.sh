@@ -68,6 +68,5 @@ do
 done
 
 #---- Run setup
-ls $COMMON_DIR
-source $COMMON_DIR/nas/src/nas_omv_setup.sh
+source $SRC_DIR/omv/nas_omv_setup.sh
 #-----------------------------------------------------------------------------------
