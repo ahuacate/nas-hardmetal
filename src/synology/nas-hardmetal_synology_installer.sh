@@ -824,12 +824,18 @@ echo
 
 # Update '/etc/hosts' file
 if [[ ${NFS_EXPORT_TYPE} == '0' ]]; then 
-echo "# --- BEGIN PVE HOST IP ADDRESS FOR NFS ---" >> /etc/hosts
-while IFS=, read hostid ipaddr desc; do
-  echo "${ipaddr} ${hostid}.${SEARCHDOMAIN} ${hostid}" >> /etc/hosts
-done < <( printf '%s\n' "${pve_node_LIST[@]}" )
-echo "# --- END PVE HOST IP ADDRESS FOR NFS ---" >> /etc/hosts
+  while IFS=, read hostid ipaddr desc; do
+    # Check if the entry already exists in /etc/hosts
+    if grep -q "${hostid}\.${SEARCHDOMAIN}" /etc/hosts; then
+        # Entry exists, update it
+        sed -i "s/.*${hostid}\.${SEARCHDOMAIN}.*/${ipaddr} ${hostid}.${SEARCHDOMAIN} ${hostid} # ${desc}/" /etc/hosts
+    else
+        # Entry doesn't exist, add it
+        echo "${ipaddr} ${hostid}.${SEARCHDOMAIN} ${hostid} # ${desc}" >> /etc/hosts
+    fi
+  done < <( printf '%s\n' "${pve_node_LIST[@]}" )
 fi
+
 
 # Set NFS settings
 sed -i "s#^\(nfsv4_enable.*\s*=\s*\).*\$#\1yes#" /etc/nfs/syno_nfs_conf # Enable nfs4.1
