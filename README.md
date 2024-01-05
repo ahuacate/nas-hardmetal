@@ -27,6 +27,8 @@ Our Easy Script will create, modify and change system settings including:
 
 <h2>Prerequisites</h2>
 
+Read about our <a href="https://github.com/ahuacate/common/tree/main/pve/src/local_about_our_build.md" target="_blank">system-wide requirements</a> before proceeding any further.
+
 **Network Prerequisites**
 
 - [x] Layer 2/3 Network Switches
@@ -117,12 +119,12 @@ If you followed our OMV guide then you created a 'MergerFS & SnapRAID' pool. Whe
 <hr>
 
 # 1. OMV configuration
-For OMV hard metal installs follow the online OMV installation [guide](https://www.openmediavault.org/). The installer ISO images archive can be found [here](https://www.openmediavault.org/download.html). [Create a USB stick](https://docs.openmediavault.org/en/latest/installation/index.html) to boot your machine and install OpenMediaVault. 
+Follow the OMV installation [guide](https://www.openmediavault.org/). The installer ISO images can be found [here](https://www.openmediavault.org/download.html). [Create a USB stick](https://docs.openmediavault.org/en/latest/installation/index.html) to boot your machine and install OpenMediaVault. 
 
-The PVE hosted OMV installation guide is also available [here](https://github.com/ahuacate/pve-nas).
+For those wanting a Proxmox hosted OMV installation follow this [guide]https://github.com/ahuacate/pve-nas).
 
 ## 1.1. OMV install configuration
-Once the PVE VM or hard metal machine has been powered on with boot OMV media, install OpenMediaVault configuring the steps as shown.
+After booting the physical server with the OpenMediaVault (OMV) installation media, proceed to install OpenMediaVault by following the provided configuration steps.
 
 ![alt text](./images/OpenMediaVault_1.png)
 
@@ -148,14 +150,11 @@ The installer starts to load some additional packages from the installation medi
 
 Enter the hostname of your NAS server. The hostname is critical because it aids our Ahuacate scripts to identify NAS appliances on your network.
 
-
 | Recommended Hostname | Description
 |---|---
 | nas-01 | Primary NAS (your first/main NAS appliance)
 | nas-02 | Secondary NAS (your second NAS appliance)
 | nas-03 | Third NAS (and so on)
-
-
 
 The domain name is requested in the next screen, so the hostname here is the first part of the fully qualified domain name (FQDN). When the server shall have the fqdn "nas-01.local" then the hostname is "server1". 
 
@@ -165,7 +164,7 @@ Enter the domain name of the server. We recommend 'local' because it's your LAN.
 
 We recommend <span style="color:red">you read</span> about network Local DNS and why a PiHole server is a necessity. Click <a href="https://github.com/ahuacate/common/tree/main/pve/src/local_dns_records.md" target="_blank">here</a> to learn more before proceeding any further.
 
-Your network Local Domain or Search domain must be also set. We recommend only top-level domain (spTLD) names for residential and small networks names because they cannot be resolved across the internet. Routers and DNS servers know, in theory, not to forward ARPA requests they do not understand onto the public internet. It is best to choose one of our listed names: local, home.arpa, localdomain or lan only. Do NOT use made-up names.
+Your network's Local Domain or Search domain must be also set. We recommend only top-level domain (spTLD) names for residential and small networks names because they cannot be resolved across the internet. Routers and DNS servers know, in theory, not to forward ARPA requests they do not understand onto the public internet. It is best to choose one of our listed names: local, home.arpa, localdomain or lan only. Do NOT use made-up names.
 
 ![alt text](./images/OpenMediaVault_8.png)
 
@@ -211,7 +210,7 @@ Select your bootloader disk. For a PVE VM install it will be labeled as`/dev/sda
 
 The installation is finished. Press ENTER to reboot the server. Remove USB installation media or set VM  `Hardware` > `CD/DVD Drive (IDE2)` > `Edit`  to `Do not use any media`.
 
-The System is ready. You can now log in to OpenMediaVault on the shell as `root` user or in the Web interface.
+The System is ready. You can now log in to OpenMediaVault using CLI shell as user `root` or `admin` in the Web interface.
 
 > **Web interface**
 > URL: http://nas-01.local (hostname.domain)
@@ -255,15 +254,15 @@ You need to establish two connections to your OMV host:
 
 Perform the following tasks to bring your OMV host up-to-date and ready for configuration. Remember to immediately apply all changes at each stage for the changes to take effect.
 
-1. Cut & Paste the CLI command (all lines) into your OMV SSH shell. This command will install OMV-Extras.
+Cut and paste the CLI command (all lines) into your OMV SSH shell. This command will install OMV-Extras.
 
 ```
-wget -O - https://github.com/OpenMediaVault-Plugin-Developers/packages/raw/main/install | bash
+sudo wget -O - https://github.com/OpenMediaVault-Plugin-Developers/installScript/raw/master/install | sudo bash
 ```
 2. Navigate to `System` > `Update Management`:
--- Settings: `Community-maintained updates`
+-- Settings: `Community-maintained updates` > `Save` > Confirm to reload SW information `Yes`
 -- Updates: `Install updates`
-3. Cut & Paste the CLI command (all lines) into your OMV SSH shell. This command will install MergerFS and SnapRAID.
+3. Cut and paste the CLI command (all lines) into your OMV SSH shell. This command will install MergerFS and SnapRAID.
 
 ```
 apt-get install openmediavault-mergerfs -y && \
@@ -274,6 +273,9 @@ apt-get install openmediavault-snapraid -y
 OMV has many options - RAID, LVM, MergerFS, ZFS, SnapRaid and more. We recommend the following:
 
 * BTRFS/Ext4 &rarr; MergerFS &rarr; SnapRaid (Recommended - requires minimum 3 disks)
+* Ext4 (Single disk storage volume)
+
+If your hardware contains only one storage disk, excluding the file system (FS) disk, SnapRAID FS cannot be created. In such cases, you need to choose Ext4 for single-disk storage.
 
 ### 1.5.1. General disk preparation
 Let's prepare your new storage disks. When required to select a disk always select the lowest disk device ID first. Comment or label data drives in order as data1, data2 etc., and if you've chosen the MergerFS/SnapRAID system then label the parity drives as parity1, parity2 etc. The parity drive must be your largest capacity disk(s).
@@ -282,19 +284,23 @@ Let's prepare your new storage disks. When required to select a disk always sele
 
 1. Navigate to `Storage` > `Disks` (for all, but not OS SSD): `Wipe`
 2. Navigate to `Storage` > `Disks` > `Edit` (for all, but OS SSD): Power 1, Maximum performance, Spindown 30min, Enable write-cache
-3. Navigate to `Storage` > `Disks` > `Smart` > `Settings`: Enable (disable for VM)
-4. Navigate to `Storage` > `Disks` > `Smart` > `Devices`: Activate for each drive (disable for VM)
+3. Navigate to `Storage` > `Smart` > `Settings`: Enable (disable for VM)
+4. Navigate to `Storage` > `Smart` > `Devices`: Activate monitoring for all drives (disable for VM)
 
 ### 1.5.2. Create a File System
 At this stage, you must choose a file system. Ext4 is more mature, whereas BTRFS has features that should allow for greater resilience (and, in theory, should make it less susceptible to data corruption). Both file systems can recover from a power loss, but using BTRFS will not immunize you from them. I use BTRFS for multiple disk systems.
 
-1. Navigate to `Storage` > `File systems` > `+ Add` > `+ Create` (for all, but OS SSD):
+Use ext4 for single-disk systems.
+
+1. Navigate to `Storage` > `File systems` > `+ Add` > `Select FS` (for all, but OS SSD):
 -- `Device` Select a disk
--- `Type` BTRFS
+-- `Type` BTRFS (requires more than one disk)
 You will be prompted to mount the disk. Comment or label the drives as data1, data2 etc., and parity drives as parity1, parity2 etc.
 -- File System `/dev/sdx [BTRFS, 55.89 GiB]` (example)
 -- Usage Threshold `95%`
 -- Comment `data[1-9]` or `parity[1-9]`
+
+> If you opted for single-disk storage using ext4, you can proceed directly to the "Easy Script Configuration" section.
 
 ### 1.5.3. Create LUKS Encrypted disks (optional)
 I do not use LUKS. For those who know what they are doing.
@@ -377,9 +383,11 @@ The links to our Easy Scripts are at the beginning of this guide.
 <hr>
 
 # 3. Manual NAS build
-For those Users who wish to perform the tasks manually or understand what our Easy Script does read on.
+For users who prefer to execute tasks manually or gain a deeper understanding of the actions performed by our Easy Script, please continue reading.
 
-It's assumed the installer has some Linux skills. There are lots of online guides about how to configure NAS brands and Linux networking.
+> Note: This section may be outdated and is sporadically updated. It serves as a guide only, and software updates may render the information obsolete.
+
+It is assumed that the installer possesses some proficiency in Linux. Numerous online guides are available for configuring NAS brands and understanding Linux networking.
 
 - **NFS**
 Your NAS NFS server must support NFSv3/v4.
@@ -594,13 +602,19 @@ Create sub-folders with permissions as shown [here.](https://raw.githubuserconte
 │   ├── pron
 │   ├── series
 │   ├── stream
+│   │   ├── documentary
+│   │   │   ├── movies
+│   │   │   └── series
+│   │   ├── movies
+│   │   ├── musicvideo
+│   │   ├── pron
+│   │   └── series
 │   └── documentary
 │       ├── movies
-│       ├── musicvideo
-│       ├── pron
 │       └── series
 └── transcode
     ├── jellyfin
+    ├── tdarr
     └── vidcoderr
 ```
 
