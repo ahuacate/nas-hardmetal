@@ -34,22 +34,23 @@ pve_hostname_regex='^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-
 # Easy Script Section Header Body Text
 SECTION_HEAD='Synology'
 
+# ACL permissions
 # Permission '000'
-perm_01=':deny:rwxpdDaARWcCo:fd--'
+perm_01=':deny:rwxpdDaARWcCo'
 # Permission '---'
-perm_02=':deny:rwxpdDaARWcCo:fd--'
+perm_02=':deny:rwxpdDaARWcCo'
 # Permission 'rwx'
-perm_03=':allow:rwxpdDaARWc--:fd--'
+perm_03=':allow:rwxpdDaARWc--'
 # Permission 'rw-'
-perm_04=':allow:rw-p-DaARWc--:fd--'
+perm_04=':allow:rw-p-DaARWc--'
 # Permission 'r-x'
-perm_05=':allow:r-x---a-R-c--:fd--'
+perm_05=':allow:r-x---a-R-c--'
 # Permission 'r--'
-perm_06=':allow:r-----a-R-c--:fd--'
+perm_06=':allow:r-----a-R-c--'
 # Permission '-w-'
-perm_07=':allow:-w-p-D-A-W---:fd--'
+perm_07=':allow:-w-p-D-A-W---'
 # Permission '--x'
-perm_08=':allow:--x----------:fd--'
+perm_08=':allow:--x----------'
 
 # No. of reserved PVE node IPs
 PVE_HOST_NODE_CNT='5'
@@ -123,16 +124,28 @@ function synoacl_set() {
     # Set a dir acl
     # "$1" is path/to/dir
 
+    # Set inherit permission acl
+    if [ -n "$inherit" ] && [ "$inherit" -eq 0 ]; then
+        local perm_inherit='----'
+    elif [ -n "$inherit" ] && [ "$inherit" -eq 1 ]; then
+        local perm_inherit='fd--'
+    else
+        local perm_inherit='----'
+    fi
+
+    # Set acl
     if [ -n "$1" ] && [ -n "${acl_var%%:*}" ]; then
-        synoacltool -add "$1" $(echo ${acl_var} | awk -F':' -v perm_01=${perm_01} -v perm_02=${perm_02} -v perm_03=${perm_03} -v perm_04=${perm_04} -v perm_05=${perm_05} -v perm_06=${perm_06} -v perm_07=${perm_07} -v perm_08=${perm_08} '{if ($2 == "000") print "group:"$1 perm_01;
-        else if ($2 == "---") print "group:"$1 perm_02;
-        else if ($2 == "rwx") print "group:"$1 perm_03;
-        else if ($2 == "rw-") print "group:"$1 perm_04;
-        else if ($2 == "r-x") print "group:"$1 perm_05;
-        else if ($2 == "r--") print "group:"$1 perm_06;
-        else if ($2 == "-w-") print "group:"$1 perm_07;
-        else if ($2 == "--x") print "group:"$1 perm_08;
-        else print "group:"$1":deny:rwxpdDaARWcCo:fd--"}')
+        synoacltool -add "$1" $(echo ${acl_var} | awk -F':' -v perm_01=${perm_01} -v perm_02=${perm_02} -v perm_03=${perm_03} -v perm_04=${perm_04} -v perm_05=${perm_05} -v perm_06=${perm_06} -v perm_07=${perm_07} -v perm_08=${perm_08} -v perm_inherit="${perm_inherit}" '{
+            if ($2 == "000") print "group:"$1 perm_01":" perm_inherit;
+            else if ($2 == "---") print "group:"$1 perm_02":" perm_inherit;
+            else if ($2 == "rwx") print "group:"$1 perm_03":" perm_inherit;
+            else if ($2 == "rw-") print "group:"$1 perm_04":" perm_inherit;
+            else if ($2 == "r-x") print "group:"$1 perm_05":" perm_inherit;
+            else if ($2 == "r--") print "group:"$1 perm_06":" perm_inherit;
+            else if ($2 == "-w-") print "group:"$1 perm_07":" perm_inherit;
+            else if ($2 == "--x") print "group:"$1 perm_08":" perm_inherit;
+            else print "group:"$1":deny:rwxpdDaARWcCo:fd--";
+        }')
         wait
     else
         echo "Skipping processing acl entry: '$acl_var' (invalid acl)"
@@ -146,16 +159,28 @@ function synoacl_get() {
     # Gets all acl entries of the given path
     # "$1" is path/to/dir
 
-    synoacltool -get "$1" | grep "$(echo ${acl_var} | awk -F':' -v perm_01=${perm_01} -v perm_02=${perm_02} -v perm_03=${perm_03} -v perm_04=${perm_04} -v perm_05=${perm_05} -v perm_06=${perm_06} -v perm_07=${perm_07} -v perm_08=${perm_08} '{if ($2 == "000") print "group:"$1 perm_01;
-    else if ($2 == "---") print "group:"$1 perm_02;
-    else if ($2 == "rwx") print "group:"$1 perm_03;
-    else if ($2 == "rw-") print "group:"$1 perm_04;
-    else if ($2 == "r-x") print "group:"$1 perm_05;
-    else if ($2 == "r--") print "group:"$1 perm_06;
-    else if ($2 == "-w-") print "group:"$1 perm_07;
-    else if ($2 == "--x") print "group:"$1 perm_08;
-    else print "group:"$1":deny:rwxpdDaARWcCo:fd--"}')"
-    wait
+    # Set inherit permission acl
+    if [ -n "$inherit" ] && [ "$inherit" -eq 0 ]; then
+        local perm_inherit='----'
+    elif [ -n "$inherit" ] && [ "$inherit" -eq 1 ]; then
+        local perm_inherit='fd--'
+    else
+        local perm_inherit='----'
+    fi
+
+    # Get ACL
+    synoacltool -get "$1" | grep "$(echo ${acl_var} | awk -F':' -v perm_01=${perm_01} -v perm_02=${perm_02} -v perm_03=${perm_03} -v perm_04=${perm_04} -v perm_05=${perm_05} -v perm_06=${perm_06} -v perm_07=${perm_07} -v perm_08=${perm_08} -v perm_inherit="${perm_inherit}" '{
+            if ($2 == "000") print "group:"$1 perm_01":" perm_inherit;
+            else if ($2 == "---") print "group:"$1 perm_02":" perm_inherit;
+            else if ($2 == "rwx") print "group:"$1 perm_03":" perm_inherit;
+            else if ($2 == "rw-") print "group:"$1 perm_04":" perm_inherit;
+            else if ($2 == "r-x") print "group:"$1 perm_05":" perm_inherit;
+            else if ($2 == "r--") print "group:"$1 perm_06":" perm_inherit;
+            else if ($2 == "-w-") print "group:"$1 perm_07":" perm_inherit;
+            else if ($2 == "--x") print "group:"$1 perm_08":" perm_inherit;
+            else print "group:"$1":deny:rwxpdDaARWcCo:fd--";
+        }')"
+        wait
 }
 
 # Synoacltool ACL Clean Function
@@ -677,7 +702,7 @@ done < ${COMMON_DIR}/nas/src/nas_basefoldersubfolderlist
 # Create storage share folders
 msg "Creating ${SECTION_HEAD^} base ${DIR_SCHEMA} storage shares..."
 echo
-while IFS=',' read -r dir desc user group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
+while IFS=',' read -r dir desc user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
     if [ -d "$DIR_SCHEMA/$dir" ]; then
         info "Pre-existing folder: ${UNDERLINE}"$DIR_SCHEMA/$dir"${NC}\nSetting ${group^} group permissions for existing folder."
         find "$DIR_SCHEMA/$dir" -name .foo_protect -exec chattr -i {} \;
@@ -788,7 +813,7 @@ done < <( printf '%s\n' "${nas_basefolder_LIST[@]}" )
 # Create Default SubFolders
 msg "Creating ${SECTION_HEAD^} subfolder shares..."
 echo
-while IFS=',' read -r dir user group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
+while IFS=',' read -r dir user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
     if [ -d "$dir" ]; then
         info "$dir exists.\nSetting ${group^} group permissions for this folder."
         find "$dir" -name .foo_protect -exec chattr -i {} \;
@@ -878,7 +903,7 @@ while IFS=',' read -r dir user group permission acl_01 acl_02 acl_03 acl_04 acl_
 done < <( printf '%s\n' "${nas_basefoldersubfolder_LIST[@]}" )
 
 # Chattr set share points attributes to +a
-while IFS=',' read -r dir user group permission acl_01 acl_02 acl_03 acl_04 acl_05; do
+while IFS=',' read -r dir user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
     touch "$dir/.foo_protect"
     chattr +i "$dir/.foo_protect"
 done < <( printf '%s\n' "${nas_basefoldersubfolder_LIST[@]}" )
@@ -945,7 +970,7 @@ fi
 
 # Update NFS exports file
 msg "Creating new NFS exports..."
-while IFS=',' read -r dir desc user group permission user_groups; do
+while IFS=',' read -r dir desc user group permission inherit user_groups; do
     [[ "$dir" =~ 'none' ]] && continue
     # Check for dir
     if [ -d "$DIR_SCHEMA/$dir" ]; then
