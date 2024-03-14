@@ -102,6 +102,8 @@ If you followed our OMV guide then you created a 'MergerFS & SnapRAID' pool. Whe
         - [1.5.7. SnapRAID Scheduled Diff and Cron Jobs](#157-snapraid-scheduled-diff-and-cron-jobs)
     - [1.6. Easy Script Configuration](#16-easy-script-configuration)
 - [2. Synology configuration](#2-synology-configuration)
+    - [Fixes, patches & Troubleshooting](#fixes-patches--troubleshooting)
+        - [Cleanup of empty dirs](#cleanup-of-empty-dirs)
 - [3. Manual NAS build](#3-manual-nas-build)
     - [3.1. Create Groups](#31-create-groups)
         - [3.1.1. Create Groups](#311-create-groups)
@@ -379,6 +381,48 @@ The links to our Easy Scripts are at the beginning of this guide.
 Fully update your Synology DiskStation before running our Easy Script. Synology runs a custom flavor of Debian with proprietary commands. The Easy Script was written for Synology v7. One peculiar issue is NFS. While the NFS mounts are created they will not appear in the Synology WebGUI for some odd reason.
 
 The links to our Easy Scripts are at the beginning of this guide.
+
+## Fixes, patches & Troubleshooting
+
+### Cleanup of empty dirs
+Synology and clients create hidden files which can stop Sonarr, Radarr and pother applications from removing empty dirs. The solution is to use Synology Task Manager scripts to remove empty dirs.
+
+> Note the folder paths and edit to match your media dir locations. Path mistakes may cause loss of data.
+
+1. Navigate to `Control Panel` > `Task Scheduler` > `Create` > `Scheduled Task` > `user-defined script`:
+-- `General settings`
+-- Task: Delete empty media dirs
+-- User: root
+-- `Schedule`
+-- Run on the following days: Sunday
+-- `Task Setting`
+-- Run command: Paste into User-defined script box
+```
+find '/volume1/video/series/' -type d -name "@eaDir" -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/series/' -type d -empty -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/movies/' -type d -name "@eaDir" -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/movies/' -type d -empty -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/pron/' -type d -name "@eaDir" -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/pron/' -type d -empty -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/documentary/musicvideo' -type d -name "@eaDir" -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/documentary/musicvideo' -type d -empty -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/documentary/movies' -type d -name "@eaDir" -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/documentary/movies' -type d -empty -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/documentary/series' -type d -name "@eaDir" -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/documentary/series' -type d -empty -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/stream/documentary/series' -type d -name "@eaDir" -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/stream/documentary/series' -type d -empty -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/stream/documentary/movies' -type d -name "@eaDir" -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/stream/documentary/movies' -type d -empty -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/stream/movies' -type d -name "@eaDir" -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/stream/movies' -type d -empty -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/stream/pron' -type d -name "@eaDir" -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/stream/pron' -type d -empty -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/stream/series' -type d -name "@eaDir" -print0 2> /dev/null | xargs -0 rm -rf;
+find '/volume1/video/stream/series' -type d -empty -print0 2> /dev/null | xargs -0 rm -rf;
+```
+
+
 
 <hr>
 
