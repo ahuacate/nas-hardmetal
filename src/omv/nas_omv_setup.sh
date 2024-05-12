@@ -13,8 +13,7 @@
 # Check OMV version
 majorversion=$(dpkg -l | grep -i "openmediavault -" | awk {'print $3'} | cut -d '.' -f1)
 omv_min=6
-if ! [[ $(dpkg -l | grep -w openmediavault) ]]
-then
+if ! [[ $(dpkg -l | grep -w openmediavault) ]]; then
   echo "There are problems with this installation:
 
     --  Wrong Hardware. This setup script is for a OpenMediaVault (OMV).
@@ -22,8 +21,7 @@ then
   Bye..."
   sleep 2
   return
-elif [[ $(dpkg -l | grep -w openmediavault) ]] && [ ! "$majorversion" -ge $omv_min ] || [[ ! $(id -u) ]]
-then
+elif [[ $(dpkg -l | grep -w openmediavault) ]] && [ ! "$majorversion" -ge $omv_min ] || [[ ! $(id -u) ]]; then
   echo "There are problems with this installation:
 
   $(if [ ! "$majorversion" -ge $omv_min ]; then echo "  --  Wrong OMV OS version. This setup script is for a OMV Version $omv_min or later. Try upgrading your OMV OS."; fi)
@@ -34,8 +32,7 @@ then
 fi
 
 # Check OMV availaible FS storage
-if [ "$(xmlstarlet sel -t -m "//config/system/fstab/mntent" -v dir -nl /etc/openmediavault/config.xml | wc -l)" = 0 ]
-then
+if [ "$(xmlstarlet sel -t -m "//config/system/fstab/mntent" -v dir -nl /etc/openmediavault/config.xml | wc -l)" = 0 ]; then
   echo "There are problems with this installation:
   
   --  The installer could not identify a OMV file system for creating NAS storage.
@@ -48,14 +45,12 @@ then
 fi
 
 # Install chattr
-if [ $(chattr --help &> /dev/null; echo $?) != 1 ]
-then
+if [ $(chattr --help &> /dev/null; echo $?) != 1 ]; then
  apt-get install e2fsprogs -y
 fi
 
 # Install nslookup
-if [[ ! $(dpkg -s dnsutils 2> /dev/null) ]]
-then
+if [[ ! $(dpkg -s dnsutils 2> /dev/null) ]]; then
   apt-get install dnsutils -y
 fi
 
@@ -77,8 +72,7 @@ OMV_CONFIG='/etc/openmediavault/config.xml'
 DIR_PERM='0755'
 
 # Set PVE primary host IP and hostname
-if [ "$(nslookup -timeout=5 pve-01.$(hostname -d) >/dev/null 2>&1; echo $?)" = 0 ]
-then
+if [ "$(nslookup -timeout=5 pve-01.$(hostname -d) >/dev/null 2>&1; echo $?)" = 0 ]; then
   PVE_HOSTNAME='pve-01'
   PVE_HOST_IP="$(nslookup -timeout=5 pve-01.$(hostname -d) | awk '/^Address: / { print $2 }')"
 else
@@ -156,8 +150,7 @@ file_bak="config.xml_backup_$(date +%F_%R)"
 cp "$OMV_CONFIG" /etc/openmediavault/$file_bak
 
 # Install OMV-Extras
-if [ ! "$(dpkg -s openmediavault-omvextrasorg >/dev/null 2>&1; echo $?)" = 0 ]
-then
+if [ ! "$(dpkg -s openmediavault-omvextrasorg >/dev/null 2>&1; echo $?)" = 0 ]; then
   msg "Installing OMV-Extras..."
   sudo wget -O - https://github.com/OpenMediaVault-Plugin-Developers/packages/raw/master/install | sudo bash
 fi
@@ -165,12 +158,14 @@ fi
 # OMV system edits
 msg "Setting OMV timezone & community updates..."
 TIME_ZONE=$(timedatectl | awk '/Time zone:/ {print $3}')
+
 xmlstarlet edit -L \
   --update "//config/system/apt/distribution/partner" \
   --value '1' \
   --update "//config/system/time/timezone" \
   --value "${TIME_ZONE}" \
   ${OMV_CONFIG}
+  
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
 sudo omv-salt stage run prepare & spinner $!
@@ -206,8 +201,7 @@ Alternatively, you can use a registered domain name or subdomain if you know wha
 $(printf '%s\n' "${searchdomain_LIST[@]}" | grep -v 'other' | awk -F':' '{ print "  --  "$1 }')\n"
 # Confirm Search Domain
 msg "Checking NAS Search Domain name..."
-if [[ $(printf '%s\n' "${searchdomain_LIST[@]}" | awk -F':' '{ print $1 }' | grep "^${SEARCHDOMAIN}$" >/dev/null 2>&1; echo $?) == '0' ]]
-then
+if [[ $(printf '%s\n' "${searchdomain_LIST[@]}" | awk -F':' '{ print $1 }' | grep "^${SEARCHDOMAIN}$" >/dev/null 2>&1; echo $?) == '0' ]]; then
   info "NAS Search Domain is set: ${YELLOW}${SEARCHDOMAIN}${NC} ( unchanged )"
   echo
 else
@@ -238,8 +232,7 @@ fi
 
 
 #---- OMV Hostname
-if [[ ! "$(hostname)" =~ ^.*([0-9])$ ]]
-then
+if [[ ! "$(hostname)" =~ ^.*([0-9])$ ]]; then
   section "Query Hostname"
 
   msg "You may want to change your NAS hostname from '$(hostname)' to 'nas-01' ( i.e when adding additional NAS appliances use hostnames nas-02/03/04/05 ). Conforming to our standard network NAS naming convention assists our scripts in automatically detecting and resolving storage variables and other scripted tasks.\n\nThe system will now scan the network in ascending order the availability of our standard NAS hostname names beginning with: 'nas-01'. You may choose to accept our suggested new hostname or not."
@@ -251,8 +244,7 @@ then
     counter=1
     until [ $counter -eq 5 ]
     do
-      if [ ! "$(ping -s 1 -c 2 nas-0${i} &> /dev/null; echo $?)" = 0 ]
-      then
+      if [ ! "$(ping -s 1 -c 2 nas-0${i} &> /dev/null; echo $?)" = 0 ]; then
         HOSTNAME_VAR=nas-0${i}
         msg "Checking hostname 'nas-0${i}'..."
         info "New hostname 'nas-0${i}' status: ${GREEN}available${NC}"
@@ -301,8 +293,15 @@ source $COMMON_PVE_SRC_DIR/pvesource_identify_pvehosts.sh
 
 #---- Identify storage pool
 source $COMMON_DIR/nas/src/nas_identify_storagepath.sh
-# Get DIR_SCHEMA volume OMV UUID
-DIR_SCHEMA_UUID=$(xmlstarlet sel -t -v "//config/system/fstab/mntent[./dir[contains(., \"${DIR_SCHEMA}\")]]/uuid" -nl /etc/openmediavault/config.xml)
+# Get DIR_MAIN_SCHEMA & DIR_FAST_SCHEMA volume OMV UUID
+DIR_MAIN_SCHEMA_UUID=$(xmlstarlet sel -t -v "//config/system/fstab/mntent[./dir[contains(., \"${DIR_MAIN_SCHEMA}\")]]/uuid" -nl /etc/openmediavault/config.xml)
+if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
+  # Set DIR_FAST_SCHEMA_UUID to DIR_MAIN_SCHEMA_UUID
+  DIR_FAST_SCHEMA_UUID="$DIR_MAIN_SCHEMA_UUID"
+else
+  # Set DIR_FAST_SCHEMA_UUID
+  DIR_FAST_SCHEMA_UUID=$(xmlstarlet sel -t -v "//config/system/fstab/mntent[./dir[contains(., \"${DIR_FAST_SCHEMA}\")]]/uuid" -nl /etc/openmediavault/config.xml)
+fi
 
 #---- Identify storage volume
 source $COMMON_DIR/nas/src/nas_identify_volumedir.sh
@@ -318,9 +317,9 @@ grp_LIST=( "medialab:65605:For media apps (Sonarr, Radar, Jellyfin etc)"
 
 # Username List
 # 1=USERNAME:2=UID:3=HOMEDIR:4=GRP:5=ADD_GRP:6=SHELL:7=COMMENT
-user_LIST=( "media:1605:$DIR_SCHEMA/$VOLUME_DIR/homes/media:medialab:users:/bin/bash:Member of medialab group only"
-"home:1606:$DIR_SCHEMA/$VOLUME_DIR/homes/home:homelab:users,medialab:/bin/bash:Member of homelab group (+ medialab)"
-"private:1607:$DIR_SCHEMA/$VOLUME_DIR/homes/private:privatelab:users,medialab,homelab:/bin/bash:Member of privatelab group (+ medialab,homelab)" )
+user_LIST=( "media:1605:$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR/homes/media:medialab:users:/bin/bash:Member of medialab group only"
+"home:1606:$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR/homes/home:homelab:users,medialab:/bin/bash:Member of homelab group (+ medialab)"
+"private:1607:$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR/homes/private:privatelab:users,medialab,homelab:/bin/bash:Member of privatelab group (+ medialab,homelab)" )
 
 #---- Start Build ------------------------------------------------------------------
 
@@ -349,23 +348,26 @@ Use the OMV WebGUI 'Storage' > 'Shared Folders' to:
 
 Fix the issues and try again. Bye..."
 
-# Create volume dir share
-if [[ ! $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${VOLUME_DIR}' and reldirpath='${VOLUME_DIR}/' and mntentref='${DIR_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]
-then
-  info "New OMV share folder created: ${WHITE}'${VOLUME_DIR}'${NC}"
+# Create 'MAIN VOLUME DIR' share
+if [[ ! $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${VOLUME_MAIN_DIR}' and reldirpath='${VOLUME_MAIN_DIR}/' and mntentref='${DIR_MAIN_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]; then
+  info "New OMV share folder created: ${WHITE}'${VOLUME_MAIN_DIR}'${NC}"
+
   # Create uuid
-  SHARE_UUID="$(omv_uuid)"
+  SHARE_MAIN_UUID="$(omv_uuid)"
+
   # OMV shared folder template
   echo "<sharedfolder>
-    <uuid>${SHARE_UUID}</uuid>
-    <name>${VOLUME_DIR}</name>
-    <comment>Base volume</comment>
-    <mntentref>${DIR_SCHEMA_UUID}</mntentref>
-    <reldirpath>${VOLUME_DIR}/</reldirpath>
+    <uuid>${SHARE_MAIN_UUID}</uuid>
+    <name>${VOLUME_MAIN_DIR}</name>
+    <comment>Main volume</comment>
+    <mntentref>${DIR_MAIN_SCHEMA_UUID}</mntentref>
+    <reldirpath>${VOLUME_MAIN_DIR}/</reldirpath>
     <privileges></privileges>
   </sharedfolder>" > ${DIR}/shares_sharedfolder.xml
+
   # Delete subnode if already exist
-  xmlstarlet ed -L -d  "//config/system/shares/sharedfolder[name='$VOLUME_DIR' and mntentref='$DIR_SCHEMA_UUID']" ${OMV_CONFIG}
+  xmlstarlet ed -L -d  "//config/system/shares/sharedfolder[name='$VOLUME_MAIN_DIR' and mntentref='$DIR_MAIN_SCHEMA_UUID']" ${OMV_CONFIG}
+
   #Adding a new subnode to certain nodes
   TMP_XML=$(mktemp)
   xmlstarlet edit --subnode "//config/system/shares" --type elem --name "sharedfolder" \
@@ -374,41 +376,90 @@ then
   mv "$TMP_XML" ${OMV_CONFIG}
 fi
 
+# Create 'FAST VOLUME DIR' share
+
+if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
+  # Set all fast args to main args
+  DIR_FAST_SCHEMA_UUID="${DIR_MAIN_SCHEMA_UUID}"
+  SHARE_FAST_UUID="${SHARE_MAIN_UUID}"
+else
+  # Create 'FAST VOLUME DIR' share
+  if [[ ! $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${VOLUME_FAST_DIR}' and reldirpath='${VOLUME_FAST_DIR}/' and mntentref='${DIR_FAST_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]; then
+    info "New OMV share folder created: ${WHITE}'${VOLUME_FAST_DIR}'${NC}"
+
+    # Create uuid
+    SHARE_FAST_UUID="$(omv_uuid)"
+
+    # OMV shared folder template
+    echo "<sharedfolder>
+      <uuid>${SHARE_FAST_UUID}</uuid>
+      <name>${VOLUME_FAST_DIR}</name>
+      <comment>Fast volume</comment>
+      <mntentref>${DIR_FAST_SCHEMA_UUID}</mntentref>
+      <reldirpath>${VOLUME_FAST_DIR}/</reldirpath>
+      <privileges></privileges>
+    </sharedfolder>" > ${DIR}/shares_sharedfolder.xml
+
+    # Delete subnode if already exist
+    xmlstarlet ed -L -d  "//config/system/shares/sharedfolder[name='$VOLUME_FAST_DIR' and mntentref='$DIR_FAST_SCHEMA_UUID']" ${OMV_CONFIG}
+
+    #Adding a new subnode to certain nodes
+    TMP_XML=$(mktemp)
+    xmlstarlet edit --subnode "//config/system/shares" --type elem --name "sharedfolder" \
+    -v "$(xmlstarlet sel -t -c '/sharedfolder/*' ${DIR}/shares_sharedfolder.xml)" ${OMV_CONFIG} \
+    | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
+    mv "$TMP_XML" ${OMV_CONFIG}
+  fi
+fi
+
+
 # Check OMV share and process
-while IFS=',' read -r dir desc grp other
+while IFS=',' read -r dir fast desc grp other
 do
-  if [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${VOLUME_DIR}/${dir}/' and not(mntentref='${DIR_SCHEMA_UUID}')]" -nl ${OMV_CONFIG}) ]]
-  then
+  # Check if storage volume option, main or fast, and set args accordingly
+  if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
+    DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Override 'fast' arg (fast not available)
+    VOLUME_DIR="$VOLUME_MAIN_DIR" # Set to use 'main' volume
+    DIR_SCHEMA_UUID="$DIR_MAIN_SCHEMA_UUID" # Set to use 'main' uuid
+  else
+    if [ "$fast" -eq 0 ]; then
+      DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Set to use 'main' dir schema
+      VOLUME_DIR="$VOLUME_MAIN_DIR" # Set to use 'main' volume
+      DIR_SCHEMA_UUID="$DIR_MAIN_SCHEMA_UUID" # Set to use 'main' uuid
+    elif [ "$fast" -eq 1 ]; then
+      DIR_SCHEMA="$DIR_FAST_SCHEMA" # Set to use 'fast' dir schema
+      VOLUME_DIR="$VOLUME_FAST_DIR" # Set to use 'fast' volume
+      DIR_SCHEMA_UUID="$DIR_FAST_SCHEMA_UUID" # Set to use 'fast' uuid
+    fi
+  fi
+
+  if [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${VOLUME_DIR}/${dir}/' and not(mntentref='${DIR_SCHEMA_UUID}')]" -nl ${OMV_CONFIG}) ]]; then
     # Set fail msg vars
     name=${dir}
     relative_path="${VOLUME_DIR}/${dir}/"
     file_system=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}']/mntentref" -nl ${OMV_CONFIG})
     # Print fail msg
     msg "$FAIL_MSG"
-  elif [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and not (reldirpath='${VOLUME_DIR}/${dir}/')]" -nl ${OMV_CONFIG}) ]]
-  then
+  elif [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and not (reldirpath='${VOLUME_DIR}/${dir}/')]" -nl ${OMV_CONFIG}) ]]; then
     # Set fail msg vars
     name=${dir}
     relative_path=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}']/reldirpath" -nl ${OMV_CONFIG})
     file_system=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}']/mntentref" -nl ${OMV_CONFIG})
     # Print fail msg
     msg "$FAIL_MSG"
-  elif [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[reldirpath='${VOLUME_DIR}/${dir}/' and not (name='${dir}')]" -nl ${OMV_CONFIG}) ]]
-  then
+  elif [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[reldirpath='${VOLUME_DIR}/${dir}/' and not (name='${dir}')]" -nl ${OMV_CONFIG}) ]]; then
     # Set fail msg vars
     name=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[reldirpath='${VOLUME_DIR}/${dir}/']/name" -nl ${OMV_CONFIG})
     relative_path="${VOLUME_DIR}/${dir}/"
     file_system=$(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[reldirpath='${VOLUME_DIR}/${dir}/']/mntentref" -nl ${OMV_CONFIG})
     # Print fail msg
     msg "$FAIL_MSG"
-  elif [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${VOLUME_DIR}/${dir}/' and mntentref='${DIR_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]
-  then
+  elif [[ $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${VOLUME_DIR}/${dir}/' and mntentref='${DIR_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]; then
     # Existing OMV share
     info "Pre-existing OMV share folder: '${dir}' (no change)"
     # Update share comment
     xmlstarlet edit -L --update "//config/system/shares/sharedfolder[name='${dir}']/comment" --value "${desc}" ${OMV_CONFIG}
-  elif [[ ! $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${VOLUME_DIR}/${dir}/' and mntentref='${DIR_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]
-  then
+  elif [[ ! $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${dir}' and reldirpath='${VOLUME_DIR}/${dir}/' and mntentref='${DIR_SCHEMA_UUID}']" -nl ${OMV_CONFIG}) ]]; then
     # Create new share folder
     info "New OMV share folder created: ${WHITE}'${dir}'${NC}"
     # Create uuid
@@ -450,14 +501,12 @@ msg "Creating default groups..."
 while IFS=':' read -r grpname gid comment
 do
   # Create new grp
-  if [ ! "$(egrep -i "^$grpname" /etc/group >/dev/null; echo $?)" = 0 ]
-  then
+  if [ ! "$(egrep -i "^$grpname" /etc/group >/dev/null; echo $?)" = 0 ]; then
     groupadd -g $gid $grpname > /dev/null
     info "Default group created: ${YELLOW}$grpname${NC}"
   else
     # Check GID of existing grp
-    if [ ! $(getent group $grpname | cut -d: -f3) = "$gid" ]
-    then
+    if [ ! $(getent group $grpname | cut -d: -f3) = "$gid" ]; then
       groupmod -g $gid $grpname
     fi
   fi
@@ -499,19 +548,16 @@ xmlstarlet edit -L \
 while IFS=':' read -r username uid homedir grp add_grp shell comment
 do
   # Create new user
-  if [ "$(id -u {username} &>/dev/null; echo $?)" = 1 ]
-  then
+  if [ "$(id -u {username} &>/dev/null; echo $?)" = 1 ]; then
     useradd -m -d ${homedir} -u ${uid} -g ${grp} -s ${shell} -c "${comment}" ${username}
     # Additional groups
-    if [ -n "${add_grp}" ]
-    then
+    if [ -n "${add_grp}" ]; then
       usermod -a -G $add_grp $username
     fi
     info "Default user created: ${YELLOW}$username${NC}"
   else
     # Check UID of existing user
-    if [ $(id -u testuser) = "${uid}" ]
-    then
+    if [ $(id -u testuser) = "${uid}" ]; then
       usermod -u ${uid} -g ${grp} -G ${add_grp} ${username}
     fi
   fi
@@ -557,13 +603,27 @@ while IFS= read -r line
 do
   [[ "$line" =~ (${rm_match}) ]] || [[ ${nas_basefolder_extra_LIST[@]} =~ "$line" ]] && continue
   nas_nfsfolder_LIST+=( "$line" )
-done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed "s|^${VOLUME_DIR}/||" )
+done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed "s|^${VOLUME_MAIN_DIR}/||" -e "s|^${VOLUME_FAST_DIR}/||" )
 
 # Create NFS share
-while IFS=',' read -r dir desc user grp other
+while IFS=',' read -r dir fast desc user grp other
 do
   # Create new NFS share folder
   info "New OMV NFS share created: ${WHITE}'${dir}'${NC}"
+
+  # Check if storage volume option, main or fast, and set args accordingly
+  if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
+    DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Override 'fast' arg (fast not available)
+    VOLUME_DIR="$VOLUME_MAIN_DIR" # Set to use 'main' volume
+  else
+    if [ "$fast" -eq 0 ]; then
+      DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Set to use 'main' dir schema
+      VOLUME_DIR="$VOLUME_MAIN_DIR" # Set to use 'main' volume
+    elif [ "$fast" -eq 1 ]; then
+      DIR_SCHEMA="$DIR_FAST_SCHEMA" # Set to use 'fast' dir schema
+      VOLUME_DIR="$VOLUME_FAST_DIR" # Set to use 'fast' volume
+    fi
+  fi
 
   # Create uuid(s)
   MNTENT_UUID="$(omv_uuid)"
@@ -643,7 +703,7 @@ while IFS= read -r line
 do
   [[ "$line" =~ (${rm_match}) ]] || [[ ${nas_basefolder_extra_LIST[@]} =~ "$line" ]] && continue
   nas_smbfolder_LIST+=( "$line" )
-done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed "s|^${VOLUME_DIR}/||" )
+done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed "s|^${VOLUME_MAIN_DIR}/||" -e "s|^${VOLUME_FAST_DIR}/||" )
 
 # Configure SMB Global settings
 xmlstarlet edit -L \
@@ -678,7 +738,7 @@ xmlstarlet edit -L \
   ${OMV_CONFIG}
 
 # Configure SMB shares (dirs)
-while IFS=',' read -r dir desc user grp other
+while IFS=',' read -r dir fast desc user grp other
 do
   # Create new NFS share folder
   info "New OMV SMB share created: ${WHITE}'${dir}'${NC}"
@@ -786,7 +846,7 @@ xmlstarlet edit -L \
   --value "# Settings for chrootjail
   Match Group chrootjail
     AuthorizedKeysFile /var/lib/openmediavault/ssh/authorized_keys/%u
-    ChrootDirectory ${DIR_SCHEMA}/homes/%u
+    ChrootDirectory ${DIR_MAIN_SCHEMA}/homes/%u
     PubkeyAuthentication yes
     PasswordAuthentication no
     AllowTCPForwarding no
@@ -802,8 +862,7 @@ sudo omv-salt deploy run ssh & spinner $!
 #---- Fail2ban
 
 # Fail2ban plugin
-if [ "$(dpkg -s openmediavault-fail2ban >/dev/null 2>&1; echo $?)" != 0 ]
-then
+if [ "$(dpkg -s openmediavault-fail2ban >/dev/null 2>&1; echo $?)" != 0 ]; then
   msg "Installing fail2ban plugin..."
   apt-get install openmediavault-fail2ban -y
 fi
@@ -840,8 +899,7 @@ EOF
 # Check plugin status
 while IFS=':' read -r plugin desc
 do
-  if [[ ! $(dpkg -s $plugin 2>/dev/null) ]]
-  then
+  if [[ ! $(dpkg -s $plugin 2>/dev/null) ]]; then
     apt-get install $plugin -y
     info "OMV $desc plugin status: ${WHITE}installed${NC}"
   else
@@ -854,8 +912,7 @@ echo
 #---- Other OMV mods
 
 #---- Set Hostname
-if [ "$HOSTNAME_MOD" = 0 ]
-then
+if [ "$HOSTNAME_MOD" = 0 ]; then
   section "Modify OMV Hostname"
 
   # Change hostname
@@ -878,8 +935,7 @@ section "Completion Status"
 # Interface
 interface=$(ip route ls | grep default | grep -Po '(?<=dev )(\S+)')
 # Get IP type (ip -4 addr show eth0)
-if [ "$(ip addr show ${interface} | grep -q dynamic > /dev/null; echo $?)" = 0 ]
-then 
+if [ "$(ip addr show ${interface} | grep -q dynamic > /dev/null; echo $?)" = 0 ]; then 
   ip_type='dhcp - best use dhcp IP reservation'
 else
   ip_type='static IP'
