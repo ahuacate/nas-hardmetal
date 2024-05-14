@@ -702,7 +702,7 @@ done < ${COMMON_DIR}/nas/src/nas_basefoldersubfolderlist
 # Create storage share folders
 msg "Creating ${SECTION_HEAD^} base ${DIR_SCHEMA} storage shares..."
 echo
-while IFS=',' read -r dir desc user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
+while IFS=',' read -r dir fast desc user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
     if [ -d "$DIR_SCHEMA/$dir" ]; then
         info "Pre-existing folder: ${UNDERLINE}"$DIR_SCHEMA/$dir"${NC}\nSetting ${group^} group permissions for existing folder."
         find "$DIR_SCHEMA/$dir" -name .foo_protect -exec chattr -i {} \;
@@ -813,7 +813,7 @@ done < <( printf '%s\n' "${nas_basefolder_LIST[@]}" )
 # Create Default SubFolders
 msg "Creating ${SECTION_HEAD^} subfolder shares..."
 echo
-while IFS=',' read -r dir user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
+while IFS=',' read -r dir fast user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
     if [ -d "$dir" ]; then
         info "$dir exists.\nSetting ${group^} group permissions for this folder."
         find "$dir" -name .foo_protect -exec chattr -i {} \;
@@ -903,7 +903,7 @@ while IFS=',' read -r dir user group permission inherit acl_01 acl_02 acl_03 acl
 done < <( printf '%s\n' "${nas_basefoldersubfolder_LIST[@]}" )
 
 # Chattr set share points attributes to +a
-while IFS=',' read -r dir user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
+while IFS=',' read -r dir fast user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
     touch "$dir/.foo_protect"
     chattr +i "$dir/.foo_protect"
 done < <( printf '%s\n' "${nas_basefoldersubfolder_LIST[@]}" )

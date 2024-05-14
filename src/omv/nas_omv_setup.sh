@@ -293,6 +293,7 @@ source $COMMON_PVE_SRC_DIR/pvesource_identify_pvehosts.sh
 
 #---- Identify storage pool
 source $COMMON_DIR/nas/src/nas_identify_storagepath.sh
+
 # Get DIR_MAIN_SCHEMA & DIR_FAST_SCHEMA volume OMV UUID
 DIR_MAIN_SCHEMA_UUID=$(xmlstarlet sel -t -v "//config/system/fstab/mntent[./dir[contains(., \"${DIR_MAIN_SCHEMA}\")]]/uuid" -nl /etc/openmediavault/config.xml)
 if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
@@ -327,9 +328,9 @@ user_LIST=( "media:1605:$DIR_MAIN_SCHEMA/$VOLUME_MAIN_DIR/homes/media:medialab:u
 source $COMMON_DIR/nas/src/nas_basefoldersetup.sh
 
 
-#---- Create OVM 'Shared Folders'
+#---- Create OMV 'Shared Folders'
 section "Create Storage Shares"
-msg "Creating OVM shares..."
+msg "Creating OMV shares..."
 
 # Fail msg
 FAIL_MSG="${RED}[WARNING]${NC}\nThere is a conflict with a existing OMV storage folder setting:
@@ -377,8 +378,7 @@ if [[ ! $(xmlstarlet sel -t -v "//config/system/shares/sharedfolder[name='${VOLU
 fi
 
 # Create 'FAST VOLUME DIR' share
-
-if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
+if [ "$DIR_FAST_SCHEMA" == "$DIR_MAIN_SCHEMA" ]; then
   # Set all fast args to main args
   DIR_FAST_SCHEMA_UUID="${DIR_MAIN_SCHEMA_UUID}"
   SHARE_FAST_UUID="${SHARE_MAIN_UUID}"
@@ -422,11 +422,11 @@ do
     VOLUME_DIR="$VOLUME_MAIN_DIR" # Set to use 'main' volume
     DIR_SCHEMA_UUID="$DIR_MAIN_SCHEMA_UUID" # Set to use 'main' uuid
   else
-    if [ "$fast" -eq 0 ]; then
+    if [ "$fast" == 0 ]; then
       DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Set to use 'main' dir schema
       VOLUME_DIR="$VOLUME_MAIN_DIR" # Set to use 'main' volume
       DIR_SCHEMA_UUID="$DIR_MAIN_SCHEMA_UUID" # Set to use 'main' uuid
-    elif [ "$fast" -eq 1 ]; then
+    elif [ "$fast" == 1 ]; then
       DIR_SCHEMA="$DIR_FAST_SCHEMA" # Set to use 'fast' dir schema
       VOLUME_DIR="$VOLUME_FAST_DIR" # Set to use 'fast' volume
       DIR_SCHEMA_UUID="$DIR_FAST_SCHEMA_UUID" # Set to use 'fast' uuid
@@ -485,14 +485,14 @@ do
     | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
     mv "$TMP_XML" ${OMV_CONFIG}
   fi
-done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed "s|^${VOLUME_DIR}/||" )
+done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed -e "s|^${VOLUME_MAIN_DIR}/||" -e "s|^${VOLUME_FAST_DIR}/||" )
 echo
+
 
 # Stage config edit
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
 sudo omv-salt stage run prepare & spinner $!
 sudo omv-salt deploy run fstab & spinner $!
-
 
 #---- Create Groups
 section "Create default User Groups"
@@ -603,7 +603,7 @@ while IFS= read -r line
 do
   [[ "$line" =~ (${rm_match}) ]] || [[ ${nas_basefolder_extra_LIST[@]} =~ "$line" ]] && continue
   nas_nfsfolder_LIST+=( "$line" )
-done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed "s|^${VOLUME_MAIN_DIR}/||" -e "s|^${VOLUME_FAST_DIR}/||" )
+done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed -e "s|^${VOLUME_MAIN_DIR}/||" -e "s|^${VOLUME_FAST_DIR}/||" )
 
 # Create NFS share
 while IFS=',' read -r dir fast desc user grp other
@@ -703,7 +703,7 @@ while IFS= read -r line
 do
   [[ "$line" =~ (${rm_match}) ]] || [[ ${nas_basefolder_extra_LIST[@]} =~ "$line" ]] && continue
   nas_smbfolder_LIST+=( "$line" )
-done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed "s|^${VOLUME_MAIN_DIR}/||" -e "s|^${VOLUME_FAST_DIR}/||" )
+done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed -e "s|^${VOLUME_MAIN_DIR}/||" -e "s|^${VOLUME_FAST_DIR}/||" )
 
 # Configure SMB Global settings
 xmlstarlet edit -L \
@@ -836,6 +836,7 @@ msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )...
 sudo omv-salt stage run prepare & spinner $!
 sudo omv-salt deploy run samba & spinner $!
 
+
 #---- SSH
 section "SSH Setup"
 msg "Editing SSH config..."
@@ -846,7 +847,7 @@ xmlstarlet edit -L \
   --value "# Settings for chrootjail
   Match Group chrootjail
     AuthorizedKeysFile /var/lib/openmediavault/ssh/authorized_keys/%u
-    ChrootDirectory ${DIR_MAIN_SCHEMA}/homes/%u
+    ChrootDirectory ${DIR_MAIN_SCHEMA}/${VOLUME_MAIN_DIR}/homes/%u
     PubkeyAuthentication yes
     PasswordAuthentication no
     AllowTCPForwarding no
@@ -858,6 +859,7 @@ xmlstarlet edit -L \
 msg "Deploying 'omv-salt' config ( be patient, might take a long, long time )..."
 sudo omv-salt stage run prepare & spinner $!
 sudo omv-salt deploy run ssh & spinner $!
+
 
 #---- Fail2ban
 
