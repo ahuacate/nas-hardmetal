@@ -24,7 +24,7 @@ SECTION_HEAD='OMV NAS'
 section "Introduction"
 
 msg_box "#### PLEASE READ CAREFULLY ####
-This script will fully setup your OMV NAS to support Proxmox NFS or CIFS/SMB backend storage pools (PVESM). This installer can be run on new and existing OMV builds. When run on existing builds all ahuacate defaults will be restored.
+This script will setup your OMV NAS to support Proxmox NFS or CIFS/SMB backend storage pools (PVESM). This installer can be run on new and existing OMV builds. When run on existing builds all ahuacate default shares and permissions will be restored.
 
 Requirements:
   -- A existing OMV main storage file system for NAS folder shares
@@ -44,6 +44,7 @@ OMV configuration modification/changes includes:
   -- Create NFS exports to Proxmox primary and secondary host nodes
   -- Enable NFS4 and NFS Unix permissions
   -- Enable SMB with 'min protocol=SMB2' & 'max protocol=SMB3'
+  -- SMB Recycle bin disabled on video, transcode, tmp, downloads and public folders
   -- Validate OMV hostname, search domain and more
   -- Perform a OMV update
 

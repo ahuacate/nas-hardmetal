@@ -1,0 +1,50 @@
+#-----------------------------------------------------------------------------------
+# Filename:     jellyfin.yml
+# Description:  Jellyfin Docker container
+#
+# Requires:     Global Environment settings
+#
+# Usage:        Edit the values as required. Comment out lines not required: "Ctrl/"
+#               All comments MUST have a "double space" after variable value.
+#-----------------------------------------------------------------------------------
+
+---
+version: '3.0'
+
+services:
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    hostname: jellyfin  # Explicitly set the hostname here
+    environment:
+      - PUID=${APPUSER_MEDIA_PUID}  # Set user 'media:1605'
+      - PGID=${APPUSER_MEDIALAB_PGID}  # Set group 'medialab:65605'
+      - TZ=${TIME_ZONE_VALUE}  # Set locale 'Region/City' (i.e. 'Asia/Berlin' or 'Europe/Berlin' or 'Australia/Melbourne')
+      - JELLYFIN_PublishedServerUrl=192.168.50.50  # Optional. Set to your static IP
+    volumes:
+      - ${PATH_TO_CONFIG}/jellyfin:/config   # NAS absolute path to 'appdata/docker/config/jellyfin'
+      - ${PATH_TO_AUDIO}:/data/audio  # NAS absolute path to 'audio'
+      - ${PATH_TO_BOOKS}:/data/books  # NAS absolute path to 'books'
+      - ${PATH_TO_MUSIC}:/data/music  # NAS absolute path to 'music'
+      - ${PATH_TO_PHOTO}:/data/photo  # NAS absolute path to 'photo'
+      - ${PATH_TO_VIDEO}:/data/video  # NAS absolute path to 'video'
+      - ${PATH_TO_TRANSCODE}/mediaserver:/transcode  # NAS absolute path to 'transcode/mediaserver'
+    ports:
+      - 8096:8096  # Default Jellyfin http port
+      - 8920:8920  # Optional
+      - 7359:7359/udp  # Optional
+      - 1900:1900/udp  # Optional
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128  # Optional. Map the render node device (i.e. Intel QuickSync)
+    networks:
+       # host:  # Set to use 'host' interface
+      vlan50_medialab:  # Set to 'vlan50_medialab' interface. For docker assign IP address comment out 'mac_address' and 'ipv4_address'
+        mac_address: 02:42:c0:a8:32:21  # Optional. Example MAC address, ensure it is unique
+        ipv4_address: 192.168.50.120  # Optional. Sets static IP. Ensure its not in your LAN network dhcp IP range or conflicts with another network device
+    restart: unless-stopped
+
+networks:
+   # host:
+   #   external: true
+  vlan50_medialab:
+    external: true

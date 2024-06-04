@@ -54,6 +54,37 @@ if [[ ! $(dpkg -s dnsutils 2> /dev/null) ]]; then
   apt-get install dnsutils -y
 fi
 
+# Install powertop
+if [[ ! $(dpkg -s powertop 2> /dev/null) ]]; then
+  apt-get install powertop -y
+fi
+
+# Check if the powertop service exists
+if ! systemctl is-active --quiet powertop; then
+# Create the powertop service file
+sudo tee /lib/systemd/system/powertop.service > /dev/null <<EOF
+[Unit]
+Description=Optimize OMV power efficiency
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/powertop --auto-tune
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  # Reload the systemd daemon to recognize the new service
+  sudo systemctl daemon-reload
+
+  # Enable the powertop service
+  sudo systemctl enable powertop
+
+  # Start the powertop service
+  sudo systemctl start powertop
+fi
+
+
 
 #---- Static Variables -------------------------------------------------------------
 
@@ -290,7 +321,6 @@ fi
 #---- Validating your PVE hosts
 source $COMMON_PVE_SRC_DIR/pvesource_identify_pvehosts.sh
 
-
 #---- Identify storage pool
 source $COMMON_DIR/nas/src/nas_identify_storagepath.sh
 
@@ -309,10 +339,10 @@ source $COMMON_DIR/nas/src/nas_identify_volumedir.sh
 
 #---- Create User & Group lists
 # Group LIST
-# 1=GRPNAME:2=GID:3=COMMENT
-grp_LIST=( "medialab:65605:For media apps (Sonarr, Radar, Jellyfin etc)"
-"homelab:65606:For smart home apps (CCTV, Home Assistant)"
-"privatelab:65607:Power, trusted or admin User group"
+# 1=GRPNAME:2=GID:3=COMMENT # Do not use ',' in 'comment' arg
+grp_LIST=( "medialab:65605:For media apps (Sonarr Radar Jellyfin etc)"
+"homelab:65606:For smart home apps (CCTV Home Assistant)"
+"privatelab:65607:Power trusted or admin User group"
 "chrootjail:65608:Users are jailed to their home folder (General user group)"
 "sftp-access:65609:sFTP access group (for sftp plugin)" )
 
@@ -413,9 +443,27 @@ else
 fi
 
 
-# Check OMV share and process
-while IFS=',' read -r dir fast desc grp other
-do
+# Check OMV base shares
+# Add docker 'backup,compose,containers,config' dirs
+# Initialize the nas_baseshare_LIST array
+nas_baseshare_LIST=()
+# Transform and append the nas_basefolder_LIST entries to nas_baseshare_LIST
+for entry in "${nas_basefolder_LIST[@]}"; do
+  # Remove the VOLUME_MAIN_DIR or VOLUME_FAST_DIR prefix
+  transformed_entry="${entry#${VOLUME_MAIN_DIR}/}"
+  transformed_entry="${transformed_entry#${VOLUME_FAST_DIR}/}"
+  nas_baseshare_LIST+=("$transformed_entry")
+done
+# Append additional docker entries
+nas_baseshare_LIST+=(
+  "docker/backup,0,Docker backup storage,root,users,1750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000"
+  "docker/compose,0,Docker compose storage,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000"
+  "appdata/docker/config,1,Docker personal files and data,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000"
+  "appdata/docker/data,1,Docker persistent container data,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000"
+  "appdata/docker/var,1,Docker App install location,root,users,0750,1,:--x,65605:rwx,65606:rwx,65607:rwx,65608:000"
+)
+
+while IFS=',' read -r dir fast desc grp other; do
   # Check if storage volume option, main or fast, and set args accordingly
   if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
     DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Override 'fast' arg (fast not available)
@@ -478,14 +526,14 @@ do
     # Delete subnode if already exist
     xmlstarlet ed -L -d  "//config/system/shares/sharedfolder[name='$dir' and mntentref='$DIR_SCHEMA_UUID']" ${OMV_CONFIG}
 
-    #Adding a new subnode to certain nodes
+    # Adding a new subnode to certain nodes
     TMP_XML=$(mktemp)
     xmlstarlet edit --subnode "//config/system/shares" --type elem --name "sharedfolder" \
     -v "$(xmlstarlet sel -t -c '/sharedfolder/*' ${DIR}/shares_sharedfolder.xml)" ${OMV_CONFIG} \
     | xmlstarlet unesc | xmlstarlet fo > "$TMP_XML"
     mv "$TMP_XML" ${OMV_CONFIG}
   fi
-done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed -e "s|^${VOLUME_MAIN_DIR}/||" -e "s|^${VOLUME_FAST_DIR}/||" )
+done <<< $( printf '%s\n' "${nas_baseshare_LIST[@]}" )
 echo
 
 
@@ -606,8 +654,7 @@ do
 done <<< $( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed -e "s|^${VOLUME_MAIN_DIR}/||" -e "s|^${VOLUME_FAST_DIR}/||" )
 
 # Create NFS share
-while IFS=',' read -r dir fast desc user grp other
-do
+while IFS=',' read -r dir fast desc user grp other; do
   # Create new NFS share folder
   info "New OMV NFS share created: ${WHITE}'${dir}'${NC}"
 
@@ -751,8 +798,8 @@ do
   [[ ${SHARE_FOLDERREF} == "" ]] && continue
 
   # SMB share vars
-  if [ ${dir} == 'public' ]; then
-    # SMB vars
+  if [ "$dir" == 'public' ]; then
+    # Public SMB vars (recycle bin 'disabled', all user access)
     GUEST=allow
     ENABLE=1
     READONLY=0
@@ -774,8 +821,8 @@ do
     force create mode = 0664
     directory mask = 0775
     force directory mode = 0775'
-  else
-    # SMB vars (default all)
+  elif [[ "$dir" =~ ^(appdata|video|transcode|tmp|downloads)$ ]]; then
+    # SMB vars (recycle bin 'disabled')
     GUEST=no
     ENABLE=1
     READONLY=0
@@ -783,6 +830,26 @@ do
     RECYCLEBIN=0
     BINMAXSIZE=0
     BINMAXAGE=0
+    HIDEDOT=1
+    INHERITACLS=1
+    INHERITPERMISSIONS=1
+    EASUPPORT=0
+    STOREDOSATTRIBUTES=0
+    HOSTSALLOW=""
+    HOSTSDENY=""
+    AUDIT=0
+    TIMEMACHINE=0
+    # SMB extra options
+    EXTRAOPTIONS=""
+  else
+    # SMB vars (recycle bin 'enabled')
+    GUEST=no
+    ENABLE=1
+    READONLY=0
+    BROWSEABLE=1
+    RECYCLEBIN=1
+    BINMAXSIZE=0
+    BINMAXAGE=14
     HIDEDOT=1
     INHERITACLS=1
     INHERITPERMISSIONS=1
@@ -929,6 +996,7 @@ if [ "$HOSTNAME_MOD" = 0 ]; then
   sudo omv-salt deploy run hostname & spinner $!
   echo
 fi
+
 
 #---- Finish Line ------------------------------------------------------------------
 
