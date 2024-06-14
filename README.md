@@ -175,7 +175,7 @@ Type|Item|Notes
 |**Boot Disk**| Kingston SSD M.2/NVMe 240GB DC1000B :heavy_check_mark: | OMV boot drive
 
 ## 1.2. My Modified 2U Rack Case
-I modified this 2U short 350mm case to include direct disk cooling using an Arctic P8 80mm fan. Any future storage expansion will be done using JBOD.
+I modified this 2U short 350mm case to include direct disk cooling using Arctic P8 80mm fans. Any future storage expansion will be done using JBOD.
 
 ## 1.3. My BIOS setting tweaks
 Mainboard is a ASRock B660M Pro RS.
