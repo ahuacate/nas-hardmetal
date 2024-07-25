@@ -58,6 +58,7 @@ PVE_HOST_NODE_CNT='5'
 # NFS string and settings
 NFS_STRING='(rw,async,no_wdelay,no_root_squash,insecure_locks,sec=sys,anonuid=1025,anongid=100)'
 NFS_EXPORTS='/etc/exports'
+NFS_AUTO=0
 
 # SMB settings
 SMB_CONF='/etc/samba/smb.conf'
@@ -121,8 +122,8 @@ function valid_ip() {
 function synoacl_set() {
     # Usage: synoacl_set "path/to/dir"
 
-    # Set a dir acl
-    # "$1" is path/to/dir
+    # Gets all function parameters
+    local path="$1"  # "$1" is path/to/dir
 
     # Set inherit permission acl
     if [ -n "$inherit" ] && [ "$inherit" -eq 0 ]; then
@@ -134,8 +135,8 @@ function synoacl_set() {
     fi
 
     # Set acl
-    if [ -n "$1" ] && [ -n "${acl_var%%:*}" ]; then
-        synoacltool -add "$1" $(echo ${acl_var} | awk -F':' -v perm_01=${perm_01} -v perm_02=${perm_02} -v perm_03=${perm_03} -v perm_04=${perm_04} -v perm_05=${perm_05} -v perm_06=${perm_06} -v perm_07=${perm_07} -v perm_08=${perm_08} -v perm_inherit="${perm_inherit}" '{
+    if [ -n "$path" ] && [ -n "${acl_var%%:*}" ]; then
+        synoacltool -add "$path" $(echo ${acl_var} | awk -F':' -v perm_01=${perm_01} -v perm_02=${perm_02} -v perm_03=${perm_03} -v perm_04=${perm_04} -v perm_05=${perm_05} -v perm_06=${perm_06} -v perm_07=${perm_07} -v perm_08=${perm_08} -v perm_inherit="${perm_inherit}" '{
             if ($2 == "000") print "group:"$1 perm_01":" perm_inherit;
             else if ($2 == "---") print "group:"$1 perm_02":" perm_inherit;
             else if ($2 == "rwx") print "group:"$1 perm_03":" perm_inherit;
@@ -156,20 +157,19 @@ function synoacl_set() {
 function synoacl_get() {
     # Usage: synoacl_get "path/to/dir"
 
-    # Gets all acl entries of the given path
-    # "$1" is path/to/dir
+    # Gets all function parameters
+    local path="$1"  # "$1" is path/to/dir
 
-    # Set inherit permission acl
-    if [ -n "$inherit" ] && [ "$inherit" -eq 0 ]; then
-        local perm_inherit='----'
-    elif [ -n "$inherit" ] && [ "$inherit" -eq 1 ]; then
-        local perm_inherit='fd--'
-    else
-        local perm_inherit='----'
+    # Validate and set inherit permission acl
+    local perm_inherit='----'
+    if [[ "$inherit" =~ ^[01]$ ]]; then
+        if [ "$inherit" -eq 1 ]; then
+            perm_inherit='fd--'
+        fi
     fi
 
     # Get ACL
-    synoacltool -get "$1" | grep "$(echo ${acl_var} | awk -F':' -v perm_01=${perm_01} -v perm_02=${perm_02} -v perm_03=${perm_03} -v perm_04=${perm_04} -v perm_05=${perm_05} -v perm_06=${perm_06} -v perm_07=${perm_07} -v perm_08=${perm_08} -v perm_inherit="${perm_inherit}" '{
+    if synoacltool -get "$path" | grep -q "$(echo ${acl_var} | awk -F':' -v perm_01=${perm_01} -v perm_02=${perm_02} -v perm_03=${perm_03} -v perm_04=${perm_04} -v perm_05=${perm_05} -v perm_06=${perm_06} -v perm_07=${perm_07} -v perm_08=${perm_08} -v perm_inherit="${perm_inherit}" '{
             if ($2 == "000") print "group:"$1 perm_01":" perm_inherit;
             else if ($2 == "---") print "group:"$1 perm_02":" perm_inherit;
             else if ($2 == "rwx") print "group:"$1 perm_03":" perm_inherit;
@@ -179,18 +179,22 @@ function synoacl_get() {
             else if ($2 == "-w-") print "group:"$1 perm_07":" perm_inherit;
             else if ($2 == "--x") print "group:"$1 perm_08":" perm_inherit;
             else print "group:"$1":deny:rwxpdDaARWcCo:fd--";
-        }')"
-        wait
+        }')" 2>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
 }
+
 
 # Synoacltool ACL Clean Function
 function synoacl_clean() {
     # Usage: synoacl_clean "path/to/dir"
 
-    # Checks for acl entry by group name and if exists removes (all) the acl entries of group name
-    # "$1" is path/to/dir
+    # Gets all function parameters
+    local path="$1"  # "$1" is path/to/dir
 
-    while synoacltool -get "$1" | grep -q "$(echo ${acl_var} | awk -F':' '{print $1}')"; do
+    while synoacltool -get "$path" | grep -q "$(echo ${acl_var} | awk -F':' '{print $1}')"; do
         acl_index=$(synoacltool -get "$1" | grep "$(echo ${acl_var} | awk -F':' '{print $1}')" | awk -F'[][]' '{print $2}' | head -n 1)
 
         if [ -n "$acl_index" ]; then
@@ -290,7 +294,7 @@ After running this script a fully compatible suite of Synology NAS folder shares
 
 User input is required in the next steps to set Synology NFS export settings. This script will not delete any existing Synology folders or files but may modify file access permissions on existing shared folders. It is recommended you have a Synology file and settings backup before proceeding."
 echo
-echo
+
 while true; do
     read -p "Proceed with your Synology NAS setup [y/n]?: " -n 1 -r YN
     echo
@@ -414,7 +418,7 @@ fi
 
 #---- Set PVE primary host hostname and IP address
 section "Input Proxmox primary hostname and IP address"
-msg "#### PLEASE READ CAREFULLY ####\n\nThe User must confirm their PVE primary hostname (i.e pve-01) and IP address. Only input your PVE primary host details and NOT a secondary hostname. These inputs are critical for system and networking configuration."
+msg "#### PLEASE READ CAREFULLY ####\n\nThe User must confirm their Proxmox PVE primary hostname (i.e pve-01) and IP address (i.e 192.168.1.101). Only input your PVE primary host details and NOT a secondary hostname. These inputs are critical for system and networking configuration."
 echo
 HOSTNAME_FAIL_MSG="The PVE hostname is not valid. A valid PVE hostname is when all of the following constraints are satisfied:\n
   --  it does exists on the network.
@@ -633,8 +637,9 @@ fi
 echo
 
 
-#---- New Synology Shared Folder
-section "New Synology Shared Folders"
+#---- Synology Main Storage Volume
+
+section "Synology Main Storage Volume"
 
 # Set DIR Schema
 if [ -d "/volume1" ]; then
@@ -642,21 +647,21 @@ if [ -d "/volume1" ]; then
 else
     DIR_SCHEMA_TMP='/storage_example'
 fi
-msg "#### PLEASE READ CAREFULLY - SHARED FOLDERS ####\n
-Shared folders are the basic directories where you can store files and folders on your Synology NAS. Below is a list of the Ahuacate default Synology shared folders.
+msg "#### PLEASE READ CAREFULLY - MAIN STORAGE VOLUME AND SHARES ####\n
+The main storage volume is where your primary shared folders, such as homes, music, photo, and video, will be created on your Synology NAS. This is typically your largest Synology storage volume. If you have a dedicated fast NVMe or SSD volume for cache, downloads, transcode or temporary files, it is not considered the main storage volume. Below is a list of the default shared folders on Ahuacate Synology.
 
 $(while IFS=',' read -r var1 var2; do echo "  --  ${DIR_SCHEMA_TMP}/'${var1}'"; done < <( cat ${COMMON_DIR}/nas/src/nas_basefolderlist | sed 's/^#.*//' | sed '/^$/d' ))
 
-Some of these shared folders may already exist. This script will modify the permissions and ACLs of matching existing shared folders and create new shared folders if required. You should always perform a Synology backup before running this script. This script will NOT delete any existing data but may change shared folder permissions.
+Some of the shared folders listed above may already exist. This script will modify the permissions and ACLs of any matching existing shared folders and create new ones if necessary. It is recommended to perform a backup of your Synology NAS before running this script. The script will not delete any existing data but may change the permissions of shared folders and files.
 
-The User must now select a Synology storage volume or pool location for our default shared storage folders."
+Please select a Synology main storage volume for our default main shared storage folders."
 echo
 
 unset options
 mapfile -t options <<< $(df -hx tmpfs --output=target | grep -v 'Mounted on\|^/dev$\|^/$')
-PS3="Select a Synology storage volume (entering numeric) : "
-select DIR_SCHEMA in "${options[@]}"; do
-    msg "You have assigned and set: ${YELLOW}$DIR_SCHEMA${NC}"
+PS3="Select a Synology main storage volume (enter numeric) : "
+select DIR_MAIN_SCHEMA in "${options[@]}"; do
+    msg "You have assigned and set: ${YELLOW}$DIR_MAIN_SCHEMA${NC} (main)"
     while true; do
         read -p "Confirm your selection is correct [y/n]?: " -n 1 -r YN
         echo
@@ -678,24 +683,120 @@ select DIR_SCHEMA in "${options[@]}"; do
     done
 done
 
+
+#---- Select or input a fast storage path ( set DIR_FAST_SCHEMA )
+
+# Count other volumes
+other_volume_count=$(df -hx tmpfs --output=target | grep -v 'Mounted on\|^/dev$\|^/$' | grep -v "^$DIR_MAIN_SCHEMA" | grep -v '^$' | wc -l)
+
+if [ "$other_volume_count" -ne 0 ]; then
+    section "Synology Fast Storage Volume"
+
+    msg "#### PLEASE READ CAREFULLY - FAST SHARED FOLDERS ####\n\nThis part is optional. A fast storage volume is a dedicated SSD or NVMe location where downloads, transcodes, public, and temporary folders and files will be created. If you have a dedicated fast SSD or NVMe Synology volume available, you should select it here.\nPlease select a fast storage location or choose 'None - skip this step' to use your main volume '$DIR_MAIN_SCHEMA'."
+    echo
+
+    # Capture and clean up the output, ensuring no empty lines
+    output=$(df -hx tmpfs --output=target | grep -v 'Mounted on\|^/dev$\|^/$' | grep -v "^$DIR_MAIN_SCHEMA" | grep -v '^$')
+
+    # Convert cleaned output to an array
+    unset options
+    mapfile -t options <<< "$output"
+
+    # Filter out any empty lines (if they still exist)
+    options=($(printf "%s\n" "${options[@]}" | grep -v '^$'))
+
+    # Append "none" to the array if no other elements are present
+    if [ ${#options[@]} -eq 0 ]; then
+        options=("None - use main storage volume")
+    else
+        options+=("None - use main storage volume")
+    fi
+
+    PS3="Select a Synology fast storage volume (enter numeric) : "
+    select DIR_FAST_SCHEMA in "${options[@]}"; do
+        msg "You have assigned and set: ${YELLOW}$DIR_FAST_SCHEMA${NC}"
+        while true; do
+            read -p "Confirm your selection is correct [y/n]?: " -n 1 -r YN
+            echo
+            case $YN in
+            [Yy]*)
+                echo
+                break 2
+                ;;
+            [Nn]*)
+                msg "No problem. Try again..."
+                echo
+                break
+                ;;
+            *)
+                warn "Error! Entry must be 'y' or 'n'. Try again..."
+                echo
+                ;;
+            esac
+        done
+    done
+
+    # Set for 'none' arg
+    if [[ "${DIR_FAST_SCHEMA,,}" =~ ^none ]]; then
+        DIR_FAST_SCHEMA="$DIR_MAIN_SCHEMA"
+    fi
+else
+    DIR_FAST_SCHEMA="$DIR_MAIN_SCHEMA"
+fi
+
+#---- Create share and sub-folder lists
+# Create two array lists: one for primary shares ("${nas_basefolder_LIST[@]}") and another for share sub-folders ("${nas_basefoldersubfolder_LIST[@]}"). Check if a fast SSD or NVMe storage volume is available. If a fast SSD or NVMe storage volume exists and the option to use it is enabled, verify if the share already exists on the 'main' volume to avoid conflicts. If the share already exists on the 'main' volume, the option to use the 'fast' volume is void.
+
 # Create base folder array list
 rm_match='^\#.*$|^\s*$'
-# 'nas_basefolder_LIST' array
 unset nas_basefolder_LIST
 nas_basefolder_LIST=()
-while IFS= read -r line; do
-    [[ "$line" =~ (${rm_match}) ]] && continue
-    nas_basefolder_LIST+=( "$line" )
+# Read input file and process each line
+while IFS=',' read -r dir fast desc user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
+    # Skip lines matching rm_match
+    [[ "$dir" =~ (${rm_match}) ]] && continue
+
+    # Check if storage volume option, main or fast, and set args accordingly
+    if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
+        DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Override 'fast' arg (fast not available)
+    else
+        if [ "$fast" == 0 ]; then
+            DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Set to use 'main' dir schema
+        elif [ "$fast" == 1 ] && [ ! -d "$DIR_MAIN_SCHEMA/$dir" ]; then
+            DIR_SCHEMA="$DIR_FAST_SCHEMA" # Set to use 'fast' dir schema
+        elif [ "$fast" == 1 ] && [ -d "$DIR_MAIN_SCHEMA/$dir" ]; then
+            DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Set to override 'fast' and use 'main' dir schema
+        fi
+    fi
+
+    # Add the constructed path to the array
+    nas_basefolder_LIST+=("${DIR_SCHEMA}/${dir},${fast},${user},${group},${permission},${inherit},${acl_01},${acl_02},${acl_03},${acl_04},${acl_05}")
 done < ${COMMON_DIR}/nas/src/nas_basefolderlist
 
 # Create subfolder array list
 rm_match='^\#.*$|^\s*$'
-# 'nas_basefoldersubfolder_LIST' array
 unset nas_basefoldersubfolder_LIST
 nas_basefoldersubfolder_LIST=()
-while IFS= read -r line; do
-    [[ "$line" =~ (${rm_match}) ]] && continue
-    nas_basefoldersubfolder_LIST+=( "${DIR_SCHEMA}/${line}" )
+# Read input file and process each line
+while IFS=',' read -r dir fast user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
+    # Skip lines matching rm_match
+    [[ "$dir" =~ (${rm_match}) ]] && continue
+
+    # Check if storage volume option, main or fast, and set args accordingly
+    if [ "$DIR_MAIN_SCHEMA" == "$DIR_FAST_SCHEMA" ]; then
+        DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Override 'fast' arg (fast not available)
+    else
+        if [ "$fast" == 0 ]; then
+            DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Set to use 'main' dir schema
+        elif [ "$fast" == 1 ] && [ ! -d "$DIR_MAIN_SCHEMA/$dir" ]; then
+            DIR_SCHEMA="$DIR_FAST_SCHEMA" # Set to use 'fast' dir schema
+        elif [ "$fast" == 1 ] && [ -d "$DIR_MAIN_SCHEMA/$dir" ]; then
+            DIR_SCHEMA="$DIR_MAIN_SCHEMA" # Set to override 'fast' and use 'main' dir schema
+        fi
+    fi
+
+    # Add the constructed path to the array
+    nas_basefoldersubfolder_LIST+=("${DIR_SCHEMA}/${dir},${fast},${user},${group},${permission},${inherit},${acl_01},${acl_02},${acl_03},${acl_04},${acl_05}")
 done < ${COMMON_DIR}/nas/src/nas_basefoldersubfolderlist
 
 
@@ -703,97 +804,97 @@ done < ${COMMON_DIR}/nas/src/nas_basefoldersubfolderlist
 msg "Creating ${SECTION_HEAD^} base ${DIR_SCHEMA} storage shares..."
 echo
 while IFS=',' read -r dir fast desc user group permission inherit acl_01 acl_02 acl_03 acl_04 acl_05; do
-    if [ -d "$DIR_SCHEMA/$dir" ]; then
-        info "Pre-existing folder: ${UNDERLINE}"$DIR_SCHEMA/$dir"${NC}\nSetting ${group^} group permissions for existing folder."
-        find "$DIR_SCHEMA/$dir" -name .foo_protect -exec chattr -i {} \;
+    if [ -d "$dir" ]; then
+        info "Pre-existing folder: ${UNDERLINE}"$dir"${NC}\nSetting ${group^} group permissions for existing folder."
+        find "$dir" -name .foo_protect -exec chattr -i {} \;
 
         # Set 'administrators' ACL
         acl_var='administrators:rwx'  # acl var (user/group:permissions)
-        if [[ ! $(synoacl_get "$DIR_SCHEMA/$dir") ]]; then
-            synoacl_clean "$DIR_SCHEMA/$dir"  # Remove old non-conforming acl entry
-            synoacl_set "$DIR_SCHEMA/$dir"  # Make new acl entry
+        if ! synoacl_get "$dir"; then
+            synoacl_clean "$dir"  # Remove old non-conforming acl entry
+            synoacl_set "$dir"  # Make new acl entry
         fi
 
         # Set ACLs
         if [ -n "$acl_01" ]; then
             acl_var="$acl_01"  # acl var (user/group:permissions)
-            if [[ ! $(synoacl_get "$DIR_SCHEMA/$dir") ]]; then
-                synoacl_clean "$DIR_SCHEMA/$dir"  # Remove old non-conforming acl entry
-                synoacl_set "$DIR_SCHEMA/$dir"  # Make new acl entry
+            if ! synoacl_get "$dir"; then
+                synoacl_clean "$dir"  # Remove old non-conforming acl entry
+                synoacl_set "$dir"  # Make new acl entry
             fi
         fi
         if [ -n "$acl_02" ]; then
             acl_var="$acl_02"  # acl var (user/group:permissions)
-            if [[ ! $(synoacl_get "$DIR_SCHEMA/$dir") ]]; then
-                synoacl_clean "$DIR_SCHEMA/$dir"  # Remove old non-conforming acl entry
-                synoacl_set "$DIR_SCHEMA/$dir"  # Make new acl entry
+            if ! synoacl_get "$dir"; then
+                synoacl_clean "$dir"  # Remove old non-conforming acl entry
+                synoacl_set "$dir"  # Make new acl entry
             fi
         fi
         if [ -n "$acl_03" ]; then
             acl_var="$acl_03"  # acl var (user/group:permissions)
-            if [[ ! $(synoacl_get "$DIR_SCHEMA/$dir") ]]; then
-                synoacl_clean "$DIR_SCHEMA/$dir"  # Remove old non-conforming acl entry
-                synoacl_set "$DIR_SCHEMA/$dir"  # Make new acl entry
+            if ! synoacl_get "$dir"; then
+                synoacl_clean "$dir"  # Remove old non-conforming acl entry
+                synoacl_set "$dir"  # Make new acl entry
             fi
         fi
         if [ -n "$acl_04" ]; then
             acl_var="$acl_04"  # acl var (user/group:permissions)
-            if [[ ! $(synoacl_get "$DIR_SCHEMA/$dir") ]]; then
-                synoacl_clean "$DIR_SCHEMA/$dir"  # Remove old non-conforming acl entry
-                synoacl_set "$DIR_SCHEMA/$dir"  # Make new acl entry
+            if ! synoacl_get "$dir"; then
+                synoacl_clean "$dir"  # Remove old non-conforming acl entry
+                synoacl_set "$dir"  # Make new acl entry
             fi
         fi
         if [ -n "$acl_05" ]; then
             acl_var="$acl_05"  # acl var (user/group:permissions)
-            if [[ ! $(synoacl_get "$DIR_SCHEMA/$dir") ]]; then
-                synoacl_clean "$DIR_SCHEMA/$dir"  # Remove old non-conforming acl entry
-                synoacl_set "$DIR_SCHEMA/$dir"  # Make new acl entry
+            if ! synoacl_get "$dir"; then
+                synoacl_clean "$dir"  # Remove old non-conforming acl entry
+                synoacl_set "$dir"  # Make new acl entry
             fi
         fi
         echo
     else
-        info "New base folder created:\n${WHITE}"$DIR_SCHEMA/$dir"${NC}"
-        synoshare --add "$dir" "$desc" "$DIR_SCHEMA/$dir" "" "@administrators" "" 1 0
+        info "New base folder created:\n${WHITE}"$dir"${NC}"
+        synoshare --add "$dir" "$desc" "$dir" "" "@administrators" "" 1 0
         sleep 2
 
         # Set 'administrators' ACL
         acl_var='administrators:rwx'  # acl var (user/group:permissions)
-        if [[ ! $(synoacl_get "$DIR_SCHEMA/$dir") ]]; then
-            synoacl_set "$DIR_SCHEMA/$dir"  # Make new acl entry
+        if ! synoacl_get "$dir"; then
+            synoacl_set "$dir"  # Make new acl entry
         fi
 
         # Set ACLs
         if [ -n "$acl_01" ]; then
             acl_var="$acl_01"  # acl var (user/group:permissions)
-            synoacl_set "$DIR_SCHEMA/$dir"  # Make new acl entry
+            synoacl_set "$dir"  # Make new acl entry
         fi
         if [ -n "$acl_02" ]; then
             acl_var="$acl_02"  # acl var (user/group:permissions)
-            synoacl_set "$DIR_SCHEMA/$dir"  # Make new acl entry
+            synoacl_set "$dir"  # Make new acl entry
         fi
         if [ -n "$acl_03" ]; then
             acl_var="$acl_03"  # acl var (user/group:permissions)
-            synoacl_set "$DIR_SCHEMA/$dir"  # Make new acl entry
+            synoacl_set "$dir"  # Make new acl entry
         fi
         if [ -n "$acl_04" ]; then
             acl_var="$acl_04"  # acl var (user/group:permissions)
-            synoacl_set "$DIR_SCHEMA/$dir"  # Make new acl entry
+            synoacl_set "$dir"  # Make new acl entry
         fi
         if [ -n "$acl_05" ]; then
             acl_var="$acl_05"  # acl var (user/group:permissions)
-            synoacl_set "$DIR_SCHEMA/$dir"  # Make new acl entry
+            synoacl_set "$dir"  # Make new acl entry
         fi
         echo
     fi
 
     # Add file '.stignore' for Syncthing
-    if [ -d "$DIR_SCHEMA/$dir" ]; then
+    if [ -d "$dir" ]; then
         common_stignore="$COMMON_DIR/nas/src/nas_stignorelist"
-        file_stignore="$DIR_SCHEMA/$dir/.stignore"
+        file_stignore="$dir/.stignore"
 
         # Create missing '.stignore' file
         if [ ! -f "$file_stignore" ]; then
-            touch "$DIR_SCHEMA/$dir/.stignore"
+            touch "$dir/.stignore"
         fi
 
         # Read each line from the common ignore list
@@ -822,7 +923,7 @@ while IFS=',' read -r dir fast user group permission inherit acl_01 acl_02 acl_0
 
         # Set 'administrators' ACL
         acl_var='administrators:rwx'  # acl var (user/group:permissions)
-        if [[ ! $(synoacl_get "$dir") ]]; then
+        if ! synoacl_get "$dir"; then
             synoacl_clean "$dir"  # Remove old non-conforming acl entry
             synoacl_set "$dir"  # Make new acl entry
         fi
@@ -830,35 +931,35 @@ while IFS=',' read -r dir fast user group permission inherit acl_01 acl_02 acl_0
         # Set ACLs
         if [ -n "$acl_01" ]; then
             acl_var="$acl_01"  # acl var (user/group:permissions)
-            if [[ ! $(synoacl_get "$dir") ]]; then
+            if ! synoacl_get "$dir"; then
                 synoacl_clean "$dir"  # Remove old non-conforming acl entry
                 synoacl_set "$dir"  # Make new acl entry
             fi
         fi
         if [ -n "$acl_02" ]; then
             acl_var="$acl_02"  # acl var (user/group:permissions)
-            if [[ ! $(synoacl_get "$dir") ]]; then
+            if ! synoacl_get "$dir"; then
                 synoacl_clean "$dir"  # Remove old non-conforming acl entry
                 synoacl_set "$dir"  # Make new acl entry
             fi
         fi
         if [ -n "$acl_03" ]; then
             acl_var="$acl_03"  # acl var (user/group:permissions)
-            if [[ ! $(synoacl_get "$dir") ]]; then
+            if ! synoacl_get "$dir"; then
                 synoacl_clean "$dir"  # Remove old non-conforming acl entry
                 synoacl_set "$dir"  # Make new acl entry
             fi
         fi
         if [ -n "$acl_04" ]; then
             acl_var="$acl_04"  # acl var (user/group:permissions)
-            if [[ ! $(synoacl_get "$dir") ]]; then
+            if ! synoacl_get "$dir"; then
                 synoacl_clean "$dir"  # Remove old non-conforming acl entry
                 synoacl_set "$dir"  # Make new acl entry
             fi
         fi
         if [ -n "$acl_05" ]; then
             acl_var="$acl_05"  # acl var (user/group:permissions)
-            if [[ ! $(synoacl_get "$dir") ]]; then
+            if ! synoacl_get "$dir"; then
                 synoacl_clean "$dir"  # Remove old non-conforming acl entry
                 synoacl_set "$dir"  # Make new acl entry
             fi
@@ -872,7 +973,7 @@ while IFS=',' read -r dir fast user group permission inherit acl_01 acl_02 acl_0
 
         # Set 'administrators' ACL
         acl_var='administrators:rwx'  # acl var (user/group:permissions)
-        if [[ ! $(synoacl_get "$dir") ]]; then
+        if ! synoacl_get "$dir"; then
             synoacl_clean "$dir"  # Remove old non-conforming acl entry
             synoacl_set "$dir"  # Make new acl entry
         fi
@@ -912,124 +1013,177 @@ done < <( printf '%s\n' "${nas_basefoldersubfolder_LIST[@]}" )
 #---- Create NFS exports
 section "Setup NFS exports"
 
-# Stop NFS service
-# if [[ $(synoservice --is-enabled nfsd) ]]; then
-#   synoservice --disable nfsd &> /dev/null
-# fi
-if [[ $(systemctl is-active nfs-mountd.service) ]]; then
-    # synoservice --disable nfsd &> /dev/null
-    systemctl stop nfs-idmapd.service
-    systemctl stop nfs-mountd.service
-fi
+msg "#### PLEASE READ CAREFULLY - SYNOLOGY NFS ISSUES ####\n
+Synology's built-in WebGUI NFS configuration tool cannot be configured via CLI or scripting. Our NFS configurator can set up your Synology NFS shares, but these shares will not appear in the Synology WebGUI frontend. Any future NFS edits must be performed directly on the /etc/exports file using the CLI (via SSH as sudo -i).
 
-# Check if Static hostnames are mapped
-if [ ! $(nslookup $(synonet --get_hostname) >/dev/null 2>&1; echo $?) -eq 0 ]; then
-    # Set NFS export method (because nslookup failed to resolve PVE primary hostname)
-    display_msg1="Search domain:${SEARCHDOMAIN}:Use local, home.arpa, localdomain or lan only.\nDNS Server 1:$(ip route show default | awk '/default/ {print $3}' | awk -F'.' 'BEGIN {OFS=FS} { print $1, $2, $3, "254" }'):This is your PiHole server IP address\nDNS Server 2:$(ip route show default | awk '/default/ {print $3}'):This is your network router DNS IP"
-    display_msg2="/volume1/audio:${PVE_HOST_IP}(rw,sync):IP based\n/volume1/audio:${PVE_HOSTNAME}(rw,sync):Hostname based (Recommended)"
+You can choose to let this installer script configure your NFS shares or skip this step."
+echo
 
-    msg "#### PLEASE READ CAREFULLY - NFS SHARED FOLDERS ####\n\nYour Proxmox primary host probably requires shared storage mountpoints to this NAS. You can choose between 'hostname' or 'IP' based NAS NFS exports.\n\nUnfortunately some network DNS servers may not map arbitrary hostnames to their static IP addresses (UniFi for example). An alternative is to configure NFS exports with 'IP' based exports when configuring NFS '/etc/exports'. Or we recommend you install a PVE CT PiHole DNS server to resolve arbitrary hostnames to their static IP addresses by adding each PVE host IP and NAS IP to the PiHole local DNS record. Also enable 'Use Conditional Forwarding' and fields and enable 'Use DNSSEC'. Your PiHole Local DNS Records will be:\n\n$(printf '%s\n' "${pve_node_LIST[@]}" | sed "$ a ${HOSTNAME_VAR},${NAS_IP}" | awk -F',' -v searchdomain="$(echo ${SEARCHDOMAIN})" 'BEGIN {OFS="\t"} { print $1"."searchdomain, $2 }' | indent2)\n\nThen edit each PVE host DNS setting ( in identical order, PiHole first ) as follows:\n\n$(echo -e "${display_msg1}" | awk -F':' 'BEGIN{OFS="\t"} {$1=$1;print}' | indent2)\n\nRemember in the event the User changes their PVE hosts IP addresses you must update the PiHole local DNS records.\n\nExamples of NFS exports is as follows:\n\n$(echo -e "${display_msg2}" | awk -F':' '{ printf "%-15s %-25s %-20s\n", $1, $2, $3 }' | indent2)"
+while true; do
+    read -p "Create my Synology NFS shares for me (Recommended) [y/n]?: " -n 1 -r YN
     echo
-    echo
-
-    unset options
-    options=( "Hostname Based (Recommended)" "IP Based" )
-    PS3="Select a NFS export type (entering numeric) : "
-    select NFS_TYPE_VAR in "${options[@]}"; do
-        msg "You have assigned and set: ${YELLOW}$NFS_TYPE_VAR${NC}"
-        while true; do
-        read -p "Confirm your selection is correct [y/n]?: " -n 1 -r YN
+    case $YN in
+    [Yy]*)
+        NFS_AUTO=1
         echo
-        case $YN in
-            [Yy]*)
-            echo
-            break 2
-            ;;
-            [Nn]*)
-            msg "No problem. Try again..."
-            echo
-            break
-            ;;
-            *)
-            warn "Error! Entry must be 'y' or 'n'. Try again..."
-            echo
-            ;;
-        esac
-        done
-    done
-    # Set NFS Type var
-    if [[ "$NFS_TYPE_VAR" =~ ^Hostname ]]; then
-        NFS_EXPORT_TYPE=0
-    elif [[ "$NFS_TYPE_VAR" =~ ^IP ]]; then
-        NFS_EXPORT_TYPE=1
-    fi
-else
-    # NFS exports set to use hostnames
-    NFS_EXPORT_TYPE=0
-fi
+        break
+        ;;
+    [Nn]*)
+        NFS_AUTO=0
+        msg "No problem. You can manually add your NFS Shares using the Synology WebGUI."
+        echo
+        break
+        ;;
+    *)
+        warn "Error! Entry must be 'y' or 'n'. Try again..."
+        echo
+        ;;
+    esac
+done
 
-# Update NFS exports file
-msg "Creating new NFS exports..."
-while IFS=',' read -r dir desc user group permission inherit user_groups; do
-    [[ "$dir" =~ 'none' ]] && continue
-    # Check for dir
-    if [ -d "$DIR_SCHEMA/$dir" ]; then
-        if [[ $(grep -xs "^${DIR_SCHEMA}/${dir}.*" "$NFS_EXPORTS") ]]; then
-            # Edit existing nfs export share
-            while IFS=, read hostid ipaddr desc; do
-                nfs_var=$(if [[ "$NFS_EXPORT_TYPE" -eq 0 ]]; then echo "${hostid}.${SEARCHDOMAIN}"; else echo "$ipaddr"; fi)
-                match=$(grep --color=never -xs "^${DIR_SCHEMA}/${dir}.*" "$NFS_EXPORTS")
-                if [[ $(echo "$match" | grep -ws "$nfs_var") ]]; then
-                    substitute=$(echo "$match" | sed -e "s/${nfs_var}[^\t]*/${nfs_var}${NFS_STRING}/")
-                    sed -i "s|${match}|${substitute}|" "$NFS_EXPORTS"
-                else
+if [ $NFS_AUTO == 1 ]; then
+    # Stop NFS service
+    if [[ $(systemctl is-active nfs-mountd.service) ]]; then
+        # synoservice --disable nfsd &> /dev/null
+        systemctl stop nfs-idmapd.service
+        systemctl stop nfs-mountd.service
+    fi
+
+    # Check if Static hostnames are mapped
+    if [ ! $(nslookup $(synonet --get_hostname) >/dev/null 2>&1; echo $?) -eq 0 ]; then
+        # Set NFS export method (because nslookup failed to resolve PVE primary hostname)
+        display_msg1="Search domain:${SEARCHDOMAIN}:Use local, home.arpa, localdomain or lan only.\nDNS Server 1:$(ip route show default | awk '/default/ {print $3}' | awk -F'.' 'BEGIN {OFS=FS} { print $1, $2, $3, "254" }'):This is your PiHole server IP address\nDNS Server 2:$(ip route show default | awk '/default/ {print $3}'):This is your network router DNS IP"
+        display_msg2="/volume1/audio:${PVE_HOSTNAME}(rw,sync):Hostname based (Recommended)\n/volume1/audio:${PVE_HOST_IP}(rw,sync):IP based"
+
+        msg "#### PLEASE READ CAREFULLY - NFS SHARED FOLDERS ####\n\nYour Proxmox primary host likely requires shared storage mount points to this NAS. You can choose between 'hostname' or 'IP' based NAS NFS exports.\n\nWe recommend using hostname-based exports for ease of management. However, some network DNS servers may not map arbitrary hostnames to their static IP addresses (UniFi, for example). An alternative is to configure NFS exports with IP-based exports when setting up NFS in /etc/exports.\n\nTo ensure hostname resolution, we suggest installing a PVE CT PiHole DNS server. This will allow you to resolve arbitrary hostnames to their static IP addresses by adding each PVE host IP and NAS IP to the PiHole local DNS record. Additionally, enable 'Use Conditional Forwarding' and 'Use DNSSEC'. Your PiHole Local DNS Records will be:\n\n$(printf '%s\n' "${pve_node_LIST[@]}" | sed "$ a ${HOSTNAME_VAR},${NAS_IP}" | awk -F',' -v searchdomain="$(echo ${SEARCHDOMAIN})" 'BEGIN {OFS="\t"} { print $1"."searchdomain, $2 }' | indent2)\n\nThen edit each PVE host DNS setting ( in identical order, PiHole first ) as follows:\n\n$(echo -e "${display_msg1}" | awk -F':' 'BEGIN{OFS="\t"} {$1=$1;print}' | indent2)\n\nRemember in the event the User changes their PVE hosts IP addresses you must update the PiHole local DNS records.\n\nExamples of NFS exports is as follows:\n\n$(echo -e "${display_msg2}" | awk -F':' '{ printf "%-15s %-25s %-20s\n", $1, $2, $3 }' | indent2)"
+        echo
+        echo
+
+        unset options
+        options=( "Hostname Based (Recommended)" "IP Based" )
+        PS3="Select a NFS export type (entering numeric) : "
+        select NFS_TYPE_VAR in "${options[@]}"; do
+            msg "You have assigned and set: ${YELLOW}$NFS_TYPE_VAR${NC}"
+            while true; do
+            read -p "Confirm your selection is correct [y/n]?: " -n 1 -r YN
+            echo
+            case $YN in
+                [Yy]*)
+                echo
+                break 2
+                ;;
+                [Nn]*)
+                msg "No problem. Try again..."
+                echo
+                break
+                ;;
+                *)
+                warn "Error! Entry must be 'y' or 'n'. Try again..."
+                echo
+                ;;
+            esac
+            done
+        done
+        # Set NFS Type var
+        if [[ "$NFS_TYPE_VAR" =~ ^Hostname ]]; then
+            NFS_EXPORT_TYPE=0
+        elif [[ "$NFS_TYPE_VAR" =~ ^IP ]]; then
+            NFS_EXPORT_TYPE=1
+        fi
+    else
+        # NFS exports set to use hostnames
+        NFS_EXPORT_TYPE=0
+    fi
+
+    # Update NFS exports file
+    msg "Creating new NFS exports..."
+    while IFS=',' read -r dir desc user group permission inherit user_groups; do
+        [[ "$dir" =~ 'none' ]] && continue
+
+        # Check exports file for erronous/invalid NFS exports and remove them
+        # Remove base path and extract the first subdirectory to set $share_dir
+        if [ "$DIR_MAIN_SCHEMA" != "$DIR_FAST_SCHEMA" ]; then
+            if [[ $dir == $DIR_MAIN_SCHEMA/* ]]; then
+                share_dir=$(echo "${dir#$DIR_MAIN_SCHEMA/}" | cut -d'/' -f1)
+            elif [[ $dir == $DIR_FAST_SCHEMA/* ]]; then
+                share_dir=$(echo "${dir#$DIR_FAST_SCHEMA/}" | cut -d'/' -f1)
+            fi
+
+            if [[ $dir != "$DIR_MAIN_SCHEMA/$share_dir" ]]; then
+                if [[ $(grep -xs "^$DIR_MAIN_SCHEMA/$share_dir.*" "$NFS_EXPORTS") ]]; then
+                    # Use sed to remove lines matching the pattern and write the changes back to the file
+                    sed -i "/^${DIR_MAIN_SCHEMA//\//\\/}\/${share_dir}/d" "$NFS_EXPORTS"
+                fi
+            elif [[ $dir != "$DIR_FAST_SCHEMA/$share_dir" ]]; then
+                if [[ $(grep -xs "^$DIR_FAST_SCHEMA/$share_dir.*" "$NFS_EXPORTS") ]]; then
+                    # Use sed to remove lines matching the pattern and write the changes back to the file
+                    sed -i "/^${DIR_FAST_SCHEMA//\//\\/}\/${share_dir}/d" "$NFS_EXPORTS"
+                fi
+            fi
+        fi
+
+        # Check for existing dir
+        if [ -d "$dir" ]; then
+            if [[ $(grep -xs "^${dir}.*" "$NFS_EXPORTS") ]]; then
+                # Edit existing nfs export share
+                while IFS=',' read hostid ipaddr desc; do
+                    nfs_var=$(if [[ "$NFS_EXPORT_TYPE" -eq 0 ]]; then echo "${hostid}.${SEARCHDOMAIN}"; else echo "$ipaddr"; fi)
+                    match=$(grep --color=never -xs "^${dir}.*" "$NFS_EXPORTS")
+                    if [[ $(echo "$match" | grep -ws "$nfs_var") ]]; then
+                        substitute=$(echo "$match" | sed -e "s/${nfs_var}[^\t]*/${nfs_var}${NFS_STRING}/")
+                        sed -i "s|${match}|${substitute}|" "$NFS_EXPORTS"
+                    else
+                        # Add to existing nfs export share
+                        substitute=$(echo "$match" | sed -e "s/$/\t${nfs_var}${NFS_STRING}/")
+                        sed -i "s|${match}|${substitute}|g" "$NFS_EXPORTS"
+                    fi
+                done < <( printf '%s\n' "${pve_node_LIST[@]}" )
+                info "Updating NFS share: ${YELLOW}$dir${NC}"
+            else
+                # Create new nfs export share
+                printf "\n"$dir"" >> "$NFS_EXPORTS"
+                while IFS=',' read hostid ipaddr desc; do
+                    nfs_var=$(if [ "$NFS_EXPORT_TYPE" -eq 0 ]; then echo "${hostid}.${SEARCHDOMAIN}"; else echo "$ipaddr"; fi)
+                    match=$(grep --color=never -xs "^${dir}.*" "$NFS_EXPORTS")
                     # Add to existing nfs export share
                     substitute=$(echo "$match" | sed -e "s/$/\t${nfs_var}${NFS_STRING}/")
                     sed -i "s|${match}|${substitute}|g" "$NFS_EXPORTS"
-                fi
-            done < <( printf '%s\n' "${pve_node_LIST[@]}" )
-            info "Updating NFS share: ${YELLOW}$DIR_SCHEMA/$dir${NC}"
+                done < <( printf '%s\n' "${pve_node_LIST[@]}" )
+                info "New NFS share: ${YELLOW}$dir${NC}"
+            fi
         else
-            # Create new nfs export share
-            printf "\n"$DIR_SCHEMA/$dir"" >> "$NFS_EXPORTS"
-            while IFS=, read hostid ipaddr desc; do
-                nfs_var=$(if [ "$NFS_EXPORT_TYPE" -eq 0 ]; then echo "${hostid}.${SEARCHDOMAIN}"; else echo "$ipaddr"; fi)
-                match=$(grep --color=never -xs "^${DIR_SCHEMA}/${dir}.*" "$NFS_EXPORTS")
-                # Add to existing nfs export share
-                substitute=$(echo "$match" | sed -e "s/$/\t${nfs_var}${NFS_STRING}/")
-                sed -i "s|${match}|${substitute}|g" "$NFS_EXPORTS"
-            done < <( printf '%s\n' "${pve_node_LIST[@]}" )
-            info "New NFS share: ${YELLOW}$DIR_SCHEMA/$dir${NC}"
+            info "$dir does not exist. Skipping..."
         fi
-    else
-        info "$DIR_SCHEMA/$dir does not exist. Skipping..."
+    done < <( printf '%s\n' "${nas_basefolder_LIST[@]}" \
+    | sed "/^${DIR_MAIN_SCHEMA//\//\\/}\/backup/d" \
+    | sed "/^${DIR_FAST_SCHEMA//\//\\/}\/backup/d" \
+    | sed "/^${DIR_MAIN_SCHEMA//\//\\/}\/sshkey/d" \
+    | sed "/^${DIR_FAST_SCHEMA//\//\\/}\/sshkey/d" )
+    echo
+
+    # Update '/etc/hosts' file
+    if [[ "$NFS_EXPORT_TYPE" -eq 0 ]]; then 
+        while IFS=',' read hostid ipaddr desc; do
+            # Check if the entry already exists in /etc/hosts
+            if grep -q "${hostid}\.${SEARCHDOMAIN}" /etc/hosts; then
+                # Entry exists, update it
+                sed -i "s/.*${hostid}\.${SEARCHDOMAIN}.*/${ipaddr} ${hostid}.${SEARCHDOMAIN} ${hostid} # ${desc}/" /etc/hosts
+            else
+                # Entry doesn't exist, add it
+                echo "${ipaddr} ${hostid}.${SEARCHDOMAIN} ${hostid} # ${desc}" >> /etc/hosts
+            fi
+        done < <( printf '%s\n' "${pve_node_LIST[@]}" )
     fi
-done < <( printf '%s\n' "${nas_basefolder_LIST[@]}" | sed '/^backup/d' | sed '/^sshkey/d' )
-echo
 
-# Update '/etc/hosts' file
-if [[ "$NFS_EXPORT_TYPE" -eq 0 ]]; then 
-    while IFS=, read hostid ipaddr desc; do
-        # Check if the entry already exists in /etc/hosts
-        if grep -q "${hostid}\.${SEARCHDOMAIN}" /etc/hosts; then
-            # Entry exists, update it
-            sed -i "s/.*${hostid}\.${SEARCHDOMAIN}.*/${ipaddr} ${hostid}.${SEARCHDOMAIN} ${hostid} # ${desc}/" /etc/hosts
-        else
-            # Entry doesn't exist, add it
-            echo "${ipaddr} ${hostid}.${SEARCHDOMAIN} ${hostid} # ${desc}" >> /etc/hosts
-        fi
-    done < <( printf '%s\n' "${pve_node_LIST[@]}" )
-fi
+    # Set NFS version option settings
+    sed -i "s#^\(nfsv4_enable.*\s*=\s*\).*\$#\1yes#" /etc/nfs/syno_nfs_conf # Enable nfs4.1
+    sed -i "s#^\(nfs_unix_pri_enable.*\s*=\s*\).*\$#\11#" /etc/nfs/syno_nfs_conf # Enable Unix permissions
 
-
-# Set NFS settings
-sed -i "s#^\(nfsv4_enable.*\s*=\s*\).*\$#\1yes#" /etc/nfs/syno_nfs_conf # Enable nfs4.1
-sed -i "s#^\(nfs_unix_pri_enable.*\s*=\s*\).*\$#\11#" /etc/nfs/syno_nfs_conf # Enable Unix permissions
-
-# Restart NFS
-if ! [ $(systemctl status nfs-mountd.service > /dev/null; echo $?) -eq 0 ]; then
-    systemctl restart nfs-mountd.service
-    systemctl restart nfs-idmapd.service
+    # Restart NFS
+    if ! [ $(systemctl status nfs-mountd.service > /dev/null; echo $?) -eq 0 ]; then
+        systemctl restart nfs-mountd.service
+        systemctl restart nfs-idmapd.service
+    fi
 fi
 
 # Read /etc/exports
